@@ -60,6 +60,10 @@
   --color-input: #b9c4ac;
   --color-ring: #3f5a30;
   --ring-soft: rgba(79, 107, 63, 0.16);
+  /* destructive focus glow — hue aligned to --color-destructive
+     (fixes the pre-migration drift where form.css used a
+     non-token red, rgba(220,38,38,.14)) */
+  --ring-destructive-soft: rgba(178, 59, 59, 0.14);
 
   --color-success: #4a7530;
   --color-success-strong: #2f4a1f;
@@ -171,6 +175,15 @@
   --shadow-sm: 0 1px 2px rgba(38, 49, 36, 0.06);
   --shadow-md: 0 2px 8px rgba(38, 49, 36, 0.08);
   --shadow-lg: 0 8px 24px rgba(38, 49, 36, 0.12);
+
+  /* ----------------------------------------------------------
+     MOTION — easing token (the old CSS hardcoded raw
+     `…ms ease` literals). Durations intentionally have NO
+     custom tokens: Tailwind's numeric duration scale IS the
+     mechanism (duration-150/duration-200 = the previous
+     150ms/200ms literals).
+     ---------------------------------------------------------- */
+  --ease-standard: ease;
 
   /* ----------------------------------------------------------
      LAYOUT

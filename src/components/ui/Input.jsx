@@ -1,6 +1,11 @@
 import { useId } from 'react'
 import { cx } from '../../utils/cx'
-import './form.css'
+import {
+  FIELD_CLASSES,
+  FIELD_CONTROL_CLASSES,
+  FIELD_CONTROL_ERROR_CLASSES,
+  FIELD_ERROR_CLASSES,
+} from './formStyles'
 
 export default function Input({ label, error, className, id, ...rest }) {
   const generatedId = useId()
@@ -8,19 +13,19 @@ export default function Input({ label, error, className, id, ...rest }) {
   const errorId = `${inputId}-error`
 
   return (
-    <div className={cx('field', className)}>
-      <label className="field__label text-label" htmlFor={inputId}>
+    <div className={cx(FIELD_CLASSES, className)}>
+      <label className="text-label" htmlFor={inputId}>
         {label}
       </label>
       <input
         id={inputId}
-        className={cx('field__control', error && 'field__control--error')}
+        className={cx(FIELD_CONTROL_CLASSES, error && FIELD_CONTROL_ERROR_CLASSES)}
         aria-invalid={error ? true : undefined}
         aria-describedby={error ? errorId : undefined}
         {...rest}
       />
       {error && (
-        <p className="field__error" id={errorId}>
+        <p className={FIELD_ERROR_CLASSES} id={errorId}>
           {error}
         </p>
       )}

@@ -1,6 +1,11 @@
 import { useId } from 'react'
 import { cx } from '../../utils/cx'
-import './form.css'
+import {
+  FIELD_CLASSES,
+  FIELD_CONTROL_CLASSES,
+  FIELD_CONTROL_ERROR_CLASSES,
+  FIELD_ERROR_CLASSES,
+} from './formStyles'
 
 export default function Textarea({ label, error, className, id, rows = 4, ...rest }) {
   const generatedId = useId()
@@ -8,20 +13,20 @@ export default function Textarea({ label, error, className, id, rows = 4, ...res
   const errorId = `${textareaId}-error`
 
   return (
-    <div className={cx('field', className)}>
-      <label className="field__label text-label" htmlFor={textareaId}>
+    <div className={cx(FIELD_CLASSES, className)}>
+      <label className="text-label" htmlFor={textareaId}>
         {label}
       </label>
       <textarea
         id={textareaId}
         rows={rows}
-        className={cx('field__control', error && 'field__control--error')}
+        className={cx(FIELD_CONTROL_CLASSES, error && FIELD_CONTROL_ERROR_CLASSES)}
         aria-invalid={error ? true : undefined}
         aria-describedby={error ? errorId : undefined}
         {...rest}
       />
       {error && (
-        <p className="field__error" id={errorId}>
+        <p className={FIELD_ERROR_CLASSES} id={errorId}>
           {error}
         </p>
       )}

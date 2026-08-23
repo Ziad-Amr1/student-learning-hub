@@ -1,10 +1,25 @@
 import { cx } from '../../utils/cx'
-import './Button.css'
 
-const VARIANTS = ['primary', 'secondary', 'outline', 'ghost', 'destructive']
-const SIZES = ['sm', 'md', 'lg']
+const VARIANT_CLASSES = {
+  primary: 'bg-primary text-primary-foreground hover:not-disabled:bg-primary-hover',
+  secondary: 'bg-secondary text-secondary-foreground hover:not-disabled:bg-secondary-hover',
+  outline: 'bg-transparent border-input text-foreground hover:not-disabled:bg-surface-muted',
+  ghost: 'bg-transparent text-foreground hover:not-disabled:bg-surface-muted',
+  destructive:
+    'bg-destructive text-destructive-foreground hover:not-disabled:bg-destructive-hover',
+}
+
+const SIZE_CLASSES = {
+  sm: 'px-3 py-1 text-(--font-size-small)',
+  md: 'px-4 py-2 text-(--font-size-body)',
+  lg: 'px-6 py-3 text-(--font-size-body)',
+}
+
+const BASE_CLASSES =
+  'inline-flex items-center justify-center gap-2 rounded-md border border-transparent font-medium cursor-pointer transition-[background-color,border-color,color] duration-150 ease-standard disabled:opacity-50 disabled:cursor-not-allowed active:not-disabled:brightness-[0.96]'
 
 export default function Button({
+  as,
   variant = 'primary',
   size = 'md',
   type = 'button',
@@ -13,17 +28,18 @@ export default function Button({
   children,
   ...rest
 }) {
-  const variantClass = VARIANTS.includes(variant) ? `btn--${variant}` : 'btn--primary'
-  const sizeClass = SIZES.includes(size) ? `btn--${size}` : 'btn--md'
+  const Component = as || 'button'
+  const variantClass = VARIANT_CLASSES[variant] ?? VARIANT_CLASSES.primary
+  const sizeClass = SIZE_CLASSES[size] ?? SIZE_CLASSES.md
+  const nativeButtonProps = Component === 'button' ? { type, disabled } : {}
 
   return (
-    <button
-      type={type}
-      disabled={disabled}
-      className={cx('btn', variantClass, sizeClass, className)}
+    <Component
+      className={cx(BASE_CLASSES, variantClass, sizeClass, className)}
+      {...nativeButtonProps}
       {...rest}
     >
       {children}
-    </button>
+    </Component>
   )
 }
