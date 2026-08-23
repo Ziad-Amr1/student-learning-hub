@@ -13,7 +13,6 @@ import {
   CardHeader,
   CardTitle,
 } from '../../components/ui/Card'
-import './FeatureGrid.css'
 
 const FEATURE_ICONS = {
   tasks: ListTodo,
@@ -25,19 +24,26 @@ const FEATURE_ICONS = {
 export default function FeatureGrid() {
   const { features } = LANDING
   return (
-    <section id="features" className="features" aria-labelledby="features-title">
+    <section
+      id="features"
+      className="border-y border-border bg-surface-muted py-16"
+      aria-labelledby="features-title"
+    >
       <Container>
-        <h2 id="features-title" className="features__title">
+        <h2 id="features-title" className="mb-(--layout-section-gap) max-w-[28ch]">
           {features.title}
         </h2>
-        <div className="features__grid">
+        <div className="grid grid-cols-[repeat(auto-fill,minmax(15rem,1fr))] gap-(--layout-card-gap)">
           {features.items.map((feature) => {
             const Icon = FEATURE_ICONS[feature.icon]
             return (
-              <Card key={feature.id} className="features__card">
-                <CardHeader>
-                  <span className="features__icon" aria-hidden="true">
-                    <Icon />
+              <Card key={feature.id}>
+                <CardHeader className="gap-3">
+                  <span
+                    className="inline-flex h-12 w-12 items-center justify-center rounded-lg bg-primary-soft text-primary-strong"
+                    aria-hidden="true"
+                  >
+                    <Icon className="h-(--icon-lg) w-(--icon-lg)" />
                   </span>
                   <CardTitle>{feature.title}</CardTitle>
                 </CardHeader>

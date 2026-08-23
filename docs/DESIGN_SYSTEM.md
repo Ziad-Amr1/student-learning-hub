@@ -263,8 +263,8 @@ see `docs/COMPONENTS.md`.
 - **Polymorphic `as` prop (Sprint 02.5):** pass `as={Link} to="…"` or
   `as="a" href="…"` to render navigation as an anchor wearing the full
   button system — the ONLY approved way to make a link look like a button
-  (never re-declare `btn` classes by hand; hand-applied classes skip the
-  component's CSS import and render unstyled). `type`/`disabled` apply to
+  (never hand-write raw button utilities on a link; rendering through this
+  primitive keeps the button system single-sourced). `type`/`disabled` apply to
   native buttons only; disabled links need explicit `aria-disabled`.
 - **Variants:** `primary` (main action, one per view) · `secondary` (supporting)
   · `outline` (on non-surface backgrounds) · `ghost` (low-emphasis/inline)

@@ -1,12 +1,14 @@
 import { LANDING } from '../../data/landing'
 import Container from '../../components/layout/Container'
-import './ValueProps.css'
 
 export default function ValueProps() {
   return (
-    <section className="value-props" aria-labelledby="value-props-title">
-      <Container className="value-props__inner">
-        <h2 id="value-props-title" className="value-props__statement">
+    <section className="py-16" aria-labelledby="value-props-title">
+      <Container className="flex justify-center">
+        <h2
+          id="value-props-title"
+          className="max-w-[44ch] text-center text-(--font-size-h3) leading-(--line-height-body) font-medium text-muted-foreground"
+        >
           {LANDING.valueStatement}
         </h2>
       </Container>

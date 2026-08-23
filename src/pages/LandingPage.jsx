@@ -6,13 +6,12 @@ import StudyLoop from './landing/StudyLoop'
 import AboutSection from './landing/AboutSection'
 import ClosingCta from './landing/ClosingCta'
 import LandingFooter from './landing/LandingFooter'
-import './LandingPage.css'
 
 export default function LandingPage() {
   return (
-    <div className="landing">
+    <div className="flex min-h-screen flex-col">
       <LandingHeader />
-      <main id="main-content">
+      <main id="main-content" className="flex-1">
         <Hero />
         <ValueProps />
         <FeatureGrid />

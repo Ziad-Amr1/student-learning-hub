@@ -1,25 +1,29 @@
 import { LANDING } from '../../data/landing'
 import Container from '../../components/layout/Container'
-import './StudyLoop.css'
 
 export default function StudyLoop() {
   const { studyLoop } = LANDING
   return (
-    <section className="study-loop" aria-labelledby="study-loop-title">
+    <section className="py-16" aria-labelledby="study-loop-title">
       <Container>
         <h2 id="study-loop-title">{studyLoop.title}</h2>
-        <p className="study-loop__description text-body-small">
+        <p className="mt-3 max-w-[52ch] text-body-small text-muted-foreground">
           {studyLoop.description}
         </p>
-        <ol className="study-loop__steps">
+        <ol className="mt-(--layout-section-gap) grid list-none grid-cols-[repeat(auto-fill,minmax(13rem,1fr))] gap-x-(--layout-card-gap) gap-y-8">
           {studyLoop.steps.map((step, index) => (
-            <li key={step.title} className="study-loop__step">
-              <span className="study-loop__number" aria-hidden="true">
+            <li key={step.title} className="flex gap-4">
+              <span
+                className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary-soft font-semibold text-primary-strong"
+                aria-hidden="true"
+              >
                 {String(index + 1).padStart(2, '0')}
               </span>
               <div>
-                <h3 className="study-loop__step-title">{step.title}</h3>
-                <p className="study-loop__step-description text-body-small">
+                <h3 className="mb-1 text-(--font-size-body) font-semibold">
+                  {step.title}
+                </h3>
+                <p className="text-body-small text-muted-foreground">
                   {step.description}
                 </p>
               </div>

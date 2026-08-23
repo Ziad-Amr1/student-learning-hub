@@ -3,20 +3,31 @@ import { ArrowDown } from 'lucide-react'
 import { LANDING } from '../../data/landing'
 import Container from '../../components/layout/Container'
 import Button from '../../components/ui/Button'
-import './Hero.css'
 
 export default function Hero() {
   const { hero } = LANDING
   return (
-    <section className="hero" aria-labelledby="hero-title">
-      <Container className="hero__inner">
-        <p className="hero__kicker text-caption">{LANDING.brand}</p>
-        <h1 id="hero-title" className="hero__title text-display">
+    <section
+      className="border-b border-border bg-primary-soft py-16 sm:py-20"
+      aria-labelledby="hero-title"
+    >
+      <Container className="flex flex-col items-center gap-4 text-center">
+        <p className="text-caption font-semibold uppercase text-primary-strong">
+          {LANDING.brand}
+        </p>
+        <h1 id="hero-title" className="text-display max-w-[20ch]">
           {hero.title}
         </h1>
-        <p className="hero__description text-body-small">{hero.description}</p>
-        <div className="hero__actions">
-          <Button as={Link} to={hero.primaryCta.to} size="lg">
+        <p className="max-w-[52ch] text-(--font-size-body) leading-(--line-height-small) text-muted-foreground">
+          {hero.description}
+        </p>
+        <div className="mt-2 flex flex-wrap justify-center gap-3">
+          <Button
+            as={Link}
+            to={hero.primaryCta.to}
+            size="lg"
+            className="flex-auto sm:flex-none"
+          >
             {hero.primaryCta.label}
           </Button>
           <Button
@@ -24,10 +35,10 @@ export default function Hero() {
             href={hero.secondaryCta.href}
             variant="ghost"
             size="lg"
-            className="hero__secondary"
+            className="flex-auto hover:underline sm:flex-none"
           >
             {hero.secondaryCta.label}
-            <ArrowDown className="hero__secondary-icon" aria-hidden="true" />
+            <ArrowDown className="h-(--icon-sm) w-(--icon-sm)" aria-hidden="true" />
           </Button>
         </div>
       </Container>
