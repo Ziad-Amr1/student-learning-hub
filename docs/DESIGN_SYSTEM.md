@@ -212,6 +212,11 @@ Breakpoints follow standard device widths, not a proportional scale.
   actions) → content sections separated by `--layout-section-gap`.
 - **Grids:** card grids use CSS grid with `repeat(auto-fill/fit, minmax(...))`
   and `--layout-card-gap`; no fixed pixel widths on components.
+- **Shell dimensions (Sprint 02):** navbar height `--layout-navbar-height`
+  (64px), desktop sidebar width `--layout-sidebar-width` (240px), mobile
+  bottom-nav height `--layout-mobilenav-height` (64px) — all on the 4px grid.
+  The shell offsets its main content by the mobile-nav height so the fixed
+  bar never covers content.
 
 ---
 
