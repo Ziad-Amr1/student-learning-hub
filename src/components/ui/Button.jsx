@@ -1,12 +1,13 @@
 import { cx } from '../../utils/cx'
 
 const VARIANT_CLASSES = {
-  primary: 'bg-primary text-primary-foreground hover:not-disabled:bg-primary-hover',
-  secondary: 'bg-secondary text-secondary-foreground hover:not-disabled:bg-secondary-hover',
+  primary: 'bg-primary border-transparent text-primary-foreground hover:not-disabled:bg-primary-hover',
+  secondary:
+    'bg-secondary border-transparent text-secondary-foreground hover:not-disabled:bg-secondary-hover',
   outline: 'bg-transparent border-input text-foreground hover:not-disabled:bg-surface-muted',
-  ghost: 'bg-transparent text-foreground hover:not-disabled:bg-surface-muted',
+  ghost: 'bg-transparent border-transparent text-foreground hover:not-disabled:bg-surface-muted',
   destructive:
-    'bg-destructive text-destructive-foreground hover:not-disabled:bg-destructive-hover',
+    'bg-destructive border-transparent text-destructive-foreground hover:not-disabled:bg-destructive-hover',
 }
 
 const SIZE_CLASSES = {
@@ -16,7 +17,7 @@ const SIZE_CLASSES = {
 }
 
 const BASE_CLASSES =
-  'inline-flex items-center justify-center gap-2 rounded-md border border-transparent font-medium cursor-pointer transition-[background-color,border-color,color] duration-150 ease-standard disabled:opacity-50 disabled:cursor-not-allowed active:not-disabled:brightness-[0.96]'
+  'inline-flex items-center justify-center gap-2 rounded-md border font-medium cursor-pointer transition-[background-color,border-color,color] duration-150 ease-standard disabled:opacity-50 disabled:cursor-not-allowed active:not-disabled:brightness-[0.96]'
 
 export default function Button({
   as,
