@@ -185,6 +185,12 @@
      ---------------------------------------------------------- */
   --ease-standard: ease;
 
+  /* Layering scale — previously hardcoded literals (10 navbar /
+     bottom nav, 100 skip link). Referenced through functional
+     utilities (z-(--z-nav)) which also guarantees emission. */
+  --z-nav: 10;
+  --z-skip-link: 100;
+
   /* ----------------------------------------------------------
      LAYOUT
      Breakpoints are NOT redefined here: Tailwind v4 defaults
