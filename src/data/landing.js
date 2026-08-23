@@ -77,6 +77,7 @@ export const LANDING = {
   about: {
     title: 'Built around how studying actually feels',
     body: 'Student life is messy: five courses, a dozen deadlines, ideas everywhere. Huby is a quiet daily companion that keeps the logistics tidy so you can focus on learning — personal by design, with everything stored right in your browser.',
+    previewLabel: 'Huby illustration',
   },
 
   closingCta: {

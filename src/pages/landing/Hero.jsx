@@ -32,6 +32,7 @@ export default function Hero() {
               href={hero.secondaryCta.href}
               variant="outline"
               size="lg"
+              className="border-primary"
             >
               {hero.secondaryCta.label}
               <ArrowDown className="h-(--icon-sm) w-(--icon-sm)" aria-hidden="true" />
