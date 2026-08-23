@@ -10,7 +10,7 @@ export default function ClosingCta() {
       className="bg-primary py-16 text-surface"
       aria-labelledby="closing-cta-title"
     >
-      <Container className="flex flex-col items-center gap-6 text-center">
+      <Container className="flex flex-col items-start gap-6">
         <h2 id="closing-cta-title" className="max-w-[24ch]">
           {closingCta.title}
         </h2>

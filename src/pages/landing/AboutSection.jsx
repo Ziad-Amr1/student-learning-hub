@@ -5,7 +5,8 @@ export default function AboutSection() {
   const { about } = LANDING
   return (
     <section
-      className="border-y border-border bg-surface-muted py-16"
+      id="about"
+      className="scroll-mt-(--layout-navbar-height) border-y border-border bg-surface-muted py-16"
       aria-labelledby="about-title"
     >
       <Container className="max-w-[58ch]">

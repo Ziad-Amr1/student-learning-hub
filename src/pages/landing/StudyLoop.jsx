@@ -4,7 +4,11 @@ import Container from '../../components/layout/Container'
 export default function StudyLoop() {
   const { studyLoop } = LANDING
   return (
-    <section className="py-16" aria-labelledby="study-loop-title">
+    <section
+      id="study-loop"
+      className="scroll-mt-(--layout-navbar-height) py-16"
+      aria-labelledby="study-loop-title"
+    >
       <Container>
         <h2 id="study-loop-title">{studyLoop.title}</h2>
         <p className="mt-3 max-w-[52ch] text-body-small text-muted-foreground">

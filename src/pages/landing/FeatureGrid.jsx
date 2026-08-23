@@ -26,7 +26,7 @@ export default function FeatureGrid() {
   return (
     <section
       id="features"
-      className="border-y border-border bg-surface-muted py-16"
+      className="scroll-mt-(--layout-navbar-height) border-y border-border bg-surface-muted py-16"
       aria-labelledby="features-title"
     >
       <Container>

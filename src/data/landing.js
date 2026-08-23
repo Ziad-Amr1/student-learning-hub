@@ -10,6 +10,7 @@ export const LANDING = {
       'Tasks, notes, resources, and progress — organized in one calm place, so your energy goes into learning, not searching.',
     primaryCta: { label: 'Enter the Hub', to: '/dashboard' },
     secondaryCta: { label: 'See what’s inside', href: '#features' },
+    previewLabel: 'Huby workspace preview',
   },
 
   valueStatement:
@@ -85,5 +86,16 @@ export const LANDING = {
 
   footer: {
     note: 'Built as the TechMaster course project.',
+    productLinks: [
+      { label: 'Dashboard', to: '/dashboard' },
+      { label: 'Tasks', to: '/tasks' },
+      { label: 'Notes', to: '/notes' },
+      { label: 'Resources', to: '/resources' },
+    ],
+    exploreLinks: [
+      { label: 'Features', href: '#features' },
+      { label: 'Study loop', href: '#study-loop' },
+      { label: 'About', href: '#about' },
+    ],
   },
 }

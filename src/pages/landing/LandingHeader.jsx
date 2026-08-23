@@ -9,7 +9,7 @@ export default function LandingHeader() {
       <Container className="flex h-full items-center justify-between gap-4">
         <Link
           to="/"
-          className="text-(--font-size-h4) font-bold text-foreground no-underline"
+          className="text-(--font-size-h3) font-bold text-foreground no-underline"
           aria-label="Huby — home"
         >
           {LANDING.brand}
