@@ -1,5 +1,4 @@
 import PageHeader from '../components/layout/PageHeader'
-import './Dashboard.css'
 
 export default function Dashboard() {
   return (
@@ -8,7 +7,7 @@ export default function Dashboard() {
         title="Dashboard"
         description="Your learning at a glance."
       />
-      <p className="page-stub__note text-body-small">
+      <p className="text-body-small text-muted-foreground">
         Dashboard content arrives in Sprint 03.
       </p>
     </article>

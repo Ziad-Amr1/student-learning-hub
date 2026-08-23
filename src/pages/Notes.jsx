@@ -1,5 +1,4 @@
 import PageHeader from '../components/layout/PageHeader'
-import './Notes.css'
 
 export default function Notes() {
   return (
@@ -8,7 +7,7 @@ export default function Notes() {
         title="Notes"
         description="Capture and organize your notes."
       />
-      <p className="page-stub__note text-body-small">
+      <p className="text-body-small text-muted-foreground">
         Note-taking arrives in Sprint 05.
       </p>
     </article>

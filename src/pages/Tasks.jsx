@@ -1,5 +1,4 @@
 import PageHeader from '../components/layout/PageHeader'
-import './Tasks.css'
 
 export default function Tasks() {
   return (
@@ -8,7 +7,7 @@ export default function Tasks() {
         title="Tasks"
         description="Plan and track your study tasks."
       />
-      <p className="page-stub__note text-body-small">
+      <p className="text-body-small text-muted-foreground">
         Task management arrives in Sprint 04.
       </p>
     </article>

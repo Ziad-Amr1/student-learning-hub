@@ -1,5 +1,4 @@
 import PageHeader from '../components/layout/PageHeader'
-import './Profile.css'
 
 export default function Profile() {
   return (
@@ -8,7 +7,7 @@ export default function Profile() {
         title="Profile"
         description="Your personal learning profile."
       />
-      <p className="page-stub__note text-body-small">
+      <p className="text-body-small text-muted-foreground">
         Profile features arrive in Sprint 06.
       </p>
     </article>

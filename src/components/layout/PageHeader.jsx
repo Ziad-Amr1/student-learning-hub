@@ -1,14 +1,15 @@
 import { cx } from '../../utils/cx'
-import './PageHeader.css'
 
 export default function PageHeader({ title, description, actions, className }) {
   return (
-    <header className={cx('page-header', className)}>
-      <div className="page-header__row">
+    <header className={cx('flex flex-col gap-2 mb-(--layout-section-gap)', className)}>
+      <div className="flex flex-wrap items-center justify-between gap-4">
         <h1>{title}</h1>
-        {actions && <div className="page-header__actions">{actions}</div>}
+        {actions && <div className="flex flex-wrap items-center gap-3">{actions}</div>}
       </div>
-      {description && <p className="page-header__description text-body-small">{description}</p>}
+      {description && (
+        <p className="text-body-small text-muted-foreground max-w-[60ch]">{description}</p>
+      )}
     </header>
   )
 }

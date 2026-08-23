@@ -13,7 +13,6 @@ import Sidebar from './Sidebar'
 import MobileNav from './MobileNav'
 import NavigationDrawer from './NavigationDrawer'
 import Container from './Container'
-import './AppShell.css'
 
 const NAV_ITEMS = [
   { to: '/dashboard', label: 'Dashboard', section: 'workspace', Icon: LayoutDashboard },
@@ -30,11 +29,18 @@ export default function AppShell() {
   return (
     <div
       className={cx(
-        'app-shell',
-        sidebarCollapsed && 'app-shell--sidebar-collapsed'
+        'min-h-screen grid grid-cols-1 grid-rows-[var(--layout-navbar-height)_1fr]',
+        "[grid-template-areas:'navbar'_'main']",
+        'lg:grid-cols-[var(--layout-sidebar-width)_1fr]',
+        "lg:[grid-template-areas:'sidebar_navbar'_'sidebar_main']",
+        'lg:[transition:grid-template-columns_150ms_var(--ease-standard)]',
+        sidebarCollapsed && 'lg:grid-cols-[var(--layout-sidebar-width-collapsed)_1fr]'
       )}
     >
-      <a className="skip-link" href="#main-content">
+      <a
+        className="absolute -top-full left-2 z-(--z-skip-link) py-2 px-4 bg-primary text-primary-foreground rounded-md no-underline font-medium focus:top-2"
+        href="#main-content"
+      >
         Skip to content
       </a>
       <Navbar items={NAV_ITEMS} onMenuClick={() => setMenuOpen(true)} />
@@ -43,8 +49,14 @@ export default function AppShell() {
         collapsed={sidebarCollapsed}
         onToggle={() => setSidebarCollapsed(!sidebarCollapsed)}
       />
-      <main id="main-content" className="app-shell__main" tabIndex={-1}>
-        <Container className="app-shell__page">
+      <main
+        id="main-content"
+        className="[grid-area:main] outline-none pt-6 md:pt-8 pb-[calc(var(--layout-mobilenav-height)+env(safe-area-inset-bottom,0px)+var(--space-4))] lg:pb-(--layout-section-gap)"
+        tabIndex={-1}
+      >
+        {/* mx-0! anchors the page container to the main track's inline start at lg:
+            freed sidebar width flows into content position, not symmetric gutters. */}
+        <Container className="lg:mx-0!">
           <Outlet />
         </Container>
       </main>

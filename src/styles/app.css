@@ -1,10 +1,26 @@
+@import 'tailwindcss';
+
 /* ============================================================
-   Huby — Design Tokens
-   Single source of truth for the visual language.
-   Components must consume these tokens, never hardcode values.
+   Huby — application stylesheet (single CSS entry)
+
+   Architecture:
+     1. @theme  → Huby design tokens (values verbatim from the
+                  approved tokens.css). Every variable is emitted
+                  as a real CSS custom property on :root under its
+                  existing name, so both Tailwind utilities AND
+                  plain `var(--token)` consumers read from ONE
+                  source. Names matching Tailwind namespaces
+                  (--color-*, --font-weight-*, --line-height-*,
+                  --radius-*, --shadow-*) additionally generate
+                  utilities (bg-primary, rounded-lg, shadow-md…).
+     2. @layer base → global element styles Preflight does not
+                  cover (body voice, heading scale, #root,
+                  focus-visible ring, reduced-motion guard).
+     3. @utility text-* → the four typography helpers kept under
+                  their established class names.
    ============================================================ */
 
-:root {
+@theme {
   /* ----------------------------------------------------------
      COLOR — semantic palette (light theme only for now)
      Base hues: sage green (primary), muted teal (accent),
@@ -44,6 +60,10 @@
   --color-input: #b9c4ac;
   --color-ring: #3f5a30;
   --ring-soft: rgba(79, 107, 63, 0.16);
+  /* destructive focus glow — hue aligned to --color-destructive
+     (fixes the pre-migration drift where form.css used a
+     non-token red, rgba(220,38,38,.14)) */
+  --ring-destructive-soft: rgba(178, 59, 59, 0.14);
 
   --color-success: #4a7530;
   --color-success-strong: #2f4a1f;
@@ -74,6 +94,12 @@
        display 48 → h1 40 → h2 32 → h3 24 → h4 20 → body 16
      small/caption break the pure ratio deliberately (legibility
      floor, not a proportion problem).
+
+     Size steps intentionally keep their historical
+     `--font-size-*` names (emitted verbatim) instead of
+     Tailwind's `--text-*` namespace — no duplicate parallel
+     scale is created; components consume them via var() or the
+     text-* helpers below.
      ---------------------------------------------------------- */
   --font-sans:
     system-ui,
@@ -105,7 +131,13 @@
 
   /* ----------------------------------------------------------
      SPACING SCALE  (token number × 4px = value)
+     --spacing sets Tailwind's dynamic spacing multiplier, so
+     every p-N/gap-N utility lands exactly on the Huby 4px grid
+     (p-3 = 12px = --space-3). The named steps remain available
+     as real custom properties for legacy/current var() use.
      ---------------------------------------------------------- */
+  --spacing: 0.25rem;
+
   --space-1: 0.25rem;   /* 4px  */
   --space-2: 0.5rem;    /* 8px  */
   --space-3: 0.75rem;   /* 12px */
@@ -126,7 +158,8 @@
   --icon-lg: var(--space-6);   /* 24px — section headers, empty states */
 
   /* ----------------------------------------------------------
-     BORDER RADIUS  (full scale now on the 4px spacing grid)
+     BORDER RADIUS  (full scale on the 4px spacing grid;
+     namespace-mapped → rounded-sm/md/lg/xl/full utilities)
      ---------------------------------------------------------- */
   --radius-sm: 0.25rem;   /* 4px  = --space-1 */
   --radius-md: 0.5rem;    /* 8px  = --space-2 */
@@ -135,7 +168,8 @@
   --radius-full: 9999px;
 
   /* ----------------------------------------------------------
-     SHADOWS (restrained — use sparingly)
+     SHADOWS (restrained — use sparingly; namespace-mapped →
+     shadow-sm/md/lg utilities)
      ---------------------------------------------------------- */
   --shadow-none: none;
   --shadow-sm: 0 1px 2px rgba(38, 49, 36, 0.06);
@@ -143,17 +177,117 @@
   --shadow-lg: 0 8px 24px rgba(38, 49, 36, 0.12);
 
   /* ----------------------------------------------------------
-     LAYOUT
-     Breakpoints are defined here for documentation purposes.
-     CSS media queries cannot use custom properties, so the px
-     values below must be repeated in @media rules:
-       sm ≥ 640px | md ≥ 768px | lg ≥ 1024px | xl ≥ 1280px
+     MOTION — easing token (the old CSS hardcoded raw
+     `…ms ease` literals). Durations intentionally have NO
+     custom tokens: Tailwind's numeric duration scale IS the
+     mechanism (duration-150/duration-200 = the previous
+     150ms/200ms literals).
      ---------------------------------------------------------- */
-  --container-max: 72rem;             /* 1152px */
+  --ease-standard: ease;
+
+  /* Layering scale — previously hardcoded literals (10 navbar /
+     bottom nav, 100 skip link). Referenced through functional
+     utilities (z-(--z-nav)) which also guarantees emission. */
+  --z-nav: 10;
+  --z-skip-link: 100;
+
+  /* ----------------------------------------------------------
+     LAYOUT
+     Breakpoints are NOT redefined here: Tailwind v4 defaults
+     already equal the documented Huby sweep widths
+     (sm ≥640 | md ≥768 | lg ≥1024 | xl ≥1280).
+     Note: `--container-max` was renamed `--layout-container-max`
+     during the Tailwind adoption — `--container-*` is a reserved
+     Tailwind namespace and would collide with max-w-* semantics.
+     ---------------------------------------------------------- */
+  --layout-container-max: 72rem;          /* 1152px */
   --layout-section-gap: var(--space-12);
   --layout-card-gap: var(--space-6);
   --layout-navbar-height: 4rem;       /* 64px */
   --layout-sidebar-width: 15rem;      /* 240px, expanded */
   --layout-sidebar-width-collapsed: 4rem; /* 64px, icon-only rail */
   --layout-mobilenav-height: 4rem;    /* 64px */
+}
+
+/* ============================================================
+   Global foundation — what Preflight does not provide.
+   ============================================================ */
+@layer base {
+  body {
+    font-family: var(--font-sans);
+    font-size: var(--font-size-body);
+    line-height: var(--line-height-body);
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  #root {
+    min-height: 100vh;
+  }
+
+  h1 {
+    font-size: var(--font-size-h1);
+    line-height: var(--line-height-heading);
+    font-weight: var(--font-weight-bold);
+    letter-spacing: -0.01em;
+  }
+
+  h2 {
+    font-size: var(--font-size-h2);
+    line-height: var(--line-height-heading);
+    font-weight: var(--font-weight-semibold);
+  }
+
+  h3 {
+    font-size: var(--font-size-h3);
+    line-height: var(--line-height-heading);
+    font-weight: var(--font-weight-semibold);
+  }
+
+  h4 {
+    font-size: var(--font-size-h4);
+    line-height: var(--line-height-heading);
+    font-weight: var(--font-weight-semibold);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-ring);
+    outline-offset: 2px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      transition-duration: 0.01ms !important;
+      animation-duration: 0.01ms !important;
+    }
+  }
+}
+
+/* ---------- Typography helpers (established class API) ---------- */
+
+@utility text-display {
+  font-size: var(--font-size-display);
+  line-height: var(--line-height-tight);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: -0.02em;
+}
+
+@utility text-body-small {
+  font-size: var(--font-size-small);
+  line-height: var(--line-height-small);
+}
+
+@utility text-caption {
+  font-size: var(--font-size-caption);
+  line-height: var(--line-height-small);
+  font-weight: var(--font-weight-medium);
+}
+
+@utility text-label {
+  font-size: var(--font-size-small);
+  line-height: var(--line-height-small);
+  font-weight: var(--font-weight-medium);
 }

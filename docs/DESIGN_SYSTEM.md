@@ -2,7 +2,9 @@
 
 The design system is the shared visual and UI foundation for all pages
 (Dashboard, Tasks, Notes, Resources, Profile). It is intentionally small,
-explicit, and built with **plain CSS custom properties** — no CSS framework.
+explicit, and token-driven: since Sprint 02.6 it is delivered through
+**Tailwind CSS v4** (`@tailwindcss/vite`, CSS-first) with all approved
+values defined once in the `@theme` block of `src/styles/app.css`.
 
 > **Brand:** Huby — Your Personal Hub for Students. The visual voice is
 > friendly, calm, modern, organized, and personal: soft organic tints,
@@ -11,8 +13,10 @@ explicit, and built with **plain CSS custom properties** — no CSS framework.
 > aggressive gradients/glassmorphism) is off-brand by definition.
 > TechMaster is the course context, not part of the product identity.
 
-> Source of truth: `src/styles/tokens.css`. This document explains it; the
-> two must be updated together.
+> Source of truth: the `@theme` block in `src/styles/app.css`. Every token
+> there is emitted as a real CSS custom property under its historical name
+> and generates matching utilities (`--color-primary` → `bg-primary`). This
+> document explains the system; the two must be updated together.
 
 ---
 
@@ -169,8 +173,9 @@ off-grid outlier):
 
 Icon system: **`lucide-react`** is the project's single icon library
 (Sprint 02 refinement decision — do not mix other icon sets or use emoji as
-UI icons). Icons are sized via these tokens, set in component CSS (not via
-library size props), so sizing stays token-driven:
+UI icons). Icons are sized via these tokens — since Sprint 02.6 applied as
+utilities on the icon (`w-(--icon-md) h-(--icon-md)`) rather than
+descendant selectors in component CSS, so sizing stays token-driven:
 
 | Token | Value | Usage |
 | --- | --- | --- |
@@ -206,10 +211,28 @@ Breakpoints follow standard device widths, not a proportional scale.
 | lg | ≥ 1024px | Laptop / desktop sidebar appears (Sprint 02+) |
 | xl | ≥ 1280px | Large desktop |
 
+Tailwind's default breakpoints equal these widths exactly, so no custom
+breakpoint tokens are defined.
+
+### Motion & layering (added in Sprint 02.6)
+
+- `--ease-standard: ease` — the standard curve; transitions use
+  `ease-standard` plus Tailwind's numeric duration scale
+  (`duration-150`/`duration-200`, matching the previous literals).
+  Durations deliberately have no custom tokens.
+- `--ring-destructive-soft: rgba(178, 59, 59, 0.14)` — destructive focus
+  glow; hue derives from `--color-destructive` (fixes the pre-Tailwind
+  drift where the error ring used a non-token red).
+- `--z-nav: 10`, `--z-skip-link: 100` — layering scale for fixed bars and
+  the skip link (previously raw literals); the drawer uses the native
+  dialog top layer.
+
 ## 8. Layout Conventions
 
-- **Container:** max width `--container-max` (72rem / 1152px), centered,
-  horizontal padding 16 → 24 (md) → 32 (lg). Exception: inside the AppShell
+- **Container:** max width `--layout-container-max` (72rem / 1152px;
+  renamed from `--container-max` in Sprint 02.6 — `--container-*` is a
+  reserved Tailwind namespace), centered, horizontal padding 16 → 24 (md)
+  → 32 (lg). Exception: inside the AppShell
   grid (≥ lg) the page container is anchored to the main track's inline
   start (`margin-inline: 0`) so sidebar-collapse width flows into content
   position instead of into symmetric gutters — Container still owns the
