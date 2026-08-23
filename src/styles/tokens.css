@@ -63,6 +63,8 @@
   --color-info-strong: #33506b;
   --color-info-soft: #dce6ed;
 
+  --color-scrim: rgba(38, 49, 36, 0.4); /* overlay behind modal layers */
+
   /* ----------------------------------------------------------
      TYPOGRAPHY
      Modular scale, ratio 1.25 (major third), anchored at the
@@ -151,6 +153,7 @@
   --layout-section-gap: var(--space-12);
   --layout-card-gap: var(--space-6);
   --layout-navbar-height: 4rem;       /* 64px */
-  --layout-sidebar-width: 15rem;      /* 240px */
+  --layout-sidebar-width: 15rem;      /* 240px, expanded */
+  --layout-sidebar-width-collapsed: 4rem; /* 64px, icon-only rail */
   --layout-mobilenav-height: 4rem;    /* 64px */
 }

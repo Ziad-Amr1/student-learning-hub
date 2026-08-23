@@ -167,14 +167,16 @@ off-grid outlier):
 
 ## 5a. Icon Sizes
 
-New tokens — aligned to the spacing grid so icons sit flush with text and
-buttons at every size:
+Icon system: **`lucide-react`** is the project's single icon library
+(Sprint 02 refinement decision — do not mix other icon sets or use emoji as
+UI icons). Icons are sized via these tokens, set in component CSS (not via
+library size props), so sizing stays token-driven:
 
 | Token | Value | Usage |
 | --- | --- | --- |
 | `--icon-sm` | 16px (`space-4`) | Inline with body/small text |
 | `--icon-md` | 20px (`space-5`) | Default button/nav icons |
-| `--icon-lg` | 24px (`space-6`) | Section headers, empty states |
+| `--icon-lg` | 24px (`space-6`) | Section headers, empty states, menu/close controls |
 
 ## 6. Shadow Scale (use sparingly)
 
@@ -213,10 +215,13 @@ Breakpoints follow standard device widths, not a proportional scale.
 - **Grids:** card grids use CSS grid with `repeat(auto-fill/fit, minmax(...))`
   and `--layout-card-gap`; no fixed pixel widths on components.
 - **Shell dimensions (Sprint 02):** navbar height `--layout-navbar-height`
-  (64px), desktop sidebar width `--layout-sidebar-width` (240px), mobile
-  bottom-nav height `--layout-mobilenav-height` (64px) — all on the 4px grid.
-  The shell offsets its main content by the mobile-nav height so the fixed
-  bar never covers content.
+  (64px), desktop sidebar width `--layout-sidebar-width` (240px) with a
+  collapsed icon-rail state at `--layout-sidebar-width-collapsed` (64px),
+  mobile bottom-nav height `--layout-mobilenav-height` (64px) — all on the
+  4px grid. The shell is one CSS grid (`navbar` / `sidebar` / `main` areas):
+  the sidebar spans the full viewport height at lg, and main content offsets
+  by the mobile-nav height so fixed bars never cover content. Modal layers
+  (mobile navigation drawer) dim the page with `--color-scrim`.
 
 ---
 

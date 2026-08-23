@@ -1,30 +1,22 @@
 import { NavLink } from 'react-router-dom'
-import { cx } from '../../utils/cx'
+import { Menu } from 'lucide-react'
 import './Navbar.css'
 
-export default function Navbar({ items }) {
+export default function Navbar({ items, onMenuClick }) {
   return (
     <header className="navbar">
       <div className="navbar__inner">
+        <button
+          type="button"
+          className="navbar__menu-button"
+          aria-label="Open navigation menu"
+          onClick={onMenuClick}
+        >
+          <Menu aria-hidden="true" />
+        </button>
         <NavLink to="/dashboard" className="navbar__brand">
           Huby<span className="navbar__brand-dot">.</span>
         </NavLink>
-        <nav className="navbar__links" aria-label="Primary">
-          <ul className="navbar__list">
-            {items.map((item) => (
-              <li key={item.to}>
-                <NavLink
-                  to={item.to}
-                  className={({ isActive }) =>
-                    cx('navbar__link', isActive && 'navbar__link--active')
-                  }
-                >
-                  {item.label}
-                </NavLink>
-              </li>
-            ))}
-          </ul>
-        </nav>
       </div>
     </header>
   )

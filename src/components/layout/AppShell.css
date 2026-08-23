@@ -1,21 +1,21 @@
 .app-shell {
   min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-}
-
-.app-shell__body {
-  flex: 1;
   display: grid;
   grid-template-columns: 1fr;
-  align-items: start;
-  width: 100%;
+  grid-template-rows: var(--layout-navbar-height) 1fr;
+  grid-template-areas:
+    'navbar'
+    'main';
 }
 
 .app-shell__main {
+  grid-area: main;
   outline: none;
-  /* keep content clear of the fixed mobile nav bar */
-  padding-bottom: calc(var(--layout-mobilenav-height) + var(--space-4));
+  /* keep content clear of the fixed mobile nav bar + iOS home indicator */
+  padding-bottom: calc(
+    var(--layout-mobilenav-height) + env(safe-area-inset-bottom, 0px) +
+      var(--space-4)
+  );
 }
 
 .skip-link {
@@ -36,8 +36,12 @@
 }
 
 @media (min-width: 1024px) {
-  .app-shell__body {
-    grid-template-columns: var(--layout-sidebar-width) 1fr;
+  .app-shell {
+    /* auto column lets the sidebar own its (collapsible) token width */
+    grid-template-columns: auto 1fr;
+    grid-template-areas:
+      'sidebar navbar'
+      'sidebar main';
   }
 
   .app-shell__main {

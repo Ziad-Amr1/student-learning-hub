@@ -1,4 +1,5 @@
 .navbar {
+  grid-area: navbar;
   position: sticky;
   top: 0;
   z-index: 10;
@@ -8,14 +9,34 @@
 }
 
 .navbar__inner {
-  max-width: var(--container-max);
   height: 100%;
-  margin-inline: auto;
   padding-inline: var(--space-4);
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: var(--space-4);
+  gap: var(--space-2);
+}
+
+.navbar__menu-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--space-10);
+  height: var(--space-10);
+  margin-left: calc(-1 * var(--space-2));
+  border: none;
+  border-radius: var(--radius-md);
+  background-color: transparent;
+  color: var(--color-foreground);
+  cursor: pointer;
+}
+
+.navbar__menu-button svg {
+  width: var(--icon-lg);
+  height: var(--icon-lg);
+}
+
+.navbar__menu-button:hover {
+  background-color: var(--color-surface-muted);
 }
 
 .navbar__brand {
@@ -29,48 +50,9 @@
   color: var(--color-primary);
 }
 
-.navbar__links {
-  display: none;
-}
-
-.navbar__list {
-  display: flex;
-  align-items: center;
-  gap: var(--space-1);
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.navbar__link {
-  display: block;
-  padding: var(--space-2) var(--space-3);
-  border-radius: var(--radius-md);
-  color: var(--color-muted-foreground);
-  font-size: var(--font-size-small);
-  font-weight: var(--font-weight-medium);
-  text-decoration: none;
-}
-
-.navbar__link:hover {
-  color: var(--color-foreground);
-  background-color: var(--color-surface-muted);
-}
-
-.navbar__link--active,
-.navbar__link--active:hover {
-  color: var(--color-primary-strong);
-  background-color: var(--color-primary-soft);
-  font-weight: var(--font-weight-semibold);
-}
-
 @media (min-width: 768px) {
   .navbar__inner {
     padding-inline: var(--space-6);
-  }
-
-  .navbar__links {
-    display: block;
   }
 }
 
@@ -79,8 +61,8 @@
     padding-inline: var(--space-8);
   }
 
-  /* the desktop sidebar takes over primary navigation */
-  .navbar__links {
+  /* the desktop sidebar replaces the menu button */
+  .navbar__menu-button {
     display: none;
   }
 }

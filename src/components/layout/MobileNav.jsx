@@ -10,11 +10,13 @@ export default function MobileNav({ items }) {
           <li key={item.to} className="mobile-nav__item">
             <NavLink
               to={item.to}
+              aria-label={item.label}
+              title={item.label}
               className={({ isActive }) =>
                 cx('mobile-nav__link', isActive && 'mobile-nav__link--active')
               }
             >
-              {item.label}
+              <item.Icon aria-hidden="true" />
             </NavLink>
           </li>
         ))}
