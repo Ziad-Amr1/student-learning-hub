@@ -209,7 +209,11 @@ Breakpoints follow standard device widths, not a proportional scale.
 ## 8. Layout Conventions
 
 - **Container:** max width `--container-max` (72rem / 1152px), centered,
-  horizontal padding 16 → 24 (md) → 32 (lg).
+  horizontal padding 16 → 24 (md) → 32 (lg). Exception: inside the AppShell
+  grid (≥ lg) the page container is anchored to the main track's inline
+  start (`margin-inline: 0`) so sidebar-collapse width flows into content
+  position instead of into symmetric gutters — Container still owns the
+  width cap and gutters; AppShell owns how the column sits in the grid.
 - **Page anatomy:** `Container` → `PageHeader` (title + optional description +
   actions) → content sections separated by `--layout-section-gap`.
 - **Grids:** card grids use CSS grid with `repeat(auto-fill/fit, minmax(...))`

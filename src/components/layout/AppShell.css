@@ -60,8 +60,13 @@
     padding-bottom: var(--layout-section-gap);
   }
 
-  /* balanced gap between sidebar and page content */
+  /*
+   * Inside the shell grid, anchor the page container to the main track's
+   * inline start instead of centering: the freed width from collapsing the
+   * sidebar then flows into the content position, not into symmetric
+   * gutters. Container keeps owning width cap + gutters.
+   */
   .app-shell__page {
-    padding-left: var(--space-5);
+    margin-inline: 0;
   }
 }
