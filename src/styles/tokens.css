@@ -1,5 +1,5 @@
 /* ============================================================
-   TechMaster Student Hub — Design Tokens
+   Huby — Design Tokens
    Single source of truth for the visual language.
    Components must consume these tokens, never hardcode values.
    ============================================================ */
@@ -7,61 +7,71 @@
 :root {
   /* ----------------------------------------------------------
      COLOR — semantic palette (light theme only for now)
-     Base hues: indigo (primary), teal (accent), slate (neutral)
+     Base hues: sage green (primary), muted teal (accent),
+     warm stone (secondary/neutral) — an organic, calm palette
+     suited to a student productivity app.
      Semantic states ship in three steps:
        base   → fills / icons
        strong → text on white or on soft backgrounds
        soft   → tinted backgrounds (badges, alerts)
      ---------------------------------------------------------- */
-  --color-background: #f8fafc;
-  --color-foreground: #0f172a;
+  --color-background: #f7f8f5;
+  --color-foreground: #263124;
 
   --color-surface: #ffffff;
-  --color-surface-muted: #f1f5f9;
+  --color-surface-muted: #eef1ea;
 
-  --color-primary: #4f46e5;
-  --color-primary-hover: #4338ca;
-  --color-primary-strong: #3730a3;
-  --color-primary-soft: #e0e7ff;
+  --color-primary: #4f6b3f;
+  --color-primary-hover: #3f5a30;
+  --color-primary-strong: #33452a;
+  --color-primary-soft: #e4eadc;
   --color-primary-foreground: #ffffff;
 
-  --color-secondary: #e2e8f0;
-  --color-secondary-hover: #cbd5e1;
-  --color-secondary-strong: #334155;
-  --color-secondary-foreground: #1e293b;
+  --color-secondary: #e4e7de;
+  --color-secondary-hover: #d3d8c9;
+  --color-secondary-strong: #3a3f37;
+  --color-secondary-foreground: #2b3129;
 
-  --color-accent: #0d9488;
-  --color-accent-strong: #0f766e;
-  --color-accent-soft: #ccfbf1;
+  --color-accent: #4f6360;
+  --color-accent-strong: #33413e;
+  --color-accent-soft: #dce6e4;
   --color-accent-foreground: #ffffff;
 
-  --color-muted: #f1f5f9;
-  --color-muted-foreground: #475569;
+  --color-muted: #eef1ea;
+  --color-muted-foreground: #5b6357;
 
-  --color-border: #e2e8f0;
-  --color-input: #cbd5e1;
-  --color-ring: #6366f1;
-  --ring-soft: rgba(79, 70, 229, 0.16);
+  --color-border: #d7ded0;
+  --color-input: #b9c4ac;
+  --color-ring: #3f5a30;
+  --ring-soft: rgba(79, 107, 63, 0.16);
 
-  --color-success: #16a34a;
-  --color-success-strong: #15803d;
-  --color-success-soft: #dcfce7;
+  --color-success: #4a7530;
+  --color-success-strong: #2f4a1f;
+  --color-success-soft: #e3edda;
 
-  --color-warning: #d97706;
-  --color-warning-strong: #b45309;
-  --color-warning-soft: #fef3c7;
+  --color-warning: #b8863b;
+  --color-warning-strong: #7a5a22;
+  --color-warning-soft: #f3e8d2;
 
-  --color-destructive: #dc2626;
-  --color-destructive-hover: #b91c1c;
-  --color-destructive-strong: #b91c1c;
-  --color-destructive-soft: #fee2e2;
+  --color-destructive: #b23b3b;
+  --color-destructive-hover: #922f2f;
+  --color-destructive-strong: #7a2a29;
+  --color-destructive-soft: #f3dedc;
+  --color-destructive-foreground: #ffffff;
 
-  --color-info: #2563eb;
-  --color-info-strong: #1d4ed8;
-  --color-info-soft: #dbeafe;
+  --color-info: #4a6b8a;
+  --color-info-strong: #33506b;
+  --color-info-soft: #dce6ed;
 
   /* ----------------------------------------------------------
      TYPOGRAPHY
+     Modular scale, ratio 1.25 (major third), anchored at the
+     16px body size and rounded to the 4px spacing grid — each
+     step below body shares that grid too, so type and spacing
+     are expressions of the same base unit.
+       display 48 → h1 40 → h2 32 → h3 24 → h4 20 → body 16
+     small/caption break the pure ratio deliberately (legibility
+     floor, not a proportion problem).
      ---------------------------------------------------------- */
   --font-sans:
     system-ui,
@@ -72,14 +82,14 @@
     Arial,
     sans-serif;
 
-  --font-size-display: 2.75rem;   /* 44px */
-  --font-size-h1: 2.25rem;        /* 36px */
-  --font-size-h2: 1.75rem;        /* 28px */
-  --font-size-h3: 1.375rem;       /* 22px */
-  --font-size-h4: 1.125rem;       /* 18px */
-  --font-size-body: 1rem;         /* 16px */
-  --font-size-small: 0.875rem;    /* 14px */
-  --font-size-caption: 0.75rem;   /* 12px */
+  --font-size-display: 3rem;      /* 48px = --space-12 */
+  --font-size-h1: 2.5rem;         /* 40px = --space-10 */
+  --font-size-h2: 2rem;           /* 32px = --space-8 */
+  --font-size-h3: 1.5rem;         /* 24px = --space-6 */
+  --font-size-h4: 1.25rem;        /* 20px = --space-5 */
+  --font-size-body: 1rem;         /* 16px = --space-4 (anchor) */
+  --font-size-small: 0.875rem;    /* 14px — accessibility floor, not on-scale */
+  --font-size-caption: 0.75rem;   /* 12px = --space-3 — floor, not on-scale */
 
   --line-height-tight: 1.15;
   --line-height-heading: 1.25;
@@ -98,6 +108,7 @@
   --space-2: 0.5rem;    /* 8px  */
   --space-3: 0.75rem;   /* 12px */
   --space-4: 1rem;      /* 16px */
+  --space-5: 1.25rem;   /* 20px */
   --space-6: 1.5rem;    /* 24px */
   --space-8: 2rem;      /* 32px */
   --space-10: 2.5rem;   /* 40px */
@@ -106,21 +117,28 @@
   --space-20: 5rem;     /* 80px */
 
   /* ----------------------------------------------------------
-     BORDER RADIUS
+     ICON SIZES  (aligned to the spacing grid)
      ---------------------------------------------------------- */
-  --radius-sm: 0.375rem;  /* 6px  */
-  --radius-md: 0.5rem;    /* 8px  */
-  --radius-lg: 0.75rem;   /* 12px */
-  --radius-xl: 1rem;      /* 16px */
+  --icon-sm: var(--space-4);   /* 16px — inline with body/small text */
+  --icon-md: var(--space-5);   /* 20px — default button/nav icons */
+  --icon-lg: var(--space-6);   /* 24px — section headers, empty states */
+
+  /* ----------------------------------------------------------
+     BORDER RADIUS  (full scale now on the 4px spacing grid)
+     ---------------------------------------------------------- */
+  --radius-sm: 0.25rem;   /* 4px  = --space-1 */
+  --radius-md: 0.5rem;    /* 8px  = --space-2 */
+  --radius-lg: 0.75rem;   /* 12px = --space-3 */
+  --radius-xl: 1rem;      /* 16px = --space-4 */
   --radius-full: 9999px;
 
   /* ----------------------------------------------------------
      SHADOWS (restrained — use sparingly)
      ---------------------------------------------------------- */
   --shadow-none: none;
-  --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.06);
-  --shadow-md: 0 2px 8px rgba(15, 23, 42, 0.08);
-  --shadow-lg: 0 8px 24px rgba(15, 23, 42, 0.12);
+  --shadow-sm: 0 1px 2px rgba(38, 49, 36, 0.06);
+  --shadow-md: 0 2px 8px rgba(38, 49, 36, 0.08);
+  --shadow-lg: 0 8px 24px rgba(38, 49, 36, 0.12);
 
   /* ----------------------------------------------------------
      LAYOUT

@@ -81,7 +81,7 @@
 
 .btn--destructive {
   background-color: var(--color-destructive);
-  color: #ffffff;
+  color: var(--color-destructive-foreground);
 }
 
 .btn--destructive:hover:not(:disabled) {
