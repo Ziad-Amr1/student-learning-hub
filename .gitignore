@@ -22,6 +22,12 @@ dist-ssr
 # Local files
 *.local
 
+# Internal agent/project documentation — kept local, NOT committed.
+# Exception: docs/DESIGN_SYSTEM.md remains tracked in the repository.
+/AGENTS.md
+/docs/*
+!/docs/DESIGN_SYSTEM.md
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
