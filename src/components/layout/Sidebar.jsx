@@ -1,4 +1,3 @@
-import { useState } from 'react'
 import { NavLink } from 'react-router-dom'
 import { PanelLeftClose, PanelLeftOpen } from 'lucide-react'
 import { cx } from '../../utils/cx'
@@ -10,9 +9,7 @@ const SECTIONS = [
   { id: 'account', label: 'Account' },
 ]
 
-export default function Sidebar({ items }) {
-  const [collapsed, setCollapsed] = useState(false)
-
+export default function Sidebar({ items, collapsed = false, onToggle }) {
   return (
     <aside className={cx('sidebar', collapsed && 'sidebar--collapsed')}>
       <nav className="sidebar__nav" aria-label="Primary">
@@ -48,7 +45,7 @@ export default function Sidebar({ items }) {
         className="sidebar__toggle"
         aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
         title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-        onClick={() => setCollapsed(!collapsed)}
+        onClick={onToggle}
       >
         {collapsed ? <PanelLeftOpen aria-hidden="true" /> : <PanelLeftClose aria-hidden="true" />}
         <span className="sidebar__label">Collapse</span>

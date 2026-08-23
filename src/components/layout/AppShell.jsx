@@ -7,6 +7,7 @@ import {
   ListTodo,
   NotebookPen,
 } from 'lucide-react'
+import { cx } from '../../utils/cx'
 import Navbar from './Navbar'
 import Sidebar from './Sidebar'
 import MobileNav from './MobileNav'
@@ -24,16 +25,26 @@ const NAV_ITEMS = [
 
 export default function AppShell() {
   const [menuOpen, setMenuOpen] = useState(false)
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
 
   return (
-    <div className="app-shell">
+    <div
+      className={cx(
+        'app-shell',
+        sidebarCollapsed && 'app-shell--sidebar-collapsed'
+      )}
+    >
       <a className="skip-link" href="#main-content">
         Skip to content
       </a>
       <Navbar items={NAV_ITEMS} onMenuClick={() => setMenuOpen(true)} />
-      <Sidebar items={NAV_ITEMS} />
+      <Sidebar
+        items={NAV_ITEMS}
+        collapsed={sidebarCollapsed}
+        onToggle={() => setSidebarCollapsed(!sidebarCollapsed)}
+      />
       <main id="main-content" className="app-shell__main" tabIndex={-1}>
-        <Container>
+        <Container className="app-shell__page">
           <Outlet />
         </Container>
       </main>

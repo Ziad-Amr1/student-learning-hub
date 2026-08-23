@@ -6,6 +6,9 @@ export default function Navbar({ items, onMenuClick }) {
   return (
     <header className="navbar">
       <div className="navbar__inner">
+        <NavLink to="/dashboard" className="navbar__brand">
+          Huby<span className="navbar__brand-dot">.</span>
+        </NavLink>
         <button
           type="button"
           className="navbar__menu-button"
@@ -14,9 +17,6 @@ export default function Navbar({ items, onMenuClick }) {
         >
           <Menu aria-hidden="true" />
         </button>
-        <NavLink to="/dashboard" className="navbar__brand">
-          Huby<span className="navbar__brand-dot">.</span>
-        </NavLink>
       </div>
     </header>
   )

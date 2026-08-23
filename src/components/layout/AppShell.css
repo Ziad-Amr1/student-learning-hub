@@ -11,6 +11,8 @@
 .app-shell__main {
   grid-area: main;
   outline: none;
+  /* breathing room below the navbar */
+  padding-block-start: var(--space-6);
   /* keep content clear of the fixed mobile nav bar + iOS home indicator */
   padding-bottom: calc(
     var(--layout-mobilenav-height) + env(safe-area-inset-bottom, 0px) +
@@ -35,16 +37,31 @@
   top: var(--space-2);
 }
 
+@media (min-width: 768px) {
+  .app-shell__main {
+    padding-block-start: var(--space-8);
+  }
+}
+
 @media (min-width: 1024px) {
   .app-shell {
-    /* auto column lets the sidebar own its (collapsible) token width */
-    grid-template-columns: auto 1fr;
+    grid-template-columns: var(--layout-sidebar-width) 1fr;
     grid-template-areas:
       'sidebar navbar'
       'sidebar main';
+    transition: grid-template-columns 150ms ease;
+  }
+
+  .app-shell--sidebar-collapsed {
+    grid-template-columns: var(--layout-sidebar-width-collapsed) 1fr;
   }
 
   .app-shell__main {
     padding-bottom: var(--layout-section-gap);
+  }
+
+  /* balanced gap between sidebar and page content */
+  .app-shell__page {
+    padding-left: var(--space-5);
   }
 }
