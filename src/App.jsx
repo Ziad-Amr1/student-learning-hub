@@ -1,5 +1,6 @@
-import { Link, Route, Routes } from 'react-router-dom'
+import { Route, Routes } from 'react-router-dom'
 import AppShell from './components/layout/AppShell'
+import LandingPage from './pages/LandingPage'
 import Dashboard from './pages/Dashboard'
 import Tasks from './pages/Tasks'
 import Notes from './pages/Notes'
@@ -7,23 +8,10 @@ import Resources from './pages/Resources'
 import Profile from './pages/Profile'
 import NotFound from './pages/NotFound'
 
-function HomePlaceholder() {
-  return (
-    <main>
-      <h1>Huby</h1>
-      <p>Your personal hub for students.</p>
-      <p>
-        The public landing page arrives in Sprint 02.5.{' '}
-        <Link to="/dashboard">Go to your hub</Link>
-      </p>
-    </main>
-  )
-}
-
 export default function App() {
   return (
     <Routes>
-      <Route path="/" element={<HomePlaceholder />} />
+      <Route path="/" element={<LandingPage />} />
       <Route element={<AppShell />}>
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/tasks" element={<Tasks />} />

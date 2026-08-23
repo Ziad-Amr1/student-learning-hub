@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import Button from '../components/ui/Button'
 import './NotFound.css'
 
 export default function NotFound() {
@@ -9,9 +10,9 @@ export default function NotFound() {
       <p className="text-body-small">
         The page you are looking for does not exist or has moved.
       </p>
-      <Link to="/" className="btn btn--primary btn--md">
+      <Button as={Link} to="/">
         Back to home
-      </Link>
+      </Button>
     </main>
   )
 }

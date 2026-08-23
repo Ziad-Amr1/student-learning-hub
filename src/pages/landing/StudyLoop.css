@@ -1,0 +1,51 @@
+.study-loop {
+  padding-block: var(--space-16);
+}
+
+.study-loop h2 {
+  margin: 0;
+}
+
+.study-loop__description {
+  margin: var(--space-3) 0 0;
+  max-width: 52ch;
+  color: var(--color-muted-foreground);
+}
+
+.study-loop__steps {
+  list-style: none;
+  margin: var(--layout-section-gap) 0 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(13rem, 1fr));
+  gap: var(--space-8) var(--layout-card-gap);
+}
+
+.study-loop__step {
+  display: flex;
+  gap: var(--space-4);
+}
+
+.study-loop__number {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: var(--space-10);
+  height: var(--space-10);
+  border-radius: var(--radius-full);
+  background-color: var(--color-primary-soft);
+  color: var(--color-primary-strong);
+  font-weight: var(--font-weight-semibold);
+}
+
+.study-loop__step-title {
+  margin: 0 0 var(--space-1);
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-semibold);
+}
+
+.study-loop__step-description {
+  margin: 0;
+  color: var(--color-muted-foreground);
+}

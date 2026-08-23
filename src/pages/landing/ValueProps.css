@@ -1,0 +1,18 @@
+.value-props {
+  padding-block: var(--space-16);
+}
+
+.value-props__inner {
+  display: flex;
+  justify-content: center;
+}
+
+.value-props__statement {
+  margin: 0;
+  max-width: 44ch;
+  text-align: center;
+  font-size: var(--font-size-h3);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height-body);
+  color: var(--color-muted-foreground);
+}

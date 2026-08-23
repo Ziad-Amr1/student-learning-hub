@@ -237,13 +237,23 @@ see `docs/COMPONENTS.md`.
 
 ### Button (`components/ui/Button.jsx`)
 - **Purpose:** triggers actions. Native `<button>` (type defaults to `"button"`).
+- **Polymorphic `as` prop (Sprint 02.5):** pass `as={Link} to="…"` or
+  `as="a" href="…"` to render navigation as an anchor wearing the full
+  button system — the ONLY approved way to make a link look like a button
+  (never re-declare `btn` classes by hand; hand-applied classes skip the
+  component's CSS import and render unstyled). `type`/`disabled` apply to
+  native buttons only; disabled links need explicit `aria-disabled`.
 - **Variants:** `primary` (main action, one per view) · `secondary` (supporting)
   · `outline` (on non-surface backgrounds) · `ghost` (low-emphasis/inline)
   · `destructive` (delete/remove).
 - **Sizes:** sm / md / lg. **States:** hover, active, disabled (opacity + not-allowed),
   focus-visible ring.
 - **A11y:** real button semantics; icon-only usage must include an accessible
-  label via props (`aria-label`) passed through.
+  label via props (`aria-label`) passed through. Navigation stays semantic:
+  `<Link>`/anchor via `as`, button semantics only for true actions.
+- **Known condition (flagged, not changed):** `outline` border uses
+  `--color-input`, which is below the 3:1 non-text guideline even on white;
+  revisit as a design-system decision before outline sees heavy use.
 
 ### Card (`components/ui/Card.jsx`)
 - **Purpose:** grouped content surface. Compose: `Card > CardHeader
