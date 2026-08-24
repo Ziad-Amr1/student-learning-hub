@@ -1,4 +1,5 @@
 import PageHeader from '../components/layout/PageHeader'
+import { getGreeting } from '../utils/greeting'
 import { TASKS } from '../data/tasks'
 import StatCard from './dashboard/StatCard'
 import QuickActions from './dashboard/QuickActions'
@@ -28,7 +29,7 @@ export default function Dashboard() {
   return (
     <div className="flex flex-col gap-(--layout-section-gap)">
       <PageHeader
-        title="Dashboard"
+        title={`${getGreeting()}!`}
         description="Your learning at a glance."
       />
       <QuickActions />
