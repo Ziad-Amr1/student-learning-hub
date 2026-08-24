@@ -2,9 +2,8 @@ import PageHeader from '../components/layout/PageHeader'
 
 export default function Notes() {
   return (
-    <article>
+    <article className="flex flex-col gap-(--layout-section-gap)">
       <PageHeader
-        className="mb-(--layout-section-gap)"
         title="Notes"
         description="Capture and organize your notes."
       />

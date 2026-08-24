@@ -17,11 +17,11 @@ export default function Profile() {
 
   return (
     <article>
-      <PageHeader
-        title="Profile"
-        description="Your personal learning profile."
-      />
       <div className="flex flex-col gap-(--layout-section-gap)">
+        <PageHeader
+          title="Profile"
+          description="Your personal learning profile."
+        />
         {isEditing ? (
           <ProfileEditForm
             profile={profile}

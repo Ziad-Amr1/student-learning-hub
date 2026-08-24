@@ -2,9 +2,8 @@ import PageHeader from '../components/layout/PageHeader'
 
 export default function Tasks() {
   return (
-    <article>
+    <article className="flex flex-col gap-(--layout-section-gap)">
       <PageHeader
-        className="mb-(--layout-section-gap)"
         title="Tasks"
         description="Plan and track your study tasks."
       />
