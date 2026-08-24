@@ -4,6 +4,7 @@ export default function Tasks() {
   return (
     <article>
       <PageHeader
+        className="mb-(--layout-section-gap)"
         title="Tasks"
         description="Plan and track your study tasks."
       />

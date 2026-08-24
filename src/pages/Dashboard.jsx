@@ -32,7 +32,7 @@ export default function Dashboard() {
         title={`${getGreeting()}!`}
         description="Your learning at a glance."
       />
-      <QuickActions />
+      <QuickActions className="mt-(--space-6)" />
       <section aria-label="Task statistics">
         <h2 className="sr-only">Task statistics</h2>
         <div className="grid gap-(--layout-card-gap) sm:grid-cols-2 xl:grid-cols-4">

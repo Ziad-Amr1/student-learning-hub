@@ -4,6 +4,7 @@ export default function Profile() {
   return (
     <article>
       <PageHeader
+        className="mb-(--layout-section-gap)"
         title="Profile"
         description="Your personal learning profile."
       />

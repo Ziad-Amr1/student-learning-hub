@@ -4,6 +4,7 @@ export default function Notes() {
   return (
     <article>
       <PageHeader
+        className="mb-(--layout-section-gap)"
         title="Notes"
         description="Capture and organize your notes."
       />

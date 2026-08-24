@@ -4,6 +4,7 @@ export default function Resources() {
   return (
     <article>
       <PageHeader
+        className="mb-(--layout-section-gap)"
         title="Resources"
         description="Your saved learning resources."
       />
