@@ -32,11 +32,13 @@ export default function Dashboard() {
 
   return (
     <div className="flex flex-col gap-(--layout-section-gap)">
-      <PageHeader
-        title={`${getGreeting()}!`}
-        description="Your learning at a glance."
-      />
-      <QuickActions className="mt-(--space-6)" />
+      <div className="flex flex-col gap-(--space-6)">
+        <PageHeader
+          title={`${getGreeting()}!`}
+          description="Your learning at a glance."
+        />
+        <QuickActions />
+      </div>
       <section aria-label="Task statistics">
         <h2 className="sr-only">Task statistics</h2>
         <div className="grid gap-(--layout-card-gap) sm:grid-cols-2 xl:grid-cols-4">
