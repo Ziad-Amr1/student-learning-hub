@@ -18,22 +18,24 @@ export default function Profile() {
   return (
     <article>
       <div className="flex flex-col gap-(--layout-section-gap)">
-        <PageHeader
-          title="Profile"
-          description="Your personal learning profile."
-        />
-        {isEditing ? (
-          <ProfileEditForm
-            profile={profile}
-            onSave={handleSave}
-            onCancel={() => setIsEditing(false)}
+        <div className="flex flex-col gap-(--space-6)">
+          <PageHeader
+            title="Profile"
+            description="Your personal learning profile."
           />
-        ) : (
-          <ProfileCard
-            profile={profile}
-            onEdit={() => setIsEditing(true)}
-          />
-        )}
+          {isEditing ? (
+            <ProfileEditForm
+              profile={profile}
+              onSave={handleSave}
+              onCancel={() => setIsEditing(false)}
+            />
+          ) : (
+            <ProfileCard
+              profile={profile}
+              onEdit={() => setIsEditing(true)}
+            />
+          )}
+        </div>
         <LearningProgressList items={LEARNING_PROGRESS} />
       </div>
     </article>
