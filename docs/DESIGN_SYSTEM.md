@@ -234,9 +234,11 @@ breakpoint tokens are defined.
   reserved Tailwind namespace), centered, horizontal padding 16 → 24 (md)
   → 32 (lg). Exception: inside the AppShell
   grid (≥ lg) the page container is anchored to the main track's inline
-  start (`margin-inline: 0`) so sidebar-collapse width flows into content
-  position instead of into symmetric gutters — Container still owns the
-  width cap and gutters; AppShell owns how the column sits in the grid.
+  start (`margin-inline: 0`) and releases its max-width (`max-width: none`)
+  so sidebar-collapse width flows into content position instead of pooling
+  as dead gutter — Container still owns gutters below lg; AppShell owns how
+  the column sits in the grid. Full-viewport pages (`/`, 404) keep the
+  centered 72rem reading measure.
 - **Page anatomy:** `Container` → `PageHeader` (title + optional description +
   actions) → content sections separated by `--layout-section-gap`.
 - **Grids:** card grids use CSS grid with `repeat(auto-fill/fit, minmax(...))`

@@ -54,9 +54,12 @@ export default function AppShell() {
         className="[grid-area:main] outline-none pt-6 md:pt-8 pb-[calc(var(--layout-mobilenav-height)+env(safe-area-inset-bottom,0px)+var(--space-4))] lg:pb-(--layout-section-gap)"
         tabIndex={-1}
       >
-        {/* mx-0! anchors the page container to the main track's inline start at lg:
-            freed sidebar width flows into content position, not symmetric gutters. */}
-        <Container className="lg:mx-0!">
+        {/* mx-0! anchors the page container to the main track's inline start at lg,
+            and max-w-none! releases the 72rem reading cap there - both so
+            sidebar-collapse width flows into CONTENT position instead of pooling
+            as dead gutter. Below lg, and on public pages, Container keeps its
+            centered max width. */} 
+        <Container className="lg:mx-0! lg:max-w-none!">
           <Outlet />
         </Container>
       </main>
