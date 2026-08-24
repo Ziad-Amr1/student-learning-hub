@@ -2,6 +2,8 @@ import PageHeader from '../components/layout/PageHeader'
 import { TASKS } from '../data/tasks'
 import StatCard from './dashboard/StatCard'
 import QuickActions from './dashboard/QuickActions'
+import RecentTasks from './dashboard/RecentTasks'
+import LearningProgress from './dashboard/LearningProgress'
 
 export default function Dashboard() {
   const total = TASKS.length
@@ -37,6 +39,14 @@ export default function Dashboard() {
             <StatCard key={stat.label} {...stat} />
           ))}
         </div>
+      </section>
+      <section
+        aria-label="Recent tasks and learning progress"
+        className="grid gap-(--layout-card-gap) lg:grid-cols-5"
+      >
+        <h2 className="sr-only">Recent activity</h2>
+        <RecentTasks className="lg:col-span-3" />
+        <LearningProgress className="lg:col-span-2" />
       </section>
     </div>
   )
