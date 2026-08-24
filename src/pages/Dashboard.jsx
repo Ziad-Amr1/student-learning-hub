@@ -1,6 +1,7 @@
 import PageHeader from '../components/layout/PageHeader'
 import { getGreeting } from '../utils/greeting'
 import { TASKS } from '../data/tasks'
+import { CircleCheckBig, CircleDashed, CircleDot, ListTodo } from 'lucide-react'
 import StatCard from './dashboard/StatCard'
 import QuickActions from './dashboard/QuickActions'
 import RecentTasks from './dashboard/RecentTasks'
@@ -9,20 +10,23 @@ import LearningProgress from './dashboard/LearningProgress'
 export default function Dashboard() {
   const total = TASKS.length
   const stats = [
-    { label: 'Total tasks', value: total },
+    { label: 'Total tasks', value: total, Icon: ListTodo },
     {
       label: 'To do',
       value: TASKS.filter((task) => task.status === 'todo').length,
+      Icon: CircleDashed,
     },
     {
       label: 'In progress',
       value: TASKS.filter((task) => task.status === 'in-progress').length,
       badge: { label: 'active', variant: 'info' },
+      Icon: CircleDot,
     },
     {
       label: 'Completed',
       value: TASKS.filter((task) => task.status === 'done').length,
       badge: { label: 'keep going', variant: 'success' },
+      Icon: CircleCheckBig,
     },
   ]
 

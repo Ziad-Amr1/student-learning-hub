@@ -1,3 +1,4 @@
+import { cx } from '../../utils/cx'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/Card'
 import Badge from '../../components/ui/Badge'
 import { TASKS } from '../../data/tasks'
@@ -30,7 +31,12 @@ export default function RecentTasks({ className }) {
           <ul className="flex flex-col divide-y divide-border">
             {recentTasks.map((task) => (
               <li key={task.id} className="flex items-center justify-between gap-3 py-3 first:pt-0 last:pb-0">
-                <span className="min-w-0 flex-1 truncate text-body-small font-medium">
+                <span
+                  className={cx(
+                    'min-w-0 flex-1 truncate text-body-small font-medium',
+                    task.status === 'done' && 'text-muted-foreground line-through'
+                  )}
+                >
                   {task.title}
                 </span>
                 <Badge variant={PRIORITY_BADGE_VARIANTS[task.priority] ?? 'outline'}>
