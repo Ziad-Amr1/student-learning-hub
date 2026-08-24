@@ -1,15 +1,14 @@
 import PageHeader from '../components/layout/PageHeader'
+import QuickActions from './dashboard/QuickActions'
 
 export default function Dashboard() {
   return (
-    <article>
+    <div className="flex flex-col gap-(--layout-section-gap)">
       <PageHeader
         title="Dashboard"
         description="Your learning at a glance."
       />
-      <p className="text-body-small text-muted-foreground">
-        Dashboard content arrives in Sprint 03.
-      </p>
-    </article>
+      <QuickActions />
+    </div>
   )
 }
