@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import PageHeader from '../components/layout/PageHeader';
 import Button from '../components/ui/Button';
 import Input from '../components/ui/Input';
-import Textarea from '../components/ui/Textarea';
 import Card from '../components/ui/Card';
 import Badge from '../components/ui/Badge';
 
@@ -11,19 +10,10 @@ export default function Notes() {
     const savedNotes = localStorage.getItem('huby_notes');
     return savedNotes ? JSON.parse(savedNotes) : [
       {
-        id: '1',
-        title: 'React Hooks Quick Reference',
-        content: 'Remember that useState returns a stateful value and a function to update it.',
-        category: 'Development',
-        isPinned: true,
-        createdAt: new Date().toISOString()
-      },
-      {
-        id: '2',
-        title: 'Tailwind CSS Layouts',
-        content: 'Use grid-cols-1 md:grid-cols-2 for responsive grid layouts cleanly.',
-        category: 'Study',
-        isPinned: false,
+        id: 'note-1',
+        title: 'React Hooks Overview',
+        content: 'Remember to use useState and useEffect properly for state management.',
+        category: 'Frontend',
         createdAt: new Date().toISOString()
       }
     ];
@@ -31,7 +21,7 @@ export default function Notes() {
 
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
-  const [category, setCategory] = useState('Study');
+  const [category, setCategory] = useState('Frontend');
   const [searchQuery, setSearchQuery] = useState('');
   const [noteToDelete, setNoteToDelete] = useState(null);
 
@@ -44,96 +34,89 @@ export default function Notes() {
     if (!title.trim() || !content.trim()) return;
 
     const newNote = {
-      id: Date.now().toString(),
+      id: Date.now().toString() + Math.random().toString(36).substring(2, 7),
       title,
       content,
       category,
-      isPinned: false,
       createdAt: new Date().toISOString()
     };
 
     setNotes([newNote, ...notes]);
     setTitle('');
     setContent('');
-    setCategory('Study');
-  };
-
-  const togglePinNote = (id) => {
-    setNotes(notes.map(note => 
-      note.id === id ? { ...note, isPinned: !note.isPinned } : note
-    ));
+    setCategory('Frontend');
   };
 
   const confirmDelete = () => {
     if (noteToDelete) {
-      setNotes(notes.filter(note => note.id !== noteToDelete));
+      setNotes(notes.filter(n => n.id !== noteToDelete));
       setNoteToDelete(null);
     }
   };
 
-  // Filter notes based on search query, then sort pinned ones first
-  const filteredNotes = notes.filter(note => 
-    note.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    note.content.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    note.category.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredNotes = notes.filter(n => 
+    n.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    n.content.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    n.category.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const sortedNotes = [...filteredNotes].sort((a, b) => {
-    if (a.isPinned === b.isPinned) return 0;
-    return a.isPinned ? -1 : 1;
-  });
-
   return (
-    <article className="relative">
+    <article className="space-y-6">
       <PageHeader
-        className="mb-(--layout-section-gap)"
         title="Notes"
-        description="Capture, search, pin, and organize your study notes efficiently."
+        description="Capture your study notes, thoughts, and technical snippets."
       />
-      
+
       {/* Add Note Form */}
-      <form onSubmit={handleAddNote} className="bg-white p-6 rounded-lg shadow-sm border mb-8 space-y-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="flex flex-col gap-1">
-            <label className="text-xs text-gray-700 font-medium" htmlFor="note-title-input">
+      <form onSubmit={handleAddNote} className="bg-white p-6 rounded-lg shadow-sm border space-y-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
+          <div className="flex flex-col gap-1 w-full">
+            <label className="text-xs text-gray-700 font-medium" htmlFor="note-title">
               Note Title <span className="text-red-500">*</span>
             </label>
-            <Input 
-              id="note-title-input"
-              type="text" 
+            <input 
+              id="note-title"
+              type="text"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              placeholder="e.g., Chapter 4 Summary"
+              placeholder="e.g., React Router v6 Notes"
+              className="w-full px-3 py-2 border rounded-lg focus:outline-none bg-white text-gray-800 text-sm h-[38px] border-gray-300"
               required
             />
           </div>
 
-          <div className="flex flex-col gap-1">
-            <label className="text-xs text-gray-700 font-medium" htmlFor="note-category-select">
+          <div className="flex flex-col gap-1 w-full">
+            <label className="text-xs text-gray-700 font-medium" htmlFor="note-category">
               Category
             </label>
             <select 
-              id="note-category-select"
+              id="note-category"
               value={category}
               onChange={(e) => setCategory(e.target.value)}
-              className="px-3 py-2 border rounded-lg focus:outline-none bg-white text-gray-800 text-sm"
+              className="w-full px-3 py-2 border rounded-lg focus:outline-none bg-white text-gray-800 text-sm h-[38px] border-gray-300"
             >
-              <option value="Study">Study</option>
-              <option value="Development">Development</option>
+              <option value="Frontend">Frontend</option>
+              <option value="Backend">Backend</option>
+              <option value="Database">Database</option>
+              <option value="DevOps">DevOps</option>
               <option value="General">General</option>
-              <option value="Ideas">Ideas</option>
             </select>
           </div>
         </div>
 
-        <Textarea 
-          label="Note Content"
-          value={content}
-          onChange={(e) => setContent(e.target.value)}
-          placeholder="Write your notes or study points here..."
-          rows={3}
-          required
-        />
+        <div className="flex flex-col gap-1">
+          <label className="text-xs text-gray-700 font-medium" htmlFor="note-content">
+            Content <span className="text-red-500">*</span>
+          </label>
+          <textarea 
+            id="note-content"
+            value={content}
+            onChange={(e) => setContent(e.target.value)}
+            placeholder="Write your note content here..."
+            className="w-full px-3 py-2 border rounded-lg focus:outline-none bg-white text-gray-800 text-sm h-24 border-gray-300"
+            required
+          />
+        </div>
 
         <Button type="submit" variant="primary">
           Add Note
@@ -141,50 +124,36 @@ export default function Notes() {
       </form>
 
       {/* Search Bar */}
-      <div className="mb-6">
-        <Input 
+      <div>
+        <input 
           type="text"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           placeholder="Search notes by title, content, or category..."
+          className="w-full px-3 py-2 border rounded-lg focus:outline-none bg-white text-gray-800 text-sm h-[38px] border-gray-300"
         />
       </div>
 
-      {/* Notes Grid List */}
+      {/* Notes List */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {sortedNotes.length === 0 ? (
-          <p className="text-muted-foreground col-span-full text-center py-4">No notes found matching your search.</p>
+        {filteredNotes.length === 0 ? (
+          <p className="text-gray-500 col-span-2 text-center py-4 bg-white rounded-lg border">No notes found matching your search.</p>
         ) : (
-          sortedNotes.map(note => (
-            <Card 
-              key={note.id} 
-              className={`p-5 flex flex-col justify-between gap-4 transition-all ${
-                note.isPinned ? 'border-amber-400 bg-amber-50/25 shadow-sm' : ''
-              }`}
-            >
-              <div className="space-y-2">
-                <div className="flex items-center justify-between gap-2">
-                  <h3 className="text-lg font-bold text-gray-800 flex items-center gap-2">
-                    {note.isPinned && <span className="text-amber-500 text-sm">📌</span>}
-                    {note.title}
-                  </h3>
-                  <Badge variant="info">{note.category}</Badge>
+          filteredNotes.map(note => (
+            <Card key={note.id} className="p-5 flex flex-col justify-between space-y-3">
+              <div className="space-y-1">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-base font-bold text-gray-900">{note.title}</h3>
+                  <Badge className="bg-slate-100 text-slate-800 border border-slate-200">
+                    {note.category}
+                  </Badge>
                 </div>
-                <p className="text-sm text-gray-600 whitespace-pre-wrap leading-relaxed">{note.content}</p>
-                <span className="text-xs text-gray-400 block pt-2">
-                  Created at: {new Date(note.createdAt).toLocaleString()}
-                </span>
+                <p className="text-xs text-gray-600 whitespace-pre-wrap">{note.content}</p>
               </div>
-
-              <div className="flex justify-between items-center pt-2 border-t border-gray-100">
-                <Button 
-                  variant="secondary" 
-                  size="sm" 
-                  onClick={() => togglePinNote(note.id)}
-                >
-                  {note.isPinned ? 'Unpin' : 'Pin to top'}
-                </Button>
-
+              <div className="flex items-center justify-between pt-2 border-t border-gray-100">
+                <span className="text-[10px] text-gray-400">
+                  {note.createdAt ? new Date(note.createdAt).toLocaleString() : ''}
+                </span>
                 <Button variant="danger" size="sm" onClick={() => setNoteToDelete(note.id)}>
                   Delete
                 </Button>
@@ -205,18 +174,10 @@ export default function Notes() {
               </p>
             </div>
             <div className="flex justify-end items-center gap-3 pt-2">
-              <Button 
-                variant="secondary" 
-                size="sm" 
-                onClick={() => setNoteToDelete(null)}
-              >
+              <Button variant="secondary" size="sm" onClick={() => setNoteToDelete(null)}>
                 No
               </Button>
-              <Button 
-                variant="danger" 
-                size="sm" 
-                onClick={confirmDelete}
-              >
+              <Button variant="danger" size="sm" onClick={confirmDelete}>
                 Yes
               </Button>
             </div>
