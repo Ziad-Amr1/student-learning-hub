@@ -367,6 +367,21 @@ see `docs/COMPONENTS.md`.
   (chips use `w-full` to wrap to a second line).
 - **Layering:** see `docs/LAYERING_SYSTEM.md`.
 
+### StatusDropdown (`components/ui/StatusDropdown.jsx`) ✅ (Sprint 06.5)
+- **Purpose:** accessible status selector for task cards — replaces native
+  `<select>` with a combobox-pattern dropdown built from existing primitives.
+- **Props:** `value` (current status), `onChange` (callback), `taskTitle`
+  (for aria-label).
+- **Visual:** trigger button shows status icon (Circle/Clock/CheckCircle2
+  from lucide-react) + label + chevron; positioned listbox below with
+  option highlight on hover/keyboard; selected option uses
+  `bg-primary-soft text-primary-strong`.
+- **A11y:** `role="combobox"` + `aria-expanded` + `aria-haspopup="listbox"`
+  on trigger; `role="listbox"` + `aria-selected` per option; full keyboard
+  navigation (ArrowUp/Down, Enter/Space, Escape, Tab).
+- **Scope:** lightweight interim for Sprint 06.5 hardening — full Dropdown
+  with focus trap lands in Sprint 14.
+
 ### Planned primitives (do not exist yet — build only in their Sprint)
 `EmptyState` (Sprint 08) · Tooltip/Dropdown/Drawer/Toast/Skeleton/Tabs/Breadcrumb
 (Sprint 14, value-permitting).
