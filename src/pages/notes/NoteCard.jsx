@@ -13,7 +13,7 @@ export default function NoteCard({ note, onEdit, onTogglePin, onDelete }) {
       className={cx(
         'p-5 flex flex-col justify-between space-y-3 transition-[border-color,background-color]',
         note.pinned
-          ? 'border-l-2 border-l-warning bg-warning-soft/20'
+          ? 'border-l-2 border-l-accent bg-accent-soft/20'
           : 'hover:border-border/80'
       )}
     >

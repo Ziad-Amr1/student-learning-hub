@@ -1,4 +1,4 @@
-// Seed resource data — Sprint 06 Resources.
+// Seed resource data — first-run defaults for useLocalStorage('student-hub:resources').
 // Shape: docs/DATA_MODEL.md → Resource.
 
 export const RESOURCES = [
@@ -8,6 +8,7 @@ export const RESOURCES = [
     url: 'https://react.dev/learn/thinking-in-react',
     category: 'article',
     description: 'Guide to structuring React apps from scratch.',
+    pinned: true,
     createdAt: '2026-08-01T12:00:00.000Z',
   },
   {
@@ -16,6 +17,7 @@ export const RESOURCES = [
     url: 'https://tailwindcss.com/docs',
     category: 'tool',
     description: 'Utility-first CSS framework reference.',
+    pinned: true,
     createdAt: '2026-08-05T08:30:00.000Z',
   },
   {
@@ -24,6 +26,7 @@ export const RESOURCES = [
     url: 'https://javascript.info',
     category: 'course',
     description: 'Comprehensive modern JavaScript tutorial.',
+    pinned: false,
     createdAt: '2026-08-10T14:15:00.000Z',
   },
   {
@@ -32,6 +35,7 @@ export const RESOURCES = [
     url: 'https://coolors.co/palettes/trending',
     category: 'tool',
     description: 'Browse and create accessible color palettes.',
+    pinned: false,
     createdAt: '2026-08-12T11:40:00.000Z',
   },
   {
@@ -40,6 +44,7 @@ export const RESOURCES = [
     url: 'https://www.a11yproject.com/checklist/',
     category: 'article',
     description: 'Practical accessibility checklist for web projects.',
+    pinned: false,
     createdAt: '2026-08-15T09:20:00.000Z',
   },
 ]

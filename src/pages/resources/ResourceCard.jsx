@@ -1,4 +1,4 @@
-import { ExternalLink, Pencil, Trash2, ImageOff } from 'lucide-react'
+import { ExternalLink, Pin, Pencil, Trash2, ImageOff } from 'lucide-react'
 import { cx } from '../../utils/cx'
 import Button from '../../components/ui/Button'
 import Badge from '../../components/ui/Badge'
@@ -13,9 +13,23 @@ const CATEGORY_VARIANT = {
   other: 'outline',
 }
 
-function ResourceActions({ resource, viewMode, onEdit, onDelete }) {
+const PINNED_CARD_CLASS = 'border-l-2 border-l-accent bg-accent-soft/20'
+
+function ResourceActions({ resource, onTogglePin, onEdit, onDelete }) {
   return (
     <div className="flex items-center gap-1">
+      <Button
+        variant="ghost"
+        size="sm"
+        onClick={() => onTogglePin(resource.id)}
+        aria-label={resource.pinned ? 'Unpin resource' : 'Pin resource'}
+        aria-pressed={resource.pinned}
+        className={cx(
+          resource.pinned && 'bg-primary-soft text-primary-strong hover:not-disabled:bg-primary-soft/80'
+        )}
+      >
+        <Pin className={cx('w-(--icon-sm) h-(--icon-sm)', resource.pinned && 'fill-current')} />
+      </Button>
       <Button
         as="a"
         href={resource.url}
@@ -47,10 +61,12 @@ function ResourceActions({ resource, viewMode, onEdit, onDelete }) {
   )
 }
 
-export default function ResourceCard({ resource, viewMode = 'list', onEdit, onDelete }) {
+export default function ResourceCard({ resource, viewMode = 'list', onEdit, onTogglePin, onDelete }) {
+  const pinnedClass = resource.pinned ? PINNED_CARD_CLASS : ''
+
   if (viewMode === 'grid-preview') {
     return (
-      <Card className="p-5 flex flex-col justify-between gap-4">
+      <Card className={cx('p-5 flex flex-col justify-between gap-4', pinnedClass)}>
         <div className="space-y-3">
           <div className="flex items-center justify-between gap-2">
             <h3 className="text-base font-bold text-foreground truncate">{resource.title}</h3>
@@ -75,7 +91,7 @@ export default function ResourceCard({ resource, viewMode = 'list', onEdit, onDe
           <span className="text-caption text-muted-foreground">
             Added {new Date(resource.createdAt).toLocaleDateString()}
           </span>
-          <ResourceActions resource={resource} viewMode={viewMode} onEdit={onEdit} onDelete={onDelete} />
+          <ResourceActions resource={resource} onTogglePin={onTogglePin} onEdit={onEdit} onDelete={onDelete} />
         </div>
       </Card>
     )
@@ -83,7 +99,7 @@ export default function ResourceCard({ resource, viewMode = 'list', onEdit, onDe
 
   if (viewMode === 'grid') {
     return (
-      <Card className="p-5 flex flex-col justify-between gap-4">
+      <Card className={cx('p-5 flex flex-col justify-between gap-4', pinnedClass)}>
         <div className="space-y-3">
           <div className="flex items-center justify-between gap-2">
             <h3 className="text-base font-bold text-foreground truncate">{resource.title}</h3>
@@ -102,14 +118,14 @@ export default function ResourceCard({ resource, viewMode = 'list', onEdit, onDe
           <span className="text-caption text-muted-foreground">
             Added {new Date(resource.createdAt).toLocaleDateString()}
           </span>
-          <ResourceActions resource={resource} viewMode={viewMode} onEdit={onEdit} onDelete={onDelete} />
+          <ResourceActions resource={resource} onTogglePin={onTogglePin} onEdit={onEdit} onDelete={onDelete} />
         </div>
       </Card>
     )
   }
 
   return (
-    <Card className="p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+    <Card className={cx('p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4', pinnedClass)}>
       <div className="space-y-1 flex-1 min-w-0">
         <div className="flex items-center gap-2 flex-wrap">
           <h3 className="text-base font-bold text-foreground truncate">{resource.title}</h3>
@@ -127,7 +143,7 @@ export default function ResourceCard({ resource, viewMode = 'list', onEdit, onDe
           Added {new Date(resource.createdAt).toLocaleDateString()}
         </span>
       </div>
-      <ResourceActions resource={resource} viewMode={viewMode} onEdit={onEdit} onDelete={onDelete} />
+      <ResourceActions resource={resource} onTogglePin={onTogglePin} onEdit={onEdit} onDelete={onDelete} />
     </Card>
   )
 }

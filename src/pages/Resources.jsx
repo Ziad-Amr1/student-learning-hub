@@ -96,12 +96,19 @@ export default function Resources() {
         url: url.trim(),
         category,
         description: description.trim() || undefined,
+        pinned: false,
         createdAt: new Date().toISOString(),
       }
       setResources([newResource, ...resources])
     }
     resetForm()
     setFormOpen(false)
+  }
+
+  const handleTogglePin = (id) => {
+    setResources(resources.map(r =>
+      r.id === id ? { ...r, pinned: !r.pinned } : r
+    ))
   }
 
   const handleConfirmDelete = () => {
@@ -118,6 +125,12 @@ export default function Resources() {
       (r.description && r.description.toLowerCase().includes(q))
     const matchesCategory = activeCategory === 'all' || r.category === activeCategory
     return matchesSearch && matchesCategory
+  })
+
+  const visible = [...filtered].sort((a, b) => {
+    if (a.pinned && !b.pinned) return -1
+    if (!a.pinned && b.pinned) return 1
+    return 0
   })
 
   return (
@@ -187,12 +200,13 @@ export default function Resources() {
                 : 'No resources match your search or filter.'}
             </p>
           ) : (
-            filtered.map(resource => (
+            visible.map(resource => (
               <ResourceCard
                 key={resource.id}
                 resource={resource}
                 viewMode={viewMode}
                 onEdit={handleStartEdit}
+                onTogglePin={handleTogglePin}
                 onDelete={setResourceToDelete}
               />
             ))
