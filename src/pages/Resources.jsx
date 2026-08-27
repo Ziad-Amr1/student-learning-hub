@@ -153,10 +153,7 @@ export default function Resources() {
           <Plus className="w-(--icon-sm) h-(--icon-sm)" />
           <span className="hidden sm:inline">Add Resource</span>
         </Button>
-      </ModuleToolbar>
-
-      <div className="pt-3">
-        <div className="flex flex-wrap gap-2 mb-4" role="group" aria-label="Filter by category">
+        <div className="flex flex-wrap gap-2 w-full" role="group" aria-label="Filter by category">
           {categories.map(cat => (
             <button
               key={cat}
@@ -173,6 +170,9 @@ export default function Resources() {
             </button>
           ))}
         </div>
+      </ModuleToolbar>
+
+      <div className="pt-3">
 
         <div className={cx(
           viewMode === 'list' && 'space-y-3',

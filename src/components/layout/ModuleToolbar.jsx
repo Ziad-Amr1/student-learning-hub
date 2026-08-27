@@ -4,7 +4,7 @@ export default function ModuleToolbar({ children, className }) {
   return (
     <div
       className={cx(
-        'sticky top-(--layout-navbar-height) z-5',
+        'sticky top-(--layout-navbar-height) z-(--z-toolbar)',
         'bg-background/95 backdrop-blur-sm',
         'border-b border-border',
         'py-3',

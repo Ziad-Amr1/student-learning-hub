@@ -185,11 +185,13 @@
      ---------------------------------------------------------- */
   --ease-standard: ease;
 
-  /* Layering scale — previously hardcoded literals (10 navbar /
-     bottom nav, 100 skip link). Referenced through functional
-     utilities (z-(--z-nav)) which also guarantees emission. */
-  --z-nav: 10;
-  --z-skip-link: 100;
+  /* Layering scale — semantic z-index tokens. Values are intentionally
+     small integers; native <dialog> top-layer and future Toast handle
+     their own stacking without competing with these tokens.
+     Reference via z-(--z-*) utilities in Tailwind v4. */
+  --z-toolbar: 5;      /* sticky ModuleToolbar — below navbar */
+  --z-nav: 10;         /* sticky Navbar */
+  --z-skip-link: 100;  /* skip-to-content link */
 
   /* ----------------------------------------------------------
      LAYOUT

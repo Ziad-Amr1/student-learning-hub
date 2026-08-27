@@ -34,11 +34,14 @@ export default function NoteCard({ note, onEdit, onTogglePin, onDelete }) {
         </span>
         <div className="flex items-center gap-1">
           <Button
-            variant={note.pinned ? 'secondary' : 'ghost'}
+            variant="ghost"
             size="sm"
             onClick={() => onTogglePin(note.id)}
             aria-label={note.pinned ? 'Unpin note' : 'Pin note'}
             aria-pressed={note.pinned}
+            className={cx(
+              note.pinned && 'bg-primary-soft text-primary-strong hover:not-disabled:bg-primary-soft/80'
+            )}
           >
             <Pin className={cx('w-(--icon-sm) h-(--icon-sm)', note.pinned && 'fill-current')} />
           </Button>

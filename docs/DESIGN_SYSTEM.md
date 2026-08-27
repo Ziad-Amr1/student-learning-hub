@@ -223,9 +223,11 @@ breakpoint tokens are defined.
 - `--ring-destructive-soft: rgba(178, 59, 59, 0.14)` — destructive focus
   glow; hue derives from `--color-destructive` (fixes the pre-Tailwind
   drift where the error ring used a non-token red).
-- `--z-nav: 10`, `--z-skip-link: 100` — layering scale for fixed bars and
-  the skip link (previously raw literals); the drawer uses the native
-  dialog top layer.
+- `--z-toolbar: 5` — sticky ModuleToolbar below navbar.
+- `--z-nav: 10` — sticky Navbar.
+- `--z-skip-link: 100` — skip-to-content link.
+- Native `<dialog>` top layer handles modal/drawer stacking.
+- Full layering spec: `docs/LAYERING_SYSTEM.md`.
 
 ## 8. Layout Conventions
 
@@ -358,9 +360,12 @@ see `docs/COMPONENTS.md`.
   Provides consistent location for search, filters, and action buttons.
 - **Props:** `children`, `className`.
 - **Behavior:** sticky below navbar (`top: var(--layout-navbar-height)`),
-  z-index 5 (below navbar's z-10), translucent background with backdrop blur.
+  z-index `var(--z-toolbar)` (=5, below navbar's z-10), translucent
+  background with backdrop blur.
 - **Layout:** `flex flex-wrap items-center gap-3` — controls wrap on narrow
-  viewports.
+  viewports. Resources adds category filter chips inside the sticky area
+  (chips use `w-full` to wrap to a second line).
+- **Layering:** see `docs/LAYERING_SYSTEM.md`.
 
 ### Planned primitives (do not exist yet — build only in their Sprint)
 `EmptyState` (Sprint 08) · Tooltip/Dropdown/Drawer/Toast/Skeleton/Tabs/Breadcrumb
