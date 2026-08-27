@@ -8,10 +8,11 @@ import Textarea from '../components/ui/Textarea'
 import FormDialog from '../components/ui/FormDialog'
 import ConfirmDialog from '../components/ui/ConfirmDialog'
 import { NOTES } from '../data/notes'
+import useLocalStorage from '../hooks/useLocalStorage'
 import NoteCard from './notes/NoteCard'
 
 export default function Notes() {
-  const [notes, setNotes] = useState(() => [...NOTES])
+  const [notes, setNotes] = useLocalStorage('student-hub:notes', () => [...NOTES])
 
   const [title, setTitle] = useState('')
   const [content, setContent] = useState('')

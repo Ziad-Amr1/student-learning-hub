@@ -10,6 +10,7 @@ import Textarea from '../components/ui/Textarea'
 import FormDialog from '../components/ui/FormDialog'
 import ConfirmDialog from '../components/ui/ConfirmDialog'
 import { RESOURCES } from '../data/resources'
+import useLocalStorage from '../hooks/useLocalStorage'
 import ResourceCard from './resources/ResourceCard'
 
 const VIEW_OPTIONS = [
@@ -19,7 +20,7 @@ const VIEW_OPTIONS = [
 ]
 
 export default function Resources() {
-  const [resources, setResources] = useState(() => [...RESOURCES])
+  const [resources, setResources] = useLocalStorage('student-hub:resources', () => [...RESOURCES])
   const [viewMode, setViewMode] = useState('list')
 
   const [title, setTitle] = useState('')

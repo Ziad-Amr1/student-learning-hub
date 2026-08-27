@@ -10,10 +10,11 @@ import Textarea from '../components/ui/Textarea'
 import FormDialog from '../components/ui/FormDialog'
 import ConfirmDialog from '../components/ui/ConfirmDialog'
 import { TASKS } from '../data/tasks'
+import useLocalStorage from '../hooks/useLocalStorage'
 import TaskCard from './tasks/TaskCard'
 
 export default function Tasks() {
-  const [tasks, setTasks] = useState(() => [...TASKS])
+  const [tasks, setTasks] = useLocalStorage('student-hub:tasks', () => [...TASKS])
 
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
