@@ -2,12 +2,13 @@ import { useState } from 'react'
 import PageHeader from '../components/layout/PageHeader'
 import { LEARNING_PROGRESS } from '../data/progress'
 import { profileSeed } from '../data/profile'
+import useLocalStorage from '../hooks/useLocalStorage'
 import LearningProgressList from './profile/LearningProgressList'
 import ProfileCard from './profile/ProfileCard'
 import ProfileEditForm from './profile/ProfileEditForm'
 
 export default function Profile() {
-  const [profile, setProfile] = useState(profileSeed)
+  const [profile, setProfile] = useLocalStorage('student-hub:profile', profileSeed)
   const [isEditing, setIsEditing] = useState(false)
 
   const handleSave = (nextProfile) => {
