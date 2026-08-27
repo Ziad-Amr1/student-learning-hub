@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Outlet } from 'react-router-dom'
 import {
+  BookOpen,
   CircleUser,
   LayoutDashboard,
   Library,
@@ -19,6 +20,7 @@ const NAV_ITEMS = [
   { to: '/tasks', label: 'Tasks', section: 'workspace', Icon: ListTodo },
   { to: '/notes', label: 'Notes', section: 'workspace', Icon: NotebookPen },
   { to: '/resources', label: 'Resources', section: 'workspace', Icon: Library },
+  { to: '/learning', label: 'Learning', section: 'workspace', Icon: BookOpen },
   { to: '/profile', label: 'Profile', section: 'account', Icon: CircleUser },
 ]
 
