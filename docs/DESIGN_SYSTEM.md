@@ -65,7 +65,7 @@ soft backgrounds) → `soft` (tinted backgrounds).
 | Destructive | `--color-destructive`, `-hover`, `-strong`, `-soft`, `-foreground` | terracotta | Errors, delete actions |
 | Info | `--color-info`, `-strong`, `-soft` | dusty blue | Neutral-informational states |
 
-Exact values (`tokens.css` is the source of truth — this is a reference):
+Exact values (`src/styles/app.css` is the source of truth — this is a reference):
 
 | Token | Hex |
 | --- | --- |
@@ -200,7 +200,8 @@ reasoning as color lightness steps in §2.
 ## 7. Breakpoints
 
 Mobile-first. Values are repeated as raw px inside `@media` (CSS variables
-don't work there); source of truth = this table + comment block in tokens.css.
+don't work there); source of truth = this table + comment block in
+`src/styles/app.css`.
 Breakpoints follow standard device widths, not a proportional scale.
 
 | Name | Min width | Target |
@@ -302,8 +303,8 @@ see `docs/COMPONENTS.md`.
 ### Badge (`components/ui/Badge.jsx`)
 - **Purpose:** compact status/category labels (task priority/status, resource
   category, learning states).
-- **Variants:** `default` (primary tint) · `secondary` · `success` · `warning`
-  · `danger` · `info` · `outline`.
+- **Variants:** `default` (primary tint) · `secondary` · `accent` · `success` ·
+  `warning` · `danger` · `info` · `outline`.
 - **Rules:** pick variant by meaning, not looks; caption size, pill radius.
 
 ### Avatar (`components/ui/Avatar.jsx`)
@@ -378,9 +379,14 @@ see `docs/COMPONENTS.md`.
   `<select>` with a combobox-pattern dropdown built from existing primitives.
 - **Props:** `value` (current status), `onChange` (callback), `taskTitle`
   (for aria-label).
-- **Statuses:** `todo` (Circle, muted-foreground) · `in-progress` (Clock,
-  warning-strong) · `deferred` (PauseCircle, info-strong) · `done`
-  (CheckCircle2, success-strong) · `cancelled` (XCircle, destructive-strong).
+- **Statuses & colors (Sprint 07.5 semantic mapping):** `unstarted`
+  (Circle, muted-foreground / secondary neutral) · `in-progress` (Clock,
+  accent-strong — the accent token, NOT warning) · `deferred` (PauseCircle,
+  info-strong) · `done` (CheckCircle2, success-strong) · `cancelled`
+  (XCircle, destructive-strong). `warning` is reserved for time-based
+  caution (e.g. due-soon), not for a task status. Legacy persisted `todo`
+  values render as `unstarted` (alias via `normalizeTaskStatus`) — never
+  color alone: every status keeps its icon + text label.
 - **Visual:** trigger button shows status icon + label + chevron; positioned
   listbox below with option highlight on hover/keyboard; selected option
   uses `bg-primary-soft text-primary-strong`.

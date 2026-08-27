@@ -4,8 +4,9 @@
    Huby — application stylesheet (single CSS entry)
 
    Architecture:
-     1. @theme  → Huby design tokens (values verbatim from the
-                  approved tokens.css). Every variable is emitted
+     1. @theme  → Huby design tokens (single source of truth — this
+                  file, formerly split into a separate tokens.css
+                  until Sprint 02.6). Every variable is emitted
                   as a real CSS custom property on :root under its
                   existing name, so both Tailwind utilities AND
                   plain `var(--token)` consumers read from ONE
