@@ -1,8 +1,12 @@
 import { useState } from 'react'
+import { Plus } from 'lucide-react'
 import PageHeader from '../components/layout/PageHeader'
+import ModuleToolbar from '../components/layout/ModuleToolbar'
 import Button from '../components/ui/Button'
 import Input from '../components/ui/Input'
 import Textarea from '../components/ui/Textarea'
+import FormDialog from '../components/ui/FormDialog'
+import ConfirmDialog from '../components/ui/ConfirmDialog'
 import { NOTES } from '../data/notes'
 import NoteCard from './notes/NoteCard'
 
@@ -18,6 +22,7 @@ export default function Notes() {
 
   const [searchQuery, setSearchQuery] = useState('')
   const [noteToDelete, setNoteToDelete] = useState(null)
+  const [formOpen, setFormOpen] = useState(false)
 
   const resetForm = () => {
     setTitle('')
@@ -28,6 +33,11 @@ export default function Notes() {
     setContentError('')
   }
 
+  const handleOpenCreate = () => {
+    resetForm()
+    setFormOpen(true)
+  }
+
   const handleStartEdit = (note) => {
     setEditingNote(note)
     setTitle(note.title)
@@ -35,6 +45,7 @@ export default function Notes() {
     setCategory(note.category || '')
     setTitleError('')
     setContentError('')
+    setFormOpen(true)
   }
 
   const handleSubmit = (e) => {
@@ -79,6 +90,7 @@ export default function Notes() {
       setNotes([newNote, ...notes])
     }
     resetForm()
+    setFormOpen(false)
   }
 
   const handleTogglePin = (id) => {
@@ -109,69 +121,28 @@ export default function Notes() {
     })
 
   return (
-    <article className="space-y-6">
+    <article className="space-y-0">
       <PageHeader
         title="Notes"
         description="Capture your study notes, thoughts, and technical snippets."
       />
 
-      <form onSubmit={handleSubmit} className="bg-surface p-6 rounded-lg shadow-sm border border-border space-y-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <Input
-            label="Note Title"
-            type="text"
-            value={title}
-            onChange={(e) => {
-              setTitle(e.target.value)
-              if (titleError) setTitleError('')
-            }}
-            placeholder="e.g., React Router v6 Notes"
-            required
-            error={titleError}
-          />
-          <Input
-            label="Category"
-            type="text"
-            value={category}
-            onChange={(e) => setCategory(e.target.value)}
-            placeholder="e.g., React, CSS, Git"
-          />
-        </div>
-
-        <Textarea
-          label="Content"
-          value={content}
-          onChange={(e) => {
-            setContent(e.target.value)
-            if (contentError) setContentError('')
-          }}
-          placeholder="Write your note content here..."
-          rows={4}
-          required
-          error={contentError}
+      <ModuleToolbar>
+        <Input
+          label="Search"
+          type="text"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          placeholder="Search notes..."
+          className="flex-1 min-w-[200px] sm:[&>label]:sr-only"
         />
+        <Button variant="primary" size="sm" onClick={handleOpenCreate}>
+          <Plus className="w-(--icon-sm) h-(--icon-sm)" />
+          <span className="hidden sm:inline">Add Note</span>
+        </Button>
+      </ModuleToolbar>
 
-        <div className="flex items-center gap-3">
-          <Button type="submit" variant="primary">
-            {editingNote ? 'Save Changes' : 'Add Note'}
-          </Button>
-          {editingNote && (
-            <Button type="button" variant="secondary" onClick={resetForm}>
-              Cancel
-            </Button>
-          )}
-        </div>
-      </form>
-
-      <Input
-        label="Search"
-        type="text"
-        value={searchQuery}
-        onChange={(e) => setSearchQuery(e.target.value)}
-        placeholder="Search notes by title or content..."
-      />
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="pt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
         {sortedAndFiltered.length === 0 ? (
           <p className="text-muted-foreground col-span-full text-center py-8">
             {notes.length === 0
@@ -191,26 +162,53 @@ export default function Notes() {
         )}
       </div>
 
-      {noteToDelete && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-scrim backdrop-blur-xs p-4">
-          <div className="bg-surface rounded-2xl shadow-lg max-w-sm w-full p-6 space-y-5 border border-border">
-            <div className="space-y-2">
-              <h3 className="text-h3 font-bold text-foreground">Delete Note</h3>
-              <p className="text-body-small text-muted-foreground leading-relaxed">
-                Are you sure you want to delete this note? This action cannot be undone.
-              </p>
-            </div>
-            <div className="flex justify-end items-center gap-3 pt-2">
-              <Button variant="secondary" size="sm" onClick={() => setNoteToDelete(null)}>
-                Cancel
-              </Button>
-              <Button variant="destructive" size="sm" onClick={handleConfirmDelete}>
-                Delete
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
+      <FormDialog
+        open={formOpen}
+        onClose={() => { setFormOpen(false); resetForm() }}
+        onSubmit={handleSubmit}
+        title={editingNote ? 'Edit Note' : 'Add Note'}
+        submitLabel={editingNote ? 'Save Changes' : 'Add Note'}
+      >
+        <Input
+          label="Note Title"
+          type="text"
+          value={title}
+          onChange={(e) => {
+            setTitle(e.target.value)
+            if (titleError) setTitleError('')
+          }}
+          placeholder="e.g., React Router v6 Notes"
+          required
+          error={titleError}
+        />
+        <Input
+          label="Category"
+          type="text"
+          value={category}
+          onChange={(e) => setCategory(e.target.value)}
+          placeholder="e.g., React, CSS, Git"
+        />
+        <Textarea
+          label="Content"
+          value={content}
+          onChange={(e) => {
+            setContent(e.target.value)
+            if (contentError) setContentError('')
+          }}
+          placeholder="Write your note content here..."
+          rows={4}
+          required
+          error={contentError}
+        />
+      </FormDialog>
+
+      <ConfirmDialog
+        open={!!noteToDelete}
+        onClose={() => setNoteToDelete(null)}
+        onConfirm={handleConfirmDelete}
+        title="Delete Note"
+        message="Are you sure you want to delete this note? This action cannot be undone."
+      />
     </article>
   )
 }

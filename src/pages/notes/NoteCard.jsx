@@ -1,4 +1,4 @@
-import { Pin } from 'lucide-react'
+import { Pin, Pencil, Trash2 } from 'lucide-react'
 import { cx } from '../../utils/cx'
 import { timeAgo } from '../../utils/date'
 import Button from '../../components/ui/Button'
@@ -12,18 +12,15 @@ export default function NoteCard({ note, onEdit, onTogglePin, onDelete }) {
     <Card
       className={cx(
         'p-5 flex flex-col justify-between space-y-3 transition-[border-color,background-color]',
-        note.pinned && 'border-l-2 border-l-warning bg-warning-soft/20'
+        note.pinned
+          ? 'border-l-2 border-l-warning bg-warning-soft/20'
+          : 'hover:border-border/80'
       )}
     >
       <div className="space-y-2">
         <div className="flex items-center justify-between gap-2">
           <h3 className="text-base font-bold text-foreground truncate">{note.title}</h3>
           <div className="flex items-center gap-2 shrink-0">
-            {note.pinned && (
-              <span className="text-warning-strong" aria-label="Pinned note">
-                <Pin className="w-(--icon-sm) h-(--icon-sm)" />
-              </span>
-            )}
             {note.category && <Badge variant="secondary">{note.category}</Badge>}
           </div>
         </div>
@@ -35,20 +32,31 @@ export default function NoteCard({ note, onEdit, onTogglePin, onDelete }) {
             ? `Edited ${timeAgo(note.updatedAt)}`
             : `Created ${timeAgo(note.createdAt)}`}
         </span>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1">
           <Button
-            variant="ghost"
+            variant={note.pinned ? 'secondary' : 'ghost'}
             size="sm"
             onClick={() => onTogglePin(note.id)}
             aria-label={note.pinned ? 'Unpin note' : 'Pin note'}
+            aria-pressed={note.pinned}
           >
-            {note.pinned ? 'Unpin' : 'Pin'}
+            <Pin className={cx('w-(--icon-sm) h-(--icon-sm)', note.pinned && 'fill-current')} />
           </Button>
-          <Button variant="secondary" size="sm" onClick={() => onEdit(note)}>
-            Edit
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => onEdit(note)}
+            aria-label={`Edit note: ${note.title}`}
+          >
+            <Pencil className="w-(--icon-sm) h-(--icon-sm)" />
           </Button>
-          <Button variant="destructive" size="sm" onClick={() => onDelete(note.id)}>
-            Delete
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => onDelete(note.id)}
+            aria-label={`Delete note: ${note.title}`}
+          >
+            <Trash2 className="w-(--icon-sm) h-(--icon-sm)" />
           </Button>
         </div>
       </div>
