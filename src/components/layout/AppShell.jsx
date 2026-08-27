@@ -22,9 +22,29 @@ const NAV_ITEMS = [
   { to: '/profile', label: 'Profile', section: 'account', Icon: CircleUser },
 ]
 
+const SIDEBAR_KEY = 'student-hub:sidebar-collapsed'
+
+function readSidebarPreference() {
+  try {
+    return localStorage.getItem(SIDEBAR_KEY) === 'true'
+  } catch {
+    return false
+  }
+}
+
 export default function AppShell() {
   const [menuOpen, setMenuOpen] = useState(false)
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(readSidebarPreference)
+
+  const handleSidebarToggle = () => {
+    setSidebarCollapsed((prev) => {
+      const next = !prev
+      try {
+        localStorage.setItem(SIDEBAR_KEY, String(next))
+      } catch { /* ignore */ }
+      return next
+    })
+  }
 
   return (
     <div
@@ -47,7 +67,7 @@ export default function AppShell() {
       <Sidebar
         items={NAV_ITEMS}
         collapsed={sidebarCollapsed}
-        onToggle={() => setSidebarCollapsed(!sidebarCollapsed)}
+        onToggle={handleSidebarToggle}
       />
       <main
         id="main-content"
