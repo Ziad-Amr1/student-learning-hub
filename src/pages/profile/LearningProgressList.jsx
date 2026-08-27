@@ -1,3 +1,12 @@
+import useLocalStorage from '../../hooks/useLocalStorage'
+import { LEARNING_ENTRIES } from '../../data/learning'
+import { normalizeLearningEntry } from '../../utils/learning'
+import {
+  LEARNING_CATEGORY_BADGE_VARIANT,
+  LEARNING_CATEGORY_LABELS,
+  LEARNING_STATUS_LABELS,
+  LEARNING_STATUS_VISUALS,
+} from '../../constants/learningStatus'
 import Badge from '../../components/ui/Badge'
 import Card, {
   CardContent,
@@ -13,11 +22,16 @@ function formatHours(item) {
 }
 
 /**
- * Learning-progress section — renders the Sprint 03 progress seeds.
- * 100% items switch to the success variant + a Completed badge;
- * everything else uses the default primary progress bar.
+ * Learning-progress section — Fed by the shared `student-hub:learning` store
+ * (Sprint 07.6), live-synced with the Learning page. Renders every goal with
+ * its status Badge; `completed` items switch their ProgressBar to the success
+ * variant. Distinct from the Dashboard `LearningProgress` widget by
+ * presentation (COMPONENTS.md), sharing the same data source.
  */
-export default function LearningProgressList({ items }) {
+export default function LearningProgressList() {
+  const [entries] = useLocalStorage('student-hub:learning', () => [...LEARNING_ENTRIES])
+  const items = entries.map(normalizeLearningEntry)
+
   return (
     <Card>
       <CardHeader>
@@ -35,7 +49,9 @@ export default function LearningProgressList({ items }) {
           <ul className="divide-y divide-border">
             {items.map((item) => {
               const hours = formatHours(item)
-              const isComplete = item.progress >= 100
+              const statusVisual =
+                LEARNING_STATUS_VISUALS[item.status] ?? LEARNING_STATUS_VISUALS['not-started']
+              const isComplete = item.status === 'completed'
               return (
                 <li
                   key={item.id}
@@ -44,8 +60,12 @@ export default function LearningProgressList({ items }) {
                   <div className="flex items-baseline justify-between gap-4">
                     <div className="flex min-w-0 flex-wrap items-center gap-2">
                       <h4>{item.title}</h4>
-                      <Badge variant="secondary">{item.category}</Badge>
-                      {isComplete && <Badge variant="success">Completed</Badge>}
+                      <Badge variant={LEARNING_CATEGORY_BADGE_VARIANT}>
+                        {LEARNING_CATEGORY_LABELS[item.category] ?? item.category}
+                      </Badge>
+                      <Badge variant={statusVisual.badgeVariant}>
+                        {LEARNING_STATUS_LABELS[item.status] ?? item.status}
+                      </Badge>
                     </div>
                     <span className="shrink-0 text-label text-primary-strong">
                       {item.progress}%

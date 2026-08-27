@@ -1,6 +1,5 @@
 import { useState } from 'react'
 import PageHeader from '../components/layout/PageHeader'
-import { LEARNING_PROGRESS } from '../data/progress'
 import { profileSeed } from '../data/profile'
 import useLocalStorage from '../hooks/useLocalStorage'
 import LearningProgressList from './profile/LearningProgressList'
@@ -37,7 +36,7 @@ export default function Profile() {
             />
           )}
         </div>
-        <LearningProgressList items={LEARNING_PROGRESS} />
+        <LearningProgressList />
       </div>
     </article>
   )
