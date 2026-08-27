@@ -130,12 +130,12 @@ export default function Tasks() {
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           placeholder="Search tasks..."
-          className="flex-1 min-w-[200px] sm:[&>label]:sr-only"
+          className="flex-1 min-w-[120px] [&>label]:sr-only"
         />
         <select
           value={filterPriority}
           onChange={(e) => setFilterPriority(e.target.value)}
-          className={cx(FIELD_CONTROL_CLASSES, 'w-auto text-sm cursor-pointer')}
+          className={cx(FIELD_CONTROL_CLASSES, '!w-auto text-sm cursor-pointer')}
           aria-label="Filter by priority"
         >
           <option value="all">All Priorities</option>
@@ -146,7 +146,7 @@ export default function Tasks() {
         <select
           value={filterStatus}
           onChange={(e) => setFilterStatus(e.target.value)}
-          className={cx(FIELD_CONTROL_CLASSES, 'w-auto text-sm cursor-pointer')}
+          className={cx(FIELD_CONTROL_CLASSES, '!w-auto text-sm cursor-pointer')}
           aria-label="Filter by status"
         >
           <option value="all">All Statuses</option>

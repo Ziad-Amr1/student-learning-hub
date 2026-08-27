@@ -19,7 +19,7 @@ export default function Dialog({ open, onClose, title, description, children, cl
     <dialog
       ref={dialogRef}
       className={cx(
-        'backdrop:bg-scrim p-0 border-0 rounded-2xl shadow-lg max-w-lg w-full',
+        'm-0 backdrop:bg-scrim p-0 border-0 rounded-2xl shadow-lg max-w-lg w-full',
         'open:flex flex-col overflow-hidden',
         className
       )}

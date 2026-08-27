@@ -134,7 +134,7 @@ export default function Notes() {
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           placeholder="Search notes..."
-          className="flex-1 min-w-[200px] sm:[&>label]:sr-only"
+          className="flex-1 min-w-[120px] [&>label]:sr-only"
         />
         <Button variant="primary" size="sm" onClick={handleOpenCreate}>
           <Plus className="w-(--icon-sm) h-(--icon-sm)" />

@@ -133,7 +133,7 @@ export default function Resources() {
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           placeholder="Search resources..."
-          className="flex-1 min-w-[200px] sm:[&>label]:sr-only"
+          className="flex-1 min-w-[120px] [&>label]:sr-only"
         />
         <div className="flex items-center gap-1" role="group" aria-label="View mode">
           {VIEW_OPTIONS.map(({ id, icon: Icon, label }) => (

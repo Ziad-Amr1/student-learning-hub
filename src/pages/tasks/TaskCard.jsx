@@ -1,10 +1,10 @@
-import { Pencil, Trash2, Circle, Clock, CheckCircle2 } from 'lucide-react'
+import { Pencil, Trash2 } from 'lucide-react'
 import { cx } from '../../utils/cx'
 import { formatDueDate } from '../../utils/date'
-import { FIELD_CONTROL_CLASSES } from '../../components/ui/formStyles'
 import Button from '../../components/ui/Button'
 import Badge from '../../components/ui/Badge'
 import Card from '../../components/ui/Card'
+import StatusDropdown from '../../components/ui/StatusDropdown'
 
 const PRIORITY_VARIANT = {
   low: 'outline',
@@ -18,33 +18,26 @@ const STATUS_VARIANT = {
   done: 'success',
 }
 
-const STATUS_ICON = {
-  todo: Circle,
-  'in-progress': Clock,
-  done: CheckCircle2,
-}
-
 const STATUS_BORDER_CLASS = {
-  todo: '',
+  todo: 'border-l-muted/40',
   'in-progress': 'border-l-warning',
   done: 'border-l-success',
 }
 
 const STATUS_BG_CLASS = {
   todo: '',
-  'in-progress': 'bg-warning-soft/15',
-  done: 'bg-success-soft/15',
+  'in-progress': 'bg-warning-soft/20',
+  done: 'bg-success-soft/20',
 }
 
 export default function TaskCard({ task, onEdit, onUpdateStatus, onDelete }) {
   const due = formatDueDate(task.dueDate)
-  const StatusIcon = STATUS_ICON[task.status] ?? Circle
 
   return (
     <Card
       className={cx(
         'p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4',
-        'border-l-2',
+        'border-l-2 transition-[border-color,background-color]',
         STATUS_BORDER_CLASS[task.status] ?? '',
         STATUS_BG_CLASS[task.status] ?? ''
       )}
@@ -54,7 +47,6 @@ export default function TaskCard({ task, onEdit, onUpdateStatus, onDelete }) {
           <h3 className="text-base font-bold text-foreground truncate">{task.title}</h3>
           <Badge variant={PRIORITY_VARIANT[task.priority] ?? 'outline'}>{task.priority}</Badge>
           <Badge variant={STATUS_VARIANT[task.status] ?? 'secondary'}>
-            <StatusIcon className="w-3 h-3" aria-hidden="true" />
             {task.status}
           </Badge>
         </div>
@@ -72,16 +64,11 @@ export default function TaskCard({ task, onEdit, onUpdateStatus, onDelete }) {
       </div>
 
       <div className="flex items-center gap-2 w-full sm:w-auto justify-between sm:justify-end pt-2 sm:pt-0 border-t sm:border-0 border-border">
-        <select
+        <StatusDropdown
           value={task.status}
-          onChange={(e) => onUpdateStatus(task.id, e.target.value)}
-          className={cx(FIELD_CONTROL_CLASSES, 'w-auto text-sm cursor-pointer')}
-          aria-label={`Status for "${task.title}"`}
-        >
-          <option value="todo">To Do</option>
-          <option value="in-progress">In Progress</option>
-          <option value="done">Done</option>
-        </select>
+          onChange={(newStatus) => onUpdateStatus(task.id, newStatus)}
+          taskTitle={task.title}
+        />
         <Button
           variant="ghost"
           size="sm"
