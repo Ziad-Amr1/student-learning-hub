@@ -12,6 +12,7 @@ import ConfirmDialog from '../components/ui/ConfirmDialog'
 import { TASKS } from '../data/tasks'
 import useLocalStorage from '../hooks/useLocalStorage'
 import { normalizeTaskStatus } from '../utils/taskStatus'
+import { TASK_SORT_OPTIONS, sortTasks } from '../utils/taskSort'
 import TaskCard from './tasks/TaskCard'
 
 export default function Tasks() {
@@ -28,6 +29,7 @@ export default function Tasks() {
   const [searchQuery, setSearchQuery] = useState('')
   const [filterPriority, setFilterPriority] = useState('all')
   const [filterStatus, setFilterStatus] = useState('all')
+  const [sortBy, setSortBy] = useState('manual')
   const [taskToDelete, setTaskToDelete] = useState(null)
   const [formOpen, setFormOpen] = useState(false)
 
@@ -118,6 +120,8 @@ export default function Tasks() {
     return matchesSearch && matchesPriority && matchesStatus
   })
 
+  const visibleTasks = sortTasks(filteredTasks, sortBy)
+
   return (
     <article className="space-y-0">
       <PageHeader
@@ -158,6 +162,18 @@ export default function Tasks() {
           <option value="done">Done</option>
           <option value="cancelled">Cancelled</option>
         </select>
+        <select
+          value={sortBy}
+          onChange={(e) => setSortBy(e.target.value)}
+          className={cx(FIELD_CONTROL_CLASSES, '!w-auto text-sm cursor-pointer')}
+          aria-label="Sort tasks"
+        >
+          {TASK_SORT_OPTIONS.map((option) => (
+            <option key={option.value} value={option.value}>
+              {option.label}
+            </option>
+          ))}
+        </select>
         <Button variant="primary" size="sm" onClick={handleOpenCreate}>
           <Plus className="w-(--icon-sm) h-(--icon-sm)" />
           <span className="hidden sm:inline">Add Task</span>
@@ -172,7 +188,7 @@ export default function Tasks() {
               : 'No tasks match your search or filters.'}
           </p>
         ) : (
-          filteredTasks.map(task => (
+          visibleTasks.map(task => (
             <TaskCard
               key={task.id}
               task={task}
