@@ -236,11 +236,15 @@ also a spacing token:
 | Body | `--font-size-body` | 16px (`space-4`) | regular | body 1.6 | default — the scale's anchor |
 | Small | `--font-size-small` | 14px | regular | small 1.55 | `.text-body-small` |
 | Caption | `--font-size-caption` | 12px (`space-3`) | medium | small | `.text-caption` |
+| Micro | `--font-size-micro` | 10px | medium | small | Badge `size="sm"` — metadata/UI-only, NOT a body-text level |
 | Label | `--font-size-small` | 14px | medium | small | `.text-label` |
 
 Small (14px) intentionally breaks the pure ratio — going smaller than 14px
 for regular UI text risks legibility, so the scale is capped at body and
 Small/Caption exist as a practical floor rather than a proportion.
+`--font-size-micro` (10px) sits BELOW that floor as a metadata/UI-only rung:
+reserved for compact informational elements such as `Badge size="sm"` —
+never body or heading content. All other text levels stay at or above 12px.
 
 Weights available: `--font-weight-{regular:400, medium:500, semibold:600, bold:700}`.
 Base element styles for `h1–h4` live in `global.css`; utility classes cover the
@@ -417,7 +421,8 @@ see `docs/COMPONENTS.md`.
 - **Variants:** `default` (primary tint) · `secondary` · `accent` · `success` ·
   `warning` · `danger` · `info` · `outline`.
 - **Sizes:** `md` (default, 3/4-unit horizontal padding) · `sm` (compact card
-  metadata — halved horizontal padding, zero vertical, same caption type).
+  metadata — halved horizontal padding, zero vertical, `--font-size-micro`
+  text: smaller container AND smaller type, intentionally).
 - **Rules:** pick variant by meaning, not looks; caption size, pill radius.
 
 ### Avatar (`components/ui/Avatar.jsx`)

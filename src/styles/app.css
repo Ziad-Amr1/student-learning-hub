@@ -92,9 +92,11 @@
      16px body size and rounded to the 4px spacing grid — each
      step below body shares that grid too, so type and spacing
      are expressions of the same base unit.
-       display 48 → h1 40 → h2 32 → h3 24 → h4 20 → body 16
+     display 48 → h1 40 → h2 32 → h3 24 → h4 20 → body 16
      small/caption break the pure ratio deliberately (legibility
-     floor, not a proportion problem).
+     floor, not a proportion problem). micro is a metadata/UI-only
+     rung BELOW the caption floor (compact badges) — never a body
+     text level.
 
      Size steps intentionally keep their historical
      `--font-size-*` names (emitted verbatim) instead of
@@ -119,6 +121,7 @@
   --font-size-body: 1rem;         /* 16px = --space-4 (anchor) */
   --font-size-small: 0.875rem;    /* 14px — accessibility floor, not on-scale */
   --font-size-caption: 0.75rem;   /* 12px = --space-3 — floor, not on-scale */
+  --font-size-micro: 0.625rem;    /* 10px — metadata/UI-only, below caption floor (compact badges) */
 
   --line-height-tight: 1.15;
   --line-height-heading: 1.25;

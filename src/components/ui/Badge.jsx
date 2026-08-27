@@ -15,8 +15,10 @@ const BASE_CLASSES =
   'inline-flex items-center gap-1 w-fit px-3 py-[calc(var(--space-1)/2)] rounded-full border text-(--font-size-caption) leading-small font-semibold'
 
 const SIZE_CLASSES = {
-  // sm: compact card metadata badges (same caption type, reduced padding).
-  sm: 'px-[calc(var(--space-1)/2)] py-0 text-(--font-size-caption)',
+  // sm: compact card metadata badges — reduced padding AND reduced text.
+  // Tailwind v4: (length:) disambiguates text-* to FONT-SIZE — a bare
+  // text-(--var) would resolve as color; md keeps the established form.
+  sm: 'px-[calc(var(--space-1)/2)] py-0 text-(length:--font-size-micro)',
   md: 'px-3 py-[calc(var(--space-1)/2)] text-(--font-size-caption)',
 }
 
