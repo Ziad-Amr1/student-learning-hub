@@ -420,9 +420,10 @@ see `docs/COMPONENTS.md`.
   category, learning states).
 - **Variants:** `default` (primary tint) · `secondary` · `accent` · `success` ·
   `warning` · `danger` · `info` · `outline`.
-- **Sizes:** `md` (default, 3/4-unit horizontal padding) · `sm` (compact card
-  metadata — halved horizontal padding, zero vertical, `--font-size-micro`
-  text: smaller container AND smaller type, intentionally).
+- **Sizes:** `md` (default, 3-unit horizontal + ½-unit vertical padding) · `sm`
+  (compact card metadata — 1-unit horizontal + ½-unit vertical padding for
+  breathing room, `--font-size-micro` text: smaller container AND smaller
+  type, intentionally).
 - **Rules:** pick variant by meaning, not looks; caption size, pill radius.
 
 ### Avatar (`components/ui/Avatar.jsx`)
