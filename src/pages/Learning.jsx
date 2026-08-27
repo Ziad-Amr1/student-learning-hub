@@ -1,0 +1,360 @@
+import { useState } from 'react'
+import { Plus } from 'lucide-react'
+import { cx } from '../utils/cx'
+import { FIELD_CONTROL_CLASSES } from '../components/ui/formStyles'
+import PageHeader from '../components/layout/PageHeader'
+import ModuleToolbar from '../components/layout/ModuleToolbar'
+import Button from '../components/ui/Button'
+import Input from '../components/ui/Input'
+import FormDialog from '../components/ui/FormDialog'
+import ConfirmDialog from '../components/ui/ConfirmDialog'
+import useLocalStorage from '../hooks/useLocalStorage'
+import { LEARNING_ENTRIES } from '../data/learning'
+import { NOTES } from '../data/notes'
+import { RESOURCES } from '../data/resources'
+import {
+  LEARNING_CATEGORIES,
+  LEARNING_CATEGORY_LABELS,
+  LEARNING_STATUSES,
+  LEARNING_STATUS_LABELS,
+} from '../constants/learningStatus'
+import {
+  deriveCurrentlyLearning,
+  normalizeLearningEntry,
+  resolveLinkedIds,
+} from '../utils/learning'
+import CurrentlyLearning from './learning/CurrentlyLearning'
+import LearningEntryCard from './learning/LearningEntryCard'
+import LearningEntryForm from './learning/LearningEntryForm'
+
+const EMPTY_FORM = {
+  title: '',
+  category: 'course',
+  status: 'not-started',
+  progress: '0',
+  targetHours: '',
+  completedHours: '',
+  relatedNoteIds: [],
+  relatedResourceIds: [],
+}
+
+const parseNumber = (value) => {
+  const parsed = Number(value)
+  return Number.isFinite(parsed) ? parsed : 0
+}
+
+const toggleInArray = (array, id) =>
+  array.includes(id) ? array.filter((item) => item !== id) : [...array, id]
+
+const CARD_GRID_CLASSES = 'grid gap-(--layout-card-gap) sm:grid-cols-2 xl:grid-cols-3'
+
+export default function Learning() {
+  const [entries, setEntries] = useLocalStorage('student-hub:learning', () => [...LEARNING_ENTRIES])
+  const [notes] = useLocalStorage('student-hub:notes', () => [...NOTES])
+  const [resources] = useLocalStorage('student-hub:resources', () => [...RESOURCES])
+
+  const [form, setForm] = useState(EMPTY_FORM)
+  const [editingEntry, setEditingEntry] = useState(null)
+  const [titleError, setTitleError] = useState('')
+  const [formOpen, setFormOpen] = useState(false)
+  const [entryToDelete, setEntryToDelete] = useState(null)
+
+  const [searchQuery, setSearchQuery] = useState('')
+  const [filterCategory, setFilterCategory] = useState('all')
+  const [filterStatus, setFilterStatus] = useState('all')
+
+  const setField = (name, value) => setForm((prev) => ({ ...prev, [name]: value }))
+
+  const resetForm = () => {
+    setForm(EMPTY_FORM)
+    setEditingEntry(null)
+    setTitleError('')
+  }
+
+  const handleOpenCreate = () => {
+    resetForm()
+    setFormOpen(true)
+  }
+
+  const handleStartEdit = (entry) => {
+    setEditingEntry(entry)
+    setForm({
+      title: entry.title,
+      category: entry.category,
+      status: entry.status,
+      progress: String(entry.progress ?? 0),
+      targetHours: entry.targetHours == null ? '' : String(entry.targetHours),
+      completedHours: entry.completedHours == null ? '' : String(entry.completedHours),
+      relatedNoteIds: entry.relatedNotes || [],
+      relatedResourceIds: entry.relatedResources || [],
+    })
+    setTitleError('')
+    setFormOpen(true)
+  }
+
+  const handleTitleChange = (value) => {
+    setField('title', value)
+    if (titleError) setTitleError('')
+  }
+
+  const handleStatusChange = (value) => {
+    setField('status', value)
+    if (value === 'completed') setField('progress', '100')
+  }
+
+  const buildSavePayload = () => {
+    const now = new Date().toISOString()
+    const { status, progress, targetHours, completedHours } = form
+
+    // normalizeLearningEntry centralizes the progress<->status rule (decision 4).
+    let next = normalizeLearningEntry({
+      status,
+      progress: parseNumber(progress),
+    })
+
+    const base = {
+      title: form.title.trim(),
+      category: form.category,
+      status: next.status,
+      progress: next.progress,
+      targetHours: targetHours.trim() === '' ? undefined : parseNumber(targetHours),
+      completedHours: completedHours.trim() === '' ? undefined : parseNumber(completedHours),
+      relatedNotes: form.relatedNoteIds,
+      relatedResources: form.relatedResourceIds,
+    }
+
+    if (editingEntry) {
+      next = { ...editingEntry, ...base, updatedAt: now }
+      if (!next.startedAt && next.status === 'in-progress') next.startedAt = now
+      next.completedAt = next.status === 'completed' ? (next.completedAt ?? now) : null
+      return next
+    }
+
+    next = {
+      ...base,
+      id: crypto.randomUUID(),
+      createdAt: now,
+      updatedAt: now,
+      startedAt: next.status === 'in-progress' ? now : null,
+      completedAt: next.status === 'completed' ? now : null,
+    }
+    return next
+  }
+
+  const handleSubmit = (e) => {
+    e.preventDefault()
+    const title = form.title.trim()
+    if (!title) {
+      setTitleError('Title is required')
+      return
+    }
+    if (title.length > 120) {
+      setTitleError('Title must be 120 characters or fewer')
+      return
+    }
+    setTitleError('')
+
+    const next = buildSavePayload()
+    if (editingEntry) {
+      setEntries(entries.map((entry) => (entry.id === editingEntry.id ? next : entry)))
+    } else {
+      setEntries([next, ...entries])
+    }
+    resetForm()
+    setFormOpen(false)
+  }
+
+  const handleConfirmDelete = () => {
+    if (entryToDelete) {
+      setEntries(entries.filter((entry) => entry.id !== entryToDelete.id))
+      setEntryToDelete(null)
+    }
+  }
+
+  const handleToggleNote = (id) =>
+    setField('relatedNoteIds', toggleInArray(form.relatedNoteIds, id))
+  const handleToggleResource = (id) =>
+    setField('relatedResourceIds', toggleInArray(form.relatedResourceIds, id))
+
+  const normalizedEntries = entries.map(normalizeLearningEntry)
+  const currentlyLearning = deriveCurrentlyLearning(normalizedEntries)
+
+  const isFiltering =
+    searchQuery.trim() !== '' || filterCategory !== 'all' || filterStatus !== 'all'
+
+  const filteredEntries = normalizedEntries.filter((entry) => {
+    const matchesSearch = entry.title.toLowerCase().includes(searchQuery.trim().toLowerCase())
+    const matchesCategory = filterCategory === 'all' || entry.category === filterCategory
+    const matchesStatus = filterStatus === 'all' || entry.status === filterStatus
+    return matchesSearch && matchesCategory && matchesStatus
+  })
+
+  const decorate = (list) =>
+    list.map((entry) => ({
+      entry,
+      linkedNotes: resolveLinkedIds(entry.relatedNotes, notes),
+      linkedResources: resolveLinkedIds(entry.relatedResources, resources),
+    }))
+
+  const currentItems = decorate(currentlyLearning)
+  const otherItems = decorate(
+    normalizedEntries.filter((entry) => !currentlyLearning.includes(entry))
+  )
+  const allItems = decorate(filteredEntries)
+
+  const emptyText =
+    entries.length === 0
+      ? 'No learning goals yet. Create one above.'
+      : 'No goals match your search or filters.'
+
+  return (
+    <article className="space-y-0">
+      <PageHeader
+        title="Learning"
+        description="Your personal learning workspace — what you're studying and how far along you are."
+      />
+
+      <ModuleToolbar>
+        <Input
+          label="Search"
+          type="text"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          placeholder="Search learning..."
+          className="flex-1 min-w-[120px] [&>label]:sr-only"
+        />
+        <select
+          value={filterCategory}
+          onChange={(e) => setFilterCategory(e.target.value)}
+          className={cx(FIELD_CONTROL_CLASSES, '!w-auto text-sm cursor-pointer')}
+          aria-label="Filter by category"
+        >
+          <option value="all">All Categories</option>
+          {LEARNING_CATEGORIES.map((category) => (
+            <option key={category} value={category}>
+              {LEARNING_CATEGORY_LABELS[category]}
+            </option>
+          ))}
+        </select>
+        <select
+          value={filterStatus}
+          onChange={(e) => setFilterStatus(e.target.value)}
+          className={cx(FIELD_CONTROL_CLASSES, '!w-auto text-sm cursor-pointer')}
+          aria-label="Filter by status"
+        >
+          <option value="all">All Statuses</option>
+          {LEARNING_STATUSES.map((status) => (
+            <option key={status} value={status}>
+              {LEARNING_STATUS_LABELS[status]}
+            </option>
+          ))}
+        </select>
+        <Button variant="primary" size="sm" onClick={handleOpenCreate}>
+          <Plus className="w-(--icon-sm) h-(--icon-sm)" />
+          <span className="hidden sm:inline">Add Goal</span>
+        </Button>
+      </ModuleToolbar>
+
+      <div className="flex flex-col gap-(--layout-section-gap) pt-6">
+        {entries.length === 0 ? (
+          <p className="text-muted-foreground text-center py-8 bg-surface rounded-lg border border-border">
+            No learning goals yet. Create one above.
+          </p>
+        ) : isFiltering ? (
+          <section aria-label="Learning collection">
+            <h2 className="sr-only">Learning collection</h2>
+            {filteredEntries.length === 0 ? (
+              <p className="text-muted-foreground text-center py-8 bg-surface rounded-lg border border-border">
+                {emptyText}
+              </p>
+            ) : (
+              <div className={CARD_GRID_CLASSES}>
+                {allItems.map(({ entry, linkedNotes, linkedResources }) => (
+                  <LearningEntryCard
+                    key={entry.id}
+                    entry={entry}
+                    linkedNotes={linkedNotes}
+                    linkedResources={linkedResources}
+                    onEdit={handleStartEdit}
+                    onDelete={setEntryToDelete}
+                  />
+                ))}
+              </div>
+            )}
+          </section>
+        ) : (
+          <>
+            <CurrentlyLearning
+              items={currentItems}
+              onEdit={handleStartEdit}
+              onDelete={setEntryToDelete}
+            />
+            {otherItems.length > 0 && (
+              <section aria-label="Other learning" className="flex flex-col gap-4">
+                <div className="flex flex-col gap-1">
+                  <h2>Other Learning</h2>
+                  <p className="text-body-small text-muted-foreground">
+                    Not-started and completed goals.
+                  </p>
+                </div>
+                <div className={CARD_GRID_CLASSES}>
+                  {otherItems.map(({ entry, linkedNotes, linkedResources }) => (
+                    <LearningEntryCard
+                      key={entry.id}
+                      entry={entry}
+                      linkedNotes={linkedNotes}
+                      linkedResources={linkedResources}
+                      onEdit={handleStartEdit}
+                      onDelete={setEntryToDelete}
+                    />
+                  ))}
+                </div>
+              </section>
+            )}
+          </>
+        )}
+      </div>
+
+      <FormDialog
+        open={formOpen}
+        onClose={() => {
+          setFormOpen(false)
+          resetForm()
+        }}
+        onSubmit={handleSubmit}
+        title={editingEntry ? 'Edit Learning Goal' : 'Add Learning Goal'}
+        submitLabel={editingEntry ? 'Save Changes' : 'Add Goal'}
+      >
+        <LearningEntryForm
+          title={form.title}
+          category={form.category}
+          status={form.status}
+          progress={form.progress}
+          targetHours={form.targetHours}
+          completedHours={form.completedHours}
+          relatedNoteIds={form.relatedNoteIds}
+          relatedResourceIds={form.relatedResourceIds}
+          notes={notes}
+          resources={resources}
+          titleError={titleError}
+          onTitleChange={handleTitleChange}
+          onCategoryChange={(value) => setField('category', value)}
+          onStatusChange={handleStatusChange}
+          onProgressChange={(value) => setField('progress', value)}
+          onTargetHoursChange={(value) => setField('targetHours', value)}
+          onCompletedHoursChange={(value) => setField('completedHours', value)}
+          onToggleNote={handleToggleNote}
+          onToggleResource={handleToggleResource}
+        />
+      </FormDialog>
+
+      <ConfirmDialog
+        open={!!entryToDelete}
+        onClose={() => setEntryToDelete(null)}
+        onConfirm={handleConfirmDelete}
+        title="Delete Learning Goal"
+        message="Are you sure you want to delete this learning goal? This action cannot be undone. Related notes and resources are not affected."
+      />
+    </article>
+  )
+}
