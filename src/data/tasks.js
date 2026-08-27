@@ -1,6 +1,6 @@
-// Seed task data — Sprint 03 Dashboard (read-only preview).
-// Shape: docs/DATA_MODEL.md → Task. Sprint 04 reuses this module as the
-// initial state for in-memory CRUD.
+// Seed task data — first-run defaults for useLocalStorage('student-hub:tasks').
+// Shape: docs/DATA_MODEL.md → Task. Status values are the canonical
+// five-state set (unstarted | in-progress | deferred | done | cancelled).
 
 export const TASKS = [
   {
@@ -17,7 +17,7 @@ export const TASKS = [
     title: 'Review router notes before quiz',
     description: '',
     priority: 'medium',
-    status: 'todo',
+    status: 'unstarted',
     dueDate: '2026-08-27T00:00:00.000Z',
     createdAt: '2026-08-23T09:40:00.000Z',
   },
@@ -35,7 +35,7 @@ export const TASKS = [
     title: 'Write summary of CSS layout module',
     description: 'One page on grid vs flexbox from the TechMaster material.',
     priority: 'medium',
-    status: 'todo',
+    status: 'unstarted',
     dueDate: null,
     createdAt: '2026-08-20T11:15:00.000Z',
   },
@@ -44,7 +44,7 @@ export const TASKS = [
     title: 'Prepare questions for mentor session',
     description: '',
     priority: 'high',
-    status: 'todo',
+    status: 'unstarted',
     dueDate: '2026-08-25T15:00:00.000Z',
     createdAt: '2026-08-23T18:22:00.000Z',
   },
@@ -71,7 +71,7 @@ export const TASKS = [
     title: 'Read one article about accessibility',
     description: 'Pick any WCAG-focused article and take notes.',
     priority: 'low',
-    status: 'todo',
+    status: 'unstarted',
     dueDate: null,
     createdAt: '2026-08-24T07:55:00.000Z',
   },

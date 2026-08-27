@@ -1,6 +1,7 @@
 import { Pencil, Trash2 } from 'lucide-react'
 import { cx } from '../../utils/cx'
 import { formatDueDate } from '../../utils/date'
+import { normalizeTaskStatus, TASK_STATUS_LABELS } from '../../utils/taskStatus'
 import Button from '../../components/ui/Button'
 import Badge from '../../components/ui/Badge'
 import Card from '../../components/ui/Card'
@@ -13,30 +14,31 @@ const PRIORITY_VARIANT = {
 }
 
 const STATUS_VARIANT = {
-  todo: 'secondary',
-  'in-progress': 'warning',
+  unstarted: 'secondary',
+  'in-progress': 'accent',
   deferred: 'info',
   done: 'success',
   cancelled: 'danger',
 }
 
 const STATUS_BORDER_CLASS = {
-  todo: 'border-l-muted/40',
-  'in-progress': 'border-l-warning',
+  unstarted: 'border-l-muted/40',
+  'in-progress': 'border-l-accent',
   deferred: 'border-l-info',
   done: 'border-l-success',
   cancelled: 'border-l-destructive',
 }
 
 const STATUS_BG_CLASS = {
-  todo: '',
-  'in-progress': '!bg-warning-soft/20',
+  unstarted: '',
+  'in-progress': '!bg-accent-soft/20',
   deferred: '!bg-info-soft/20',
   done: '!bg-success-soft/20',
   cancelled: '!bg-destructive-soft/20',
 }
 
 export default function TaskCard({ task, onEdit, onUpdateStatus, onDelete }) {
+  const status = normalizeTaskStatus(task.status)
   const due = formatDueDate(task.dueDate)
 
   return (
@@ -44,16 +46,16 @@ export default function TaskCard({ task, onEdit, onUpdateStatus, onDelete }) {
       className={cx(
         'p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4',
         'border-l-2 transition-[border-color,background-color]',
-        STATUS_BORDER_CLASS[task.status] ?? '',
-        STATUS_BG_CLASS[task.status] ?? ''
+        STATUS_BORDER_CLASS[status] ?? '',
+        STATUS_BG_CLASS[status] ?? ''
       )}
     >
       <div className="space-y-1 flex-1 min-w-0">
         <div className="flex items-center gap-2 flex-wrap">
           <h3 className="text-base font-bold text-foreground truncate">{task.title}</h3>
           <Badge variant={PRIORITY_VARIANT[task.priority] ?? 'outline'}>{task.priority}</Badge>
-          <Badge variant={STATUS_VARIANT[task.status] ?? 'secondary'}>
-            {task.status}
+          <Badge variant={STATUS_VARIANT[status] ?? 'secondary'}>
+            {TASK_STATUS_LABELS[status] ?? status}
           </Badge>
         </div>
         {task.description && (
@@ -71,7 +73,7 @@ export default function TaskCard({ task, onEdit, onUpdateStatus, onDelete }) {
 
       <div className="flex items-center gap-2 w-full sm:w-auto justify-between sm:justify-end pt-2 sm:pt-0 border-t sm:border-0 border-border">
         <StatusDropdown
-          value={task.status}
+          value={status}
           onChange={(newStatus) => onUpdateStatus(task.id, newStatus)}
           taskTitle={task.title}
         />

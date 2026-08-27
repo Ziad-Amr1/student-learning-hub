@@ -2,6 +2,7 @@ import PageHeader from '../components/layout/PageHeader'
 import { getGreeting } from '../utils/greeting'
 import useLocalStorage from '../hooks/useLocalStorage'
 import { TASKS } from '../data/tasks'
+import { normalizeTaskStatus } from '../utils/taskStatus'
 import { CircleCheckBig, CircleDashed, CircleDot, ListTodo } from 'lucide-react'
 import StatCard from './dashboard/StatCard'
 import QuickActions from './dashboard/QuickActions'
@@ -14,14 +15,14 @@ export default function Dashboard() {
   const stats = [
     { label: 'Total tasks', value: total, Icon: ListTodo },
     {
-      label: 'To do',
-      value: tasks.filter((task) => task.status === 'todo').length,
+      label: 'Unstarted',
+      value: tasks.filter((task) => normalizeTaskStatus(task.status) === 'unstarted').length,
       Icon: CircleDashed,
     },
     {
       label: 'In progress',
       value: tasks.filter((task) => task.status === 'in-progress').length,
-      badge: { label: 'active', variant: 'info' },
+      badge: { label: 'active', variant: 'accent' },
       Icon: CircleDot,
     },
     {

@@ -3,6 +3,7 @@ import { cx } from '../../utils/cx'
 const VARIANT_CLASSES = {
   default: 'bg-primary-soft border-transparent text-primary-strong',
   secondary: 'bg-secondary border-transparent text-secondary-strong',
+  accent: 'bg-accent-soft border-transparent text-accent-strong',
   success: 'bg-success-soft border-transparent text-success-strong',
   warning: 'bg-warning-soft border-transparent text-warning-strong',
   danger: 'bg-destructive-soft border-transparent text-destructive-strong',

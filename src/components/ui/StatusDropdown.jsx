@@ -1,31 +1,43 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { ChevronDown, Circle, Clock, CheckCircle2, PauseCircle, XCircle } from 'lucide-react'
 import { cx } from '../../utils/cx'
+import {
+  TASK_STATUSES,
+  TASK_STATUS_LABELS,
+  normalizeTaskStatus,
+} from '../../utils/taskStatus'
 
-const STATUS_OPTIONS = [
-  { value: 'todo', label: 'To Do', Icon: Circle },
-  { value: 'in-progress', label: 'In Progress', Icon: Clock },
-  { value: 'deferred', label: 'Deferred', Icon: PauseCircle },
-  { value: 'done', label: 'Done', Icon: CheckCircle2 },
-  { value: 'cancelled', label: 'Cancelled', Icon: XCircle },
-]
+const STATUS_ICON_BY_STATUS = {
+  unstarted: Circle,
+  'in-progress': Clock,
+  deferred: PauseCircle,
+  done: CheckCircle2,
+  cancelled: XCircle,
+}
+
+const STATUS_OPTIONS = TASK_STATUSES.map((value) => ({
+  value,
+  label: TASK_STATUS_LABELS[value],
+  Icon: STATUS_ICON_BY_STATUS[value],
+}))
 
 const STATUS_ICON_STYLE = {
-  todo: 'text-muted-foreground',
-  'in-progress': 'text-warning-strong',
+  unstarted: 'text-muted-foreground',
+  'in-progress': 'text-accent-strong',
   deferred: 'text-info-strong',
   done: 'text-success-strong',
   cancelled: 'text-destructive-strong',
 }
 
 export default function StatusDropdown({ value, onChange, taskTitle }) {
+  const status = normalizeTaskStatus(value) ?? TASK_STATUSES[0]
   const [open, setOpen] = useState(false)
   const [activeIndex, setActiveIndex] = useState(-1)
   const buttonRef = useRef(null)
   const listRef = useRef(null)
   const optionRefs = useRef([])
 
-  const currentOption = STATUS_OPTIONS.find(o => o.value === value) ?? STATUS_OPTIONS[0]
+  const currentOption = STATUS_OPTIONS.find(o => o.value === status) ?? STATUS_OPTIONS[0]
 
   const close = useCallback(() => {
     setOpen(false)
@@ -54,7 +66,7 @@ export default function StatusDropdown({ value, onChange, taskTitle }) {
     if (e.key === 'ArrowDown' || e.key === 'Down') {
       e.preventDefault()
       setOpen(true)
-      setActiveIndex(STATUS_OPTIONS.findIndex(o => o.value === value))
+      setActiveIndex(STATUS_OPTIONS.findIndex(o => o.value === status))
     }
   }
 
@@ -108,7 +120,7 @@ export default function StatusDropdown({ value, onChange, taskTitle }) {
           'focus:border-primary focus:shadow-[0_0_0_3px_var(--ring-soft)] focus:outline-none'
         )}
       >
-        <currentOption.Icon className={cx('w-3 h-3 shrink-0', STATUS_ICON_STYLE[value])} aria-hidden="true" />
+        <currentOption.Icon className={cx('w-3 h-3 shrink-0', STATUS_ICON_STYLE[status])} aria-hidden="true" />
         <span className="leading-none">{currentOption.label}</span>
         <ChevronDown className={cx('w-3 h-3 shrink-0 transition-transform', open && 'rotate-180')} aria-hidden="true" />
       </button>
@@ -127,7 +139,7 @@ export default function StatusDropdown({ value, onChange, taskTitle }) {
         >
           {STATUS_OPTIONS.map((option, index) => {
             const OptionIcon = option.Icon
-            const isSelected = option.value === value
+            const isSelected = option.value === status
             const isActive = index === activeIndex
             return (
               <li

@@ -11,6 +11,7 @@ import FormDialog from '../components/ui/FormDialog'
 import ConfirmDialog from '../components/ui/ConfirmDialog'
 import { TASKS } from '../data/tasks'
 import useLocalStorage from '../hooks/useLocalStorage'
+import { normalizeTaskStatus } from '../utils/taskStatus'
 import TaskCard from './tasks/TaskCard'
 
 export default function Tasks() {
@@ -19,7 +20,7 @@ export default function Tasks() {
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [priority, setPriority] = useState('medium')
-  const [status, setStatus] = useState('todo')
+  const [status, setStatus] = useState('unstarted')
   const [dueDateInput, setDueDateInput] = useState('')
   const [editingTask, setEditingTask] = useState(null)
   const [titleError, setTitleError] = useState('')
@@ -34,7 +35,7 @@ export default function Tasks() {
     setTitle('')
     setDescription('')
     setPriority('medium')
-    setStatus('todo')
+    setStatus('unstarted')
     setDueDateInput('')
     setEditingTask(null)
     setTitleError('')
@@ -50,7 +51,7 @@ export default function Tasks() {
     setTitle(task.title)
     setDescription(task.description || '')
     setPriority(task.priority)
-    setStatus(task.status)
+    setStatus(normalizeTaskStatus(task.status))
     setDueDateInput(task.dueDate ? task.dueDate.slice(0, 16) : '')
     setTitleError('')
     setFormOpen(true)
@@ -113,7 +114,7 @@ export default function Tasks() {
   const filteredTasks = tasks.filter(t => {
     const matchesSearch = t.title.toLowerCase().includes(searchQuery.toLowerCase())
     const matchesPriority = filterPriority === 'all' || t.priority === filterPriority
-    const matchesStatus = filterStatus === 'all' || t.status === filterStatus
+    const matchesStatus = filterStatus === 'all' || normalizeTaskStatus(t.status) === filterStatus
     return matchesSearch && matchesPriority && matchesStatus
   })
 
@@ -151,7 +152,7 @@ export default function Tasks() {
           aria-label="Filter by status"
         >
           <option value="all">All Statuses</option>
-          <option value="todo">To Do</option>
+          <option value="unstarted">Unstarted</option>
           <option value="in-progress">In Progress</option>
           <option value="deferred">Deferred</option>
           <option value="done">Done</option>
@@ -233,7 +234,7 @@ export default function Tasks() {
               onChange={(e) => setStatus(e.target.value)}
               className={cx(FIELD_CONTROL_CLASSES, 'w-full text-sm cursor-pointer')}
             >
-              <option value="todo">To Do</option>
+              <option value="unstarted">Unstarted</option>
               <option value="in-progress">In Progress</option>
               <option value="deferred">Deferred</option>
               <option value="done">Done</option>
