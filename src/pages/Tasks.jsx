@@ -7,22 +7,14 @@ import Badge from '../components/ui/Badge';
 
 export default function Tasks() {
   const [tasks, setTasks] = useState(() => {
-    const savedTasks = localStorage.getItem('huby_tasks');
-    return savedTasks ? JSON.parse(savedTasks) : [
+    const saved = localStorage.getItem('huby_tasks');
+    return saved ? JSON.parse(saved) : [
       {
         id: 'task-1',
         title: 'Read one article about accessibility',
         description: 'Understand basic WCAG guidelines for web development.',
         priority: 'low',
         status: 'todo',
-        createdAt: new Date().toISOString()
-      },
-      {
-        id: 'task-2',
-        title: 'Prepare questions for mentor session',
-        description: 'Write down technical blockers regarding Spring Boot and React.',
-        priority: 'high',
-        status: 'in-progress',
         createdAt: new Date().toISOString()
       }
     ];
@@ -33,30 +25,45 @@ export default function Tasks() {
   const [priority, setPriority] = useState('low');
   const [status, setStatus] = useState('todo');
   const [searchQuery, setSearchQuery] = useState('');
+  
+  const [editingId, setEditingId] = useState(null);
   const [taskToDelete, setTaskToDelete] = useState(null);
 
   useEffect(() => {
     localStorage.setItem('huby_tasks', JSON.stringify(tasks));
   }, [tasks]);
 
-  const handleAddTask = (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
     if (!title.trim()) return;
 
-    const newTask = {
-      id: Date.now().toString() + Math.random().toString(36).substring(2, 7),
-      title,
-      description,
-      priority,
-      status,
-      createdAt: new Date().toISOString()
-    };
+    if (editingId) {
+      setTasks(tasks.map(t => t.id === editingId ? { ...t, title, description, priority, status } : t));
+      setEditingId(null);
+    } else {
+      const newTask = {
+        id: Date.now().toString(),
+        title,
+        description,
+        priority,
+        status,
+        createdAt: new Date().toISOString()
+      };
+      setTasks([newTask, ...tasks]);
+    }
 
-    setTasks([newTask, ...tasks]);
     setTitle('');
     setDescription('');
     setPriority('low');
     setStatus('todo');
+  };
+
+  const handleEdit = (task) => {
+    setEditingId(task.id);
+    setTitle(task.title);
+    setDescription(task.description || '');
+    setPriority(task.priority || 'low');
+    setStatus(task.status || 'todo');
   };
 
   const toggleTaskStatus = (id) => {
@@ -82,16 +89,30 @@ export default function Tasks() {
     t.status.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+  const getStatusVariant = (st) => {
+    switch (st) {
+      case 'done': return 'success';
+      case 'in-progress': return 'info';
+      default: return 'warning';
+    }
+  };
+
+  const getPriorityVariant = (pr) => {
+    switch (pr) {
+      case 'high': return 'danger';
+      case 'medium': return 'info';
+      default: return 'outline';
+    }
+  };
+
   return (
-    <article className="relative">
+    <article className="space-y-6">
       <PageHeader
-        className="mb-(--layout-section-gap)"
         title="Tasks"
         description="Manage, organize, and track your daily engineering tasks."
       />
       
-      {/* Add Task Form */}
-      <form onSubmit={handleAddTask} className="bg-white p-6 rounded-lg shadow-sm border mb-8 space-y-4">
+      <form onSubmit={handleSubmit} className="bg-white p-6 rounded-lg shadow-sm border space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="flex flex-col gap-1">
             <label className="text-xs text-gray-700 font-medium" htmlFor="task-title">
@@ -130,7 +151,7 @@ export default function Tasks() {
               id="task-priority"
               value={priority}
               onChange={(e) => setPriority(e.target.value)}
-              className="px-3 py-2 border rounded-lg focus:outline-none bg-white text-gray-800 text-sm"
+              className="px-3 py-2 border rounded-lg focus:outline-none bg-white text-gray-800 text-sm h-[38px]"
             >
               <option value="low">Low</option>
               <option value="medium">Medium</option>
@@ -146,7 +167,7 @@ export default function Tasks() {
               id="task-status"
               value={status}
               onChange={(e) => setStatus(e.target.value)}
-              className="px-3 py-2 border rounded-lg focus:outline-none bg-white text-gray-800 text-sm"
+              className="px-3 py-2 border rounded-lg focus:outline-none bg-white text-gray-800 text-sm h-[38px]"
             >
               <option value="todo">To do</option>
               <option value="in-progress">In progress</option>
@@ -155,13 +176,19 @@ export default function Tasks() {
           </div>
         </div>
 
-        <Button type="submit" variant="primary">
-          Add Task
-        </Button>
+        <div className="flex items-center gap-3">
+          <Button type="submit" variant="primary">
+            {editingId ? 'Update Task' : 'Add Task'}
+          </Button>
+          {editingId && (
+            <Button type="button" variant="secondary" onClick={() => { setEditingId(null); setTitle(''); setDescription(''); }}>
+              Cancel
+            </Button>
+          )}
+        </div>
       </form>
 
-      {/* Search Bar */}
-      <div className="mb-6">
+      <div>
         <Input 
           type="text"
           value={searchQuery}
@@ -170,10 +197,9 @@ export default function Tasks() {
         />
       </div>
 
-      {/* Tasks List */}
       <div className="space-y-3">
         {filteredTasks.length === 0 ? (
-          <p className="text-muted-foreground text-center py-4 bg-white rounded-lg border">No tasks found matching your search.</p>
+          <p className="text-gray-500 text-center py-4 bg-white rounded-lg border">No tasks found matching your search.</p>
         ) : (
           filteredTasks.map(task => (
             <Card key={task.id} className="p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
@@ -188,34 +214,30 @@ export default function Tasks() {
               </div>
 
               <div className="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-end pt-2 sm:pt-0 border-t sm:border-0 border-gray-100">
-                {/* Status Badge */}
                 <button onClick={() => toggleTaskStatus(task.id)} title="Click to change status" className="cursor-pointer">
-                  <Badge className={task.status === 'in-progress' ? 'bg-emerald-50 text-emerald-900 border border-emerald-100' : 'bg-white text-gray-700 border border-gray-300'}>
+                  <Badge variant={getStatusVariant(task.status)}>
                     {task.status}
                   </Badge>
                 </button>
 
-                {/* Priority Badge (Low بـ خلفية بيضاء وإطار، High أحمر، Medium رمادي) */}
-                <Badge className={
-                  task.priority === 'high' 
-                    ? 'bg-rose-50 text-rose-900 border border-rose-100' 
-                    : task.priority === 'medium' 
-                    ? 'bg-slate-100 text-slate-800' 
-                    : 'bg-white text-gray-700 border border-gray-300'
-                }>
+                <Badge variant={getPriorityVariant(task.priority)}>
                   {task.priority}
                 </Badge>
 
-                <Button variant="danger" size="sm" onClick={() => setTaskToDelete(task.id)}>
-                  Delete
-                </Button>
+                <div className="flex items-center gap-2">
+                  <Button variant="secondary" size="sm" onClick={() => handleEdit(task)}>
+                    Edit
+                  </Button>
+                  <Button variant="danger" size="sm" onClick={() => setTaskToDelete(task.id)}>
+                    Delete
+                  </Button>
+                </div>
               </div>
             </Card>
           ))
         )}
       </div>
 
-      {/* Delete Confirmation Modal */}
       {taskToDelete && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs p-4">
           <div className="bg-white rounded-2xl shadow-2xl max-w-sm w-full p-6 space-y-5 border border-gray-100">
