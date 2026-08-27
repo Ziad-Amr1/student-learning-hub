@@ -14,11 +14,18 @@ const VARIANT_CLASSES = {
 const BASE_CLASSES =
   'inline-flex items-center gap-1 w-fit px-3 py-[calc(var(--space-1)/2)] rounded-full border text-(--font-size-caption) leading-small font-semibold'
 
-export default function Badge({ variant = 'default', className, children, ...rest }) {
+const SIZE_CLASSES = {
+  // sm: compact card metadata badges (same caption type, reduced padding).
+  sm: 'px-[calc(var(--space-1)/2)] py-0 text-(--font-size-caption)',
+  md: 'px-3 py-[calc(var(--space-1)/2)] text-(--font-size-caption)',
+}
+
+export default function Badge({ variant = 'default', size = 'md', className, children, ...rest }) {
   const variantClass = VARIANT_CLASSES[variant] ?? VARIANT_CLASSES.default
+  const sizeClass = SIZE_CLASSES[size] ?? SIZE_CLASSES.md
 
   return (
-    <span className={cx(BASE_CLASSES, variantClass, className)} {...rest}>
+    <span className={cx(BASE_CLASSES, sizeClass, variantClass, className)} {...rest}>
       {children}
     </span>
   )
