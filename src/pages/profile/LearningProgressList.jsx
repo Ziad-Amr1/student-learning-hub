@@ -1,6 +1,6 @@
 import useLocalStorage from '../../hooks/useLocalStorage'
 import { LEARNING_ENTRIES } from '../../data/learning'
-import { normalizeLearningEntry } from '../../utils/learning'
+import { formatLearningUnits, normalizeLearningEntry } from '../../utils/learning'
 import {
   LEARNING_CATEGORY_BADGE_VARIANT,
   LEARNING_CATEGORY_LABELS,
@@ -15,11 +15,6 @@ import Card, {
   CardTitle,
 } from '../../components/ui/Card'
 import ProgressBar from '../../components/ui/ProgressBar'
-
-function formatHours(item) {
-  if (item.targetHours == null) return null
-  return `${item.completedHours ?? 0} of ${item.targetHours} hrs`
-}
 
 /**
  * Learning-progress section — Fed by the shared `student-hub:learning` store
@@ -48,7 +43,7 @@ export default function LearningProgressList() {
         ) : (
           <ul className="divide-y divide-border">
             {items.map((item) => {
-              const hours = formatHours(item)
+              const units = formatLearningUnits(item)
               const statusVisual =
                 LEARNING_STATUS_VISUALS[item.status] ?? LEARNING_STATUS_VISUALS['not-started']
               const isComplete = item.status === 'completed'
@@ -60,10 +55,10 @@ export default function LearningProgressList() {
                   <div className="flex items-baseline justify-between gap-4">
                     <div className="flex min-w-0 flex-wrap items-center gap-2">
                       <h4>{item.title}</h4>
-                      <Badge variant={LEARNING_CATEGORY_BADGE_VARIANT}>
+                      <Badge size="sm" variant={LEARNING_CATEGORY_BADGE_VARIANT}>
                         {LEARNING_CATEGORY_LABELS[item.category] ?? item.category}
                       </Badge>
-                      <Badge variant={statusVisual.badgeVariant}>
+                      <Badge size="sm" variant={statusVisual.badgeVariant}>
                         {LEARNING_STATUS_LABELS[item.status] ?? item.status}
                       </Badge>
                     </div>
@@ -76,8 +71,8 @@ export default function LearningProgressList() {
                     label={`${item.title} progress`}
                     variant={isComplete ? 'success' : 'primary'}
                   />
-                  {hours && (
-                    <p className="text-caption text-muted-foreground">{hours}</p>
+                  {units && (
+                    <p className="text-caption text-muted-foreground">{units}</p>
                   )}
                 </li>
               )

@@ -20,8 +20,11 @@ import {
 } from '../constants/learningStatus'
 import {
   deriveCurrentlyLearning,
+  isCurrentlyLearning,
   normalizeLearningEntry,
   resolveLinkedIds,
+  sortLearningEntries,
+  LEARNING_SORT_OPTIONS,
 } from '../utils/learning'
 import CurrentlyLearning from './learning/CurrentlyLearning'
 import LearningEntryCard from './learning/LearningEntryCard'
@@ -34,6 +37,8 @@ const EMPTY_FORM = {
   progress: '0',
   targetHours: '',
   completedHours: '',
+  totalPages: '',
+  videoMinutes: '',
   relatedNoteIds: [],
   relatedResourceIds: [],
 }
@@ -62,6 +67,7 @@ export default function Learning() {
   const [searchQuery, setSearchQuery] = useState('')
   const [filterCategory, setFilterCategory] = useState('all')
   const [filterStatus, setFilterStatus] = useState('all')
+  const [sortMode, setSortMode] = useState('manual')
 
   const setField = (name, value) => setForm((prev) => ({ ...prev, [name]: value }))
 
@@ -85,6 +91,8 @@ export default function Learning() {
       progress: String(entry.progress ?? 0),
       targetHours: entry.targetHours == null ? '' : String(entry.targetHours),
       completedHours: entry.completedHours == null ? '' : String(entry.completedHours),
+      totalPages: entry.totalPages == null ? '' : String(entry.totalPages),
+      videoMinutes: entry.videoMinutes == null ? '' : String(entry.videoMinutes),
       relatedNoteIds: entry.relatedNotes || [],
       relatedResourceIds: entry.relatedResources || [],
     })
@@ -117,8 +125,24 @@ export default function Learning() {
       category: form.category,
       status: next.status,
       progress: next.progress,
-      targetHours: targetHours.trim() === '' ? undefined : parseNumber(targetHours),
-      completedHours: completedHours.trim() === '' ? undefined : parseNumber(completedHours),
+      targetHours: form.category === 'book' || form.category === 'video'
+        ? undefined
+        : targetHours.trim() === ''
+          ? undefined
+          : parseNumber(targetHours),
+      completedHours: form.category === 'book' || form.category === 'video'
+        ? undefined
+        : completedHours.trim() === ''
+          ? undefined
+          : parseNumber(completedHours),
+      totalPages:
+        form.category === 'book' && form.totalPages.trim() !== ''
+          ? parseNumber(form.totalPages)
+          : undefined,
+      videoMinutes:
+        form.category === 'video' && form.videoMinutes.trim() !== ''
+          ? parseNumber(form.videoMinutes)
+          : undefined,
       relatedNotes: form.relatedNoteIds,
       relatedResources: form.relatedResourceIds,
     }
@@ -176,8 +200,16 @@ export default function Learning() {
   const handleToggleResource = (id) =>
     setField('relatedResourceIds', toggleInArray(form.relatedResourceIds, id))
 
+  // Pinned is persisted as part of the entity; toggling does NOT bump
+  // updatedAt (Notes/Resources precedent — a pin is an organization action,
+  // not a content edit).
+  const handleTogglePin = (id) =>
+    setEntries(entries.map((entry) => (entry.id === id ? { ...entry, pinned: !entry.pinned } : entry)))
+
   const normalizedEntries = entries.map(normalizeLearningEntry)
-  const currentlyLearning = deriveCurrentlyLearning(normalizedEntries)
+  const orderedEntries = sortLearningEntries(normalizedEntries, sortMode)
+  const currentlyLearning = deriveCurrentlyLearning(orderedEntries)
+  const otherEntries = orderedEntries.filter((entry) => !isCurrentlyLearning(entry))
 
   const isFiltering =
     searchQuery.trim() !== '' || filterCategory !== 'all' || filterStatus !== 'all'
@@ -197,10 +229,8 @@ export default function Learning() {
     }))
 
   const currentItems = decorate(currentlyLearning)
-  const otherItems = decorate(
-    normalizedEntries.filter((entry) => !currentlyLearning.includes(entry))
-  )
-  const allItems = decorate(filteredEntries)
+  const otherItems = decorate(otherEntries)
+  const allItems = decorate(sortLearningEntries(filteredEntries, sortMode))
 
   const emptyText =
     entries.length === 0
@@ -249,6 +279,18 @@ export default function Learning() {
             </option>
           ))}
         </select>
+        <select
+          value={sortMode}
+          onChange={(e) => setSortMode(e.target.value)}
+          className={cx(FIELD_CONTROL_CLASSES, '!w-auto text-sm cursor-pointer')}
+          aria-label="Sort learning"
+        >
+          {LEARNING_SORT_OPTIONS.map((option) => (
+            <option key={option.value} value={option.value}>
+              {option.label}
+            </option>
+          ))}
+        </select>
         <Button variant="primary" size="sm" onClick={handleOpenCreate}>
           <Plus className="w-(--icon-sm) h-(--icon-sm)" />
           <span className="hidden sm:inline">Add Goal</span>
@@ -275,6 +317,7 @@ export default function Learning() {
                     entry={entry}
                     linkedNotes={linkedNotes}
                     linkedResources={linkedResources}
+                    onTogglePin={handleTogglePin}
                     onEdit={handleStartEdit}
                     onDelete={setEntryToDelete}
                   />
@@ -286,6 +329,7 @@ export default function Learning() {
           <>
             <CurrentlyLearning
               items={currentItems}
+              onTogglePin={handleTogglePin}
               onEdit={handleStartEdit}
               onDelete={setEntryToDelete}
             />
@@ -304,6 +348,7 @@ export default function Learning() {
                       entry={entry}
                       linkedNotes={linkedNotes}
                       linkedResources={linkedResources}
+                      onTogglePin={handleTogglePin}
                       onEdit={handleStartEdit}
                       onDelete={setEntryToDelete}
                     />
@@ -332,6 +377,8 @@ export default function Learning() {
           progress={form.progress}
           targetHours={form.targetHours}
           completedHours={form.completedHours}
+          totalPages={form.totalPages}
+          videoMinutes={form.videoMinutes}
           relatedNoteIds={form.relatedNoteIds}
           relatedResourceIds={form.relatedResourceIds}
           notes={notes}
@@ -343,6 +390,8 @@ export default function Learning() {
           onProgressChange={(value) => setField('progress', value)}
           onTargetHoursChange={(value) => setField('targetHours', value)}
           onCompletedHoursChange={(value) => setField('completedHours', value)}
+          onTotalPagesChange={(value) => setField('totalPages', value)}
+          onVideoMinutesChange={(value) => setField('videoMinutes', value)}
           onToggleNote={handleToggleNote}
           onToggleResource={handleToggleResource}
         />

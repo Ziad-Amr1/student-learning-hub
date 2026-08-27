@@ -11,7 +11,11 @@ import Button from '../../components/ui/Button'
 import ProgressBar from '../../components/ui/ProgressBar'
 import useLocalStorage from '../../hooks/useLocalStorage'
 import { LEARNING_ENTRIES } from '../../data/learning'
-import { normalizeLearningEntry, sortLearningByUpdatedAt } from '../../utils/learning'
+import {
+  formatLearningUnits,
+  normalizeLearningEntry,
+  sortLearningByUpdatedAt,
+} from '../../utils/learning'
 
 const PREVIEW_COUNT = 5
 
@@ -33,20 +37,19 @@ export default function LearningProgress({ className }) {
             No learning goals yet — add your first one on the Learning page.
           </p>
         ) : (
-          items.map((item) => (
-            <div key={item.id} className="flex flex-col gap-2">
-              <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
-                <p className="font-medium text-body-small">{item.title}</p>
-                <p className="text-caption text-muted-foreground">{item.category}</p>
+          items.map((item) => {
+            const units = formatLearningUnits(item)
+            return (
+              <div key={item.id} className="flex flex-col gap-2">
+                <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
+                  <p className="font-medium text-body-small">{item.title}</p>
+                  <p className="text-caption text-muted-foreground">{item.category}</p>
+                </div>
+                <ProgressBar value={item.progress} label={`${item.title}: ${item.progress}% complete`} />
+                {units && <p className="text-body-small text-muted-foreground">{units}</p>}
               </div>
-              <ProgressBar value={item.progress} label={`${item.title}: ${item.progress}% complete`} />
-              {typeof item.completedHours === 'number' && typeof item.targetHours === 'number' && (
-                <p className="text-body-small text-muted-foreground">
-                  {item.completedHours} of {item.targetHours} hours
-                </p>
-              )}
-            </div>
-          ))
+            )
+          })
         )}
       </CardContent>
       {items.length > 0 && (

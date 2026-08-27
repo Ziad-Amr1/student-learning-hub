@@ -3,7 +3,7 @@ import LearningEntryCard from './LearningEntryCard'
 
 // "Currently Learning" section (decision 5): entries explicitly in-progress or
 // paused, resolved with their linked notes/resources for the card preview.
-export default function CurrentlyLearning({ items, onEdit, onDelete, className }) {
+export default function CurrentlyLearning({ items, onTogglePin, onEdit, onDelete, className }) {
   if (items.length === 0) return null
 
   return (
@@ -21,6 +21,7 @@ export default function CurrentlyLearning({ items, onEdit, onDelete, className }
             entry={entry}
             linkedNotes={linkedNotes}
             linkedResources={linkedResources}
+            onTogglePin={onTogglePin}
             onEdit={onEdit}
             onDelete={onDelete}
           />

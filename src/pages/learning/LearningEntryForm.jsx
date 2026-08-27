@@ -19,6 +19,8 @@ export default function LearningEntryForm({
   progress,
   targetHours,
   completedHours,
+  totalPages,
+  videoMinutes,
   relatedNoteIds,
   relatedResourceIds,
   notes,
@@ -30,10 +32,16 @@ export default function LearningEntryForm({
   onProgressChange,
   onTargetHoursChange,
   onCompletedHoursChange,
+  onTotalPagesChange,
+  onVideoMinutesChange,
   onToggleNote,
   onToggleResource,
 }) {
   const selectClass = cx(FIELD_CONTROL_CLASSES, 'text-sm cursor-pointer')
+  // Category-aware metadata (07.6 refinement): course/practice/topic track
+  // hours, books track total pages, videos an informational duration — the
+  // extra fields only ever appear for their own category.
+  const trackHours = category !== 'book' && category !== 'video'
 
   return (
     <>
@@ -93,20 +101,40 @@ export default function LearningEntryForm({
           value={progress}
           onChange={(e) => onProgressChange(e.target.value)}
         />
-        <Input
-          label="Target hours"
-          type="number"
-          min="0"
-          value={targetHours}
-          onChange={(e) => onTargetHoursChange(e.target.value)}
-        />
-        <Input
-          label="Completed hours"
-          type="number"
-          min="0"
-          value={completedHours}
-          onChange={(e) => onCompletedHoursChange(e.target.value)}
-        />
+        {trackHours ? (
+          <>
+            <Input
+              label="Target hours"
+              type="number"
+              min="0"
+              value={targetHours}
+              onChange={(e) => onTargetHoursChange(e.target.value)}
+            />
+            <Input
+              label="Completed hours"
+              type="number"
+              min="0"
+              value={completedHours}
+              onChange={(e) => onCompletedHoursChange(e.target.value)}
+            />
+          </>
+        ) : category === 'book' ? (
+          <Input
+            label="Total pages"
+            type="number"
+            min="0"
+            value={totalPages}
+            onChange={(e) => onTotalPagesChange(e.target.value)}
+          />
+        ) : (
+          <Input
+            label="Video minutes"
+            type="number"
+            min="0"
+            value={videoMinutes}
+            onChange={(e) => onVideoMinutesChange(e.target.value)}
+          />
+        )}
       </div>
       {status === 'completed' && (
         <p className="text-caption text-muted-foreground">
