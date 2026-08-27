@@ -1,4 +1,4 @@
-import { Trash2 } from 'lucide-react'
+import { Pencil, Trash2 } from 'lucide-react'
 import { cx } from '../../utils/cx'
 import { formatDueDate } from '../../utils/date'
 import { FIELD_CONTROL_CLASSES } from '../../components/ui/formStyles'
@@ -53,8 +53,13 @@ export default function TaskCard({ task, onEdit, onUpdateStatus, onDelete }) {
           <option value="in-progress">In Progress</option>
           <option value="done">Done</option>
         </select>
-        <Button variant="secondary" size="sm" onClick={() => onEdit(task)}>
-          Edit
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => onEdit(task)}
+          aria-label={`Edit task: ${task.title}`}
+        >
+          <Pencil className="w-(--icon-sm) h-(--icon-sm)" />
         </Button>
         <Button
           variant="ghost"

@@ -1,10 +1,14 @@
 import { useState } from 'react'
+import { Plus } from 'lucide-react'
 import { cx } from '../utils/cx'
 import { FIELD_CONTROL_CLASSES } from '../components/ui/formStyles'
 import PageHeader from '../components/layout/PageHeader'
+import ModuleToolbar from '../components/layout/ModuleToolbar'
 import Button from '../components/ui/Button'
 import Input from '../components/ui/Input'
 import Textarea from '../components/ui/Textarea'
+import FormDialog from '../components/ui/FormDialog'
+import ConfirmDialog from '../components/ui/ConfirmDialog'
 import { TASKS } from '../data/tasks'
 import TaskCard from './tasks/TaskCard'
 
@@ -23,6 +27,7 @@ export default function Tasks() {
   const [filterPriority, setFilterPriority] = useState('all')
   const [filterStatus, setFilterStatus] = useState('all')
   const [taskToDelete, setTaskToDelete] = useState(null)
+  const [formOpen, setFormOpen] = useState(false)
 
   const resetForm = () => {
     setTitle('')
@@ -34,6 +39,11 @@ export default function Tasks() {
     setTitleError('')
   }
 
+  const handleOpenCreate = () => {
+    resetForm()
+    setFormOpen(true)
+  }
+
   const handleStartEdit = (task) => {
     setEditingTask(task)
     setTitle(task.title)
@@ -42,6 +52,7 @@ export default function Tasks() {
     setStatus(task.status)
     setDueDateInput(task.dueDate ? task.dueDate.slice(0, 16) : '')
     setTitleError('')
+    setFormOpen(true)
   }
 
   const handleSubmit = (e) => {
@@ -82,6 +93,7 @@ export default function Tasks() {
       setTasks([newTask, ...tasks])
     }
     resetForm()
+    setFormOpen(false)
   }
 
   const handleUpdateStatus = (id, newStatus) => {
@@ -105,122 +117,50 @@ export default function Tasks() {
   })
 
   return (
-    <article className="space-y-6">
+    <article className="space-y-0">
       <PageHeader
         title="Tasks"
         description="Manage, organize, and track your daily engineering tasks."
       />
 
-      <form onSubmit={handleSubmit} className="bg-surface p-6 rounded-lg shadow-sm border border-border space-y-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <Input
-            label="Task Title"
-            type="text"
-            value={title}
-            onChange={(e) => {
-              setTitle(e.target.value)
-              if (titleError) setTitleError('')
-            }}
-            placeholder="e.g., Finish React hooks exercise"
-            required
-            error={titleError}
-          />
-          <Textarea
-            label="Description"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            placeholder="Brief details about the task..."
-            rows={2}
-          />
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <div className="flex flex-col gap-2">
-            <label className="text-label text-foreground" htmlFor="task-priority">Priority</label>
-            <select
-              id="task-priority"
-              name="priority"
-              value={priority}
-              onChange={(e) => setPriority(e.target.value)}
-              className={cx(FIELD_CONTROL_CLASSES, 'w-full text-sm cursor-pointer')}
-            >
-              <option value="low">Low</option>
-              <option value="medium">Medium</option>
-              <option value="high">High</option>
-            </select>
-          </div>
-
-          <div className="flex flex-col gap-2">
-            <label className="text-label text-foreground" htmlFor="task-status">Status</label>
-            <select
-              id="task-status"
-              name="status"
-              value={status}
-              onChange={(e) => setStatus(e.target.value)}
-              className={cx(FIELD_CONTROL_CLASSES, 'w-full text-sm cursor-pointer')}
-            >
-              <option value="todo">To Do</option>
-              <option value="in-progress">In Progress</option>
-              <option value="done">Done</option>
-            </select>
-          </div>
-
-          <Input
-            label="Due Date"
-            type="datetime-local"
-            value={dueDateInput}
-            onChange={(e) => setDueDateInput(e.target.value)}
-          />
-        </div>
-
-        <div className="flex items-center gap-3">
-          <Button type="submit" variant="primary">
-            {editingTask ? 'Save Changes' : 'Add Task'}
-          </Button>
-          {editingTask && (
-            <Button type="button" variant="secondary" onClick={resetForm}>
-              Cancel
-            </Button>
-          )}
-        </div>
-      </form>
-
-      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+      <ModuleToolbar>
         <Input
           label="Search"
           type="text"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          placeholder="Search tasks by title..."
-          className="flex-1"
+          placeholder="Search tasks..."
+          className="flex-1 min-w-[200px] sm:[&>label]:sr-only"
         />
-        <div className="flex items-center gap-2">
-          <select
-            value={filterPriority}
-            onChange={(e) => setFilterPriority(e.target.value)}
-            className={cx(FIELD_CONTROL_CLASSES, 'w-auto text-sm cursor-pointer')}
-            aria-label="Filter by priority"
-          >
-            <option value="all">All Priorities</option>
-            <option value="low">Low</option>
-            <option value="medium">Medium</option>
-            <option value="high">High</option>
-          </select>
-          <select
-            value={filterStatus}
-            onChange={(e) => setFilterStatus(e.target.value)}
-            className={cx(FIELD_CONTROL_CLASSES, 'w-auto text-sm cursor-pointer')}
-            aria-label="Filter by status"
-          >
-            <option value="all">All Statuses</option>
-            <option value="todo">To Do</option>
-            <option value="in-progress">In Progress</option>
-            <option value="done">Done</option>
-          </select>
-        </div>
-      </div>
+        <select
+          value={filterPriority}
+          onChange={(e) => setFilterPriority(e.target.value)}
+          className={cx(FIELD_CONTROL_CLASSES, 'w-auto text-sm cursor-pointer')}
+          aria-label="Filter by priority"
+        >
+          <option value="all">All Priorities</option>
+          <option value="low">Low</option>
+          <option value="medium">Medium</option>
+          <option value="high">High</option>
+        </select>
+        <select
+          value={filterStatus}
+          onChange={(e) => setFilterStatus(e.target.value)}
+          className={cx(FIELD_CONTROL_CLASSES, 'w-auto text-sm cursor-pointer')}
+          aria-label="Filter by status"
+        >
+          <option value="all">All Statuses</option>
+          <option value="todo">To Do</option>
+          <option value="in-progress">In Progress</option>
+          <option value="done">Done</option>
+        </select>
+        <Button variant="primary" size="sm" onClick={handleOpenCreate}>
+          <Plus className="w-(--icon-sm) h-(--icon-sm)" />
+          <span className="hidden sm:inline">Add Task</span>
+        </Button>
+      </ModuleToolbar>
 
-      <div className="space-y-3">
+      <div className="pt-6 space-y-3">
         {filteredTasks.length === 0 ? (
           <p className="text-muted-foreground text-center py-8 bg-surface rounded-lg border border-border">
             {tasks.length === 0
@@ -240,26 +180,77 @@ export default function Tasks() {
         )}
       </div>
 
-      {taskToDelete && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-scrim backdrop-blur-xs p-4">
-          <div className="bg-surface rounded-2xl shadow-lg max-w-sm w-full p-6 space-y-5 border border-border">
-            <div className="space-y-2">
-              <h3 className="text-h3 font-bold text-foreground">Delete Task</h3>
-              <p className="text-body-small text-muted-foreground leading-relaxed">
-                Are you sure you want to delete this task? This action cannot be undone.
-              </p>
-            </div>
-            <div className="flex justify-end items-center gap-3 pt-2">
-              <Button variant="secondary" size="sm" onClick={() => setTaskToDelete(null)}>
-                Cancel
-              </Button>
-              <Button variant="destructive" size="sm" onClick={handleConfirmDelete}>
-                Delete
-              </Button>
-            </div>
+      <FormDialog
+        open={formOpen}
+        onClose={() => { setFormOpen(false); resetForm() }}
+        onSubmit={handleSubmit}
+        title={editingTask ? 'Edit Task' : 'Add Task'}
+        submitLabel={editingTask ? 'Save Changes' : 'Add Task'}
+      >
+        <Input
+          label="Task Title"
+          type="text"
+          value={title}
+          onChange={(e) => {
+            setTitle(e.target.value)
+            if (titleError) setTitleError('')
+          }}
+          placeholder="e.g., Finish React hooks exercise"
+          required
+          error={titleError}
+        />
+        <Textarea
+          label="Description"
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+          placeholder="Brief details about the task..."
+          rows={2}
+        />
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className="flex flex-col gap-2">
+            <label className="text-label text-foreground" htmlFor="task-priority">Priority</label>
+            <select
+              id="task-priority"
+              name="priority"
+              value={priority}
+              onChange={(e) => setPriority(e.target.value)}
+              className={cx(FIELD_CONTROL_CLASSES, 'w-full text-sm cursor-pointer')}
+            >
+              <option value="low">Low</option>
+              <option value="medium">Medium</option>
+              <option value="high">High</option>
+            </select>
           </div>
+          <div className="flex flex-col gap-2">
+            <label className="text-label text-foreground" htmlFor="task-status">Status</label>
+            <select
+              id="task-status"
+              name="status"
+              value={status}
+              onChange={(e) => setStatus(e.target.value)}
+              className={cx(FIELD_CONTROL_CLASSES, 'w-full text-sm cursor-pointer')}
+            >
+              <option value="todo">To Do</option>
+              <option value="in-progress">In Progress</option>
+              <option value="done">Done</option>
+            </select>
+          </div>
+          <Input
+            label="Due Date"
+            type="datetime-local"
+            value={dueDateInput}
+            onChange={(e) => setDueDateInput(e.target.value)}
+          />
         </div>
-      )}
+      </FormDialog>
+
+      <ConfirmDialog
+        open={!!taskToDelete}
+        onClose={() => setTaskToDelete(null)}
+        onConfirm={handleConfirmDelete}
+        title="Delete Task"
+        message="Are you sure you want to delete this task? This action cannot be undone."
+      />
     </article>
   )
 }
