@@ -174,6 +174,23 @@ Precise rule for state backgrounds on `Card` surfaces:
   is applied uniformly; perceptual strength may vary slightly per `-soft`
   value — acceptable, since Badges stay opaque and the tint is the weakest
   rung of the hierarchy either way.
+- **Learning goal statuses (LearningEntry, Sprint 07.6) — single source**
+  `LEARNING_STATUS_VISUALS` in `src/constants/learningStatus.js` (same
+  pure-string-constant pattern as `cardStatus.js`):
+
+  | Status | Badge variant | Card tint |
+  | --- | --- | --- |
+  | `not-started` | `secondary` | none |
+  | `in-progress` | `accent` | `!bg-accent-soft/20` |
+  | `paused` | `info` | `!bg-info-soft/20` |
+  | `completed` | `success` | `!bg-success-soft/20` |
+
+  `in-progress = accent` here is deliberate and distinct from the task status
+  mapping (no time-caution semantics exist for learning goals, so `warning`
+  stays free). Completed goals additionally render their ProgressBar in
+  `success` (and progress is locked at 100 — see DATA_MODEL.md
+  normalization). Cards carry the status Badge text always — color never
+  carries state alone; the Badge > tint hierarchy above holds.
 
 ---
 
