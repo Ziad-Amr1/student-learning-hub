@@ -176,21 +176,45 @@ Precise rule for state backgrounds on `Card` surfaces:
   rung of the hierarchy either way.
 - **Learning goal statuses (LearningEntry, Sprint 07.6) — single source**
   `LEARNING_STATUS_VISUALS` in `src/constants/learningStatus.js` (same
-  pure-string-constant pattern as `cardStatus.js`):
+  pure-string-constant pattern as `cardStatus.js`). After the 07.6
+  refinement statuses own **no card border** — the card's accent `border-l-2`
+  + accent tint belong to **pinning exclusively** (`PINNED_CARD_VISUAL`), so
+  a pinned `in-progress` card can never collide with the status accent:
 
   | Status | Badge variant | Card tint |
   | --- | --- | --- |
   | `not-started` | `secondary` | none |
-  | `in-progress` | `accent` | `!bg-accent-soft/20` |
+  | `in-progress` | `accent` (badge only) | none |
   | `paused` | `info` | `!bg-info-soft/20` |
   | `completed` | `success` | `!bg-success-soft/20` |
 
-  `in-progress = accent` here is deliberate and distinct from the task status
-  mapping (no time-caution semantics exist for learning goals, so `warning`
-  stays free). Completed goals additionally render their ProgressBar in
-  `success` (and progress is locked at 100 — see DATA_MODEL.md
-  normalization). Cards carry the status Badge text always — color never
-  carries state alone; the Badge > tint hierarchy above holds.
+  `in-progress = accent` is a **badge-level** decision here, deliberate and
+  distinct from the task status mapping (no time-caution semantics exist for
+  learning goals, so `warning` stays free). At the **card level**, `accent`
+  means Pinned: `PINNED_CARD_VISUAL` = `border-l-2 border-l-accent` +
+  `!bg-accent-soft/20` — the two accent uses never overlap because
+  `in-progress` carries no card tint and statuses carry no border. Completed
+  goals additionally render their ProgressBar in `success` (and progress is
+  locked at 100 — see DATA_MODEL.md normalization). Cards carry the status
+  Badge text always — color never carries state alone; the Badge > tint
+  hierarchy above holds.
+- **Learning sorting + pinned ordering (07.6 refinement):** the Learning page
+  has a transient module-local sort control — Manual order / Newest first /
+  Recently updated / Progress / Title A–Z — on its ModuleToolbar (Tasks
+  pattern): sorting is UI state only, NOT persisted, and the
+  `student-hub:learning` array keeps storage order. Pinned entries always
+  rank first in any mode (Notes/Resources pattern), then the selected
+  comparator via `sortLearningEntries` in `src/utils/learning.js`
+  (deterministic createdAt/updatedAt tie-breaks). Sorting is applied BEFORE
+  the Currently-Learning / Other status grouping, so both sections share the
+  same ordering.
+- **Learning card rhythm (07.6 refinement):** Row 1 = title + pin/edit/delete
+  actions; Row 2 = category + status Badges (`size="sm"` compact); Row 3 =
+  ProgressBar; Row 4 = context-aware units + updated date; then LinkedItems.
+  Context-aware units (`formatLearningUnits`): course/practice/topic →
+  `"X of Y hrs"`; book → `"X of Y pages"` (completed derived from
+  `progress` × `totalPages`); video → formatted duration of `videoMinutes`
+  e.g. `"2h"`.
 
 ---
 
@@ -392,6 +416,8 @@ see `docs/COMPONENTS.md`.
   category, learning states).
 - **Variants:** `default` (primary tint) · `secondary` · `accent` · `success` ·
   `warning` · `danger` · `info` · `outline`.
+- **Sizes:** `md` (default, 3/4-unit horizontal padding) · `sm` (compact card
+  metadata — halved horizontal padding, zero vertical, same caption type).
 - **Rules:** pick variant by meaning, not looks; caption size, pill radius.
 
 ### Avatar (`components/ui/Avatar.jsx`)
