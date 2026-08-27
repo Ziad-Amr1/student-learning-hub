@@ -1,5 +1,6 @@
 import { Trash2 } from 'lucide-react'
 import { cx } from '../../utils/cx'
+import { formatDueDate } from '../../utils/date'
 import { FIELD_CONTROL_CLASSES } from '../../components/ui/formStyles'
 import Button from '../../components/ui/Button'
 import Badge from '../../components/ui/Badge'
@@ -15,18 +16,6 @@ const STATUS_VARIANT = {
   todo: 'secondary',
   'in-progress': 'warning',
   done: 'success',
-}
-
-function formatDueDate(dueDate) {
-  if (!dueDate) return null
-  const date = new Date(dueDate)
-  const now = new Date()
-  const diff = date.getTime() - now.getTime()
-  if (diff <= 0) return { label: 'Overdue', overdue: true }
-  const days = Math.floor(diff / (1000 * 60 * 60 * 24))
-  if (days === 0) return { label: 'Due today', overdue: false }
-  if (days === 1) return { label: 'Due tomorrow', overdue: false }
-  return { label: `Due in ${days} days`, overdue: false }
 }
 
 export default function TaskCard({ task, onEdit, onUpdateStatus, onDelete }) {
