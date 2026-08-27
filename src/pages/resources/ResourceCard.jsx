@@ -1,5 +1,6 @@
 import { ExternalLink, Pin, Pencil, Trash2, ImageOff } from 'lucide-react'
 import { cx } from '../../utils/cx'
+import { PINNED_CARD_VISUAL, PIN_BUTTON_ACTIVE_CLASSES } from '../../constants/cardStatus'
 import Button from '../../components/ui/Button'
 import Badge from '../../components/ui/Badge'
 import Card from '../../components/ui/Card'
@@ -13,8 +14,6 @@ const CATEGORY_VARIANT = {
   other: 'outline',
 }
 
-const PINNED_CARD_CLASS = 'border-l-2 border-l-accent bg-accent-soft/20'
-
 function ResourceActions({ resource, onTogglePin, onEdit, onDelete }) {
   return (
     <div className="flex items-center gap-1">
@@ -25,7 +24,7 @@ function ResourceActions({ resource, onTogglePin, onEdit, onDelete }) {
         aria-label={resource.pinned ? 'Unpin resource' : 'Pin resource'}
         aria-pressed={resource.pinned}
         className={cx(
-          resource.pinned && 'bg-primary-soft text-primary-strong hover:not-disabled:bg-primary-soft/80'
+          resource.pinned && PIN_BUTTON_ACTIVE_CLASSES
         )}
       >
         <Pin className={cx('w-(--icon-sm) h-(--icon-sm)', resource.pinned && 'fill-current')} />
@@ -62,7 +61,9 @@ function ResourceActions({ resource, onTogglePin, onEdit, onDelete }) {
 }
 
 export default function ResourceCard({ resource, viewMode = 'list', onEdit, onTogglePin, onDelete }) {
-  const pinnedClass = resource.pinned ? PINNED_CARD_CLASS : ''
+  const pinnedClass = resource.pinned
+    ? cx(PINNED_CARD_VISUAL.borderClass, PINNED_CARD_VISUAL.bgClass)
+    : ''
 
   if (viewMode === 'grid-preview') {
     return (

@@ -1,6 +1,7 @@
 import { Pin, Pencil, Trash2 } from 'lucide-react'
 import { cx } from '../../utils/cx'
 import { timeAgo } from '../../utils/date'
+import { PINNED_CARD_VISUAL, PIN_BUTTON_ACTIVE_CLASSES } from '../../constants/cardStatus'
 import Button from '../../components/ui/Button'
 import Badge from '../../components/ui/Badge'
 import Card from '../../components/ui/Card'
@@ -13,7 +14,7 @@ export default function NoteCard({ note, onEdit, onTogglePin, onDelete }) {
       className={cx(
         'p-5 flex flex-col justify-between space-y-3 transition-[border-color,background-color]',
         note.pinned
-          ? 'border-l-2 border-l-accent bg-accent-soft/20'
+          ? cx(PINNED_CARD_VISUAL.borderClass, PINNED_CARD_VISUAL.bgClass)
           : 'hover:border-border/80'
       )}
     >
@@ -40,7 +41,7 @@ export default function NoteCard({ note, onEdit, onTogglePin, onDelete }) {
             aria-label={note.pinned ? 'Unpin note' : 'Pin note'}
             aria-pressed={note.pinned}
             className={cx(
-              note.pinned && 'bg-primary-soft text-primary-strong hover:not-disabled:bg-primary-soft/80'
+              note.pinned && PIN_BUTTON_ACTIVE_CLASSES
             )}
           >
             <Pin className={cx('w-(--icon-sm) h-(--icon-sm)', note.pinned && 'fill-current')} />

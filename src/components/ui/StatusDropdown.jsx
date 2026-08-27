@@ -23,7 +23,7 @@ const STATUS_OPTIONS = TASK_STATUSES.map((value) => ({
 
 const STATUS_ICON_STYLE = {
   unstarted: 'text-muted-foreground',
-  'in-progress': 'text-accent-strong',
+  'in-progress': 'text-warning-strong',
   deferred: 'text-info-strong',
   done: 'text-success-strong',
   cancelled: 'text-destructive-strong',

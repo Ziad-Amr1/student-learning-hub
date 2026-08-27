@@ -1,44 +1,22 @@
 import { Pencil, Trash2 } from 'lucide-react'
 import { cx } from '../../utils/cx'
 import { formatDueDate } from '../../utils/date'
-import { normalizeTaskStatus, TASK_STATUS_LABELS } from '../../utils/taskStatus'
+import {
+  normalizeTaskStatus,
+  TASK_STATUS_LABELS,
+} from '../../utils/taskStatus'
+import {
+  PRIORITY_VARIANT,
+  STATUS_VISUALS,
+} from '../../constants/cardStatus'
 import Button from '../../components/ui/Button'
 import Badge from '../../components/ui/Badge'
 import Card from '../../components/ui/Card'
 import StatusDropdown from '../../components/ui/StatusDropdown'
 
-const PRIORITY_VARIANT = {
-  low: 'outline',
-  medium: 'info',
-  high: 'danger',
-}
-
-const STATUS_VARIANT = {
-  unstarted: 'secondary',
-  'in-progress': 'accent',
-  deferred: 'info',
-  done: 'success',
-  cancelled: 'danger',
-}
-
-const STATUS_BORDER_CLASS = {
-  unstarted: 'border-l-muted/40',
-  'in-progress': 'border-l-accent',
-  deferred: 'border-l-info',
-  done: 'border-l-success',
-  cancelled: 'border-l-destructive',
-}
-
-const STATUS_BG_CLASS = {
-  unstarted: '',
-  'in-progress': '!bg-accent-soft/20',
-  deferred: '!bg-info-soft/20',
-  done: '!bg-success-soft/20',
-  cancelled: '!bg-destructive-soft/20',
-}
-
 export default function TaskCard({ task, onEdit, onUpdateStatus, onDelete }) {
   const status = normalizeTaskStatus(task.status)
+  const statusVisual = STATUS_VISUALS[status] ?? STATUS_VISUALS.unstarted
   const due = formatDueDate(task.dueDate)
 
   return (
@@ -46,15 +24,15 @@ export default function TaskCard({ task, onEdit, onUpdateStatus, onDelete }) {
       className={cx(
         'p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4',
         'border-l-2 transition-[border-color,background-color]',
-        STATUS_BORDER_CLASS[status] ?? '',
-        STATUS_BG_CLASS[status] ?? ''
+        statusVisual.borderClass,
+        statusVisual.bgClass
       )}
     >
       <div className="space-y-1 flex-1 min-w-0">
         <div className="flex items-center gap-2 flex-wrap">
           <h3 className="text-base font-bold text-foreground truncate">{task.title}</h3>
           <Badge variant={PRIORITY_VARIANT[task.priority] ?? 'outline'}>{task.priority}</Badge>
-          <Badge variant={STATUS_VARIANT[status] ?? 'secondary'}>
+          <Badge variant={statusVisual.badgeVariant}>
             {TASK_STATUS_LABELS[status] ?? status}
           </Badge>
         </div>

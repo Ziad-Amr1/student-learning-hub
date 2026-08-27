@@ -3,6 +3,7 @@ import { getGreeting } from '../utils/greeting'
 import useLocalStorage from '../hooks/useLocalStorage'
 import { TASKS } from '../data/tasks'
 import { normalizeTaskStatus } from '../utils/taskStatus'
+import { STATUS_VISUALS } from '../constants/cardStatus'
 import { CircleCheckBig, CircleDashed, CircleDot, ListTodo } from 'lucide-react'
 import StatCard from './dashboard/StatCard'
 import QuickActions from './dashboard/QuickActions'
@@ -22,13 +23,13 @@ export default function Dashboard() {
     {
       label: 'In progress',
       value: tasks.filter((task) => task.status === 'in-progress').length,
-      badge: { label: 'active', variant: 'accent' },
+      badge: { label: 'active', variant: STATUS_VISUALS['in-progress'].badgeVariant },
       Icon: CircleDot,
     },
     {
       label: 'Completed',
       value: tasks.filter((task) => task.status === 'done').length,
-      badge: { label: 'keep going', variant: 'success' },
+      badge: { label: 'keep going', variant: STATUS_VISUALS.done.badgeVariant },
       Icon: CircleCheckBig,
     },
   ]

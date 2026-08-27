@@ -105,6 +105,76 @@ Contrast rules:
   perceptual/proportional curve — accessibility wins over strict math here.
   See §11 for the reasoning.
 
+### Semantic card tints & correctness (Sprint 07.5, regression-corrected 2026-08-27)
+
+**Visual hierarchy (project-wide) for every semantic card state:**
+
+    strong semantic Badge / state indicator
+    ↓
+    medium "clear" state border or icon
+    ↓
+    very subtle semantic card background tint
+
+The card background *reinforces* the state; it must never compete with or
+merge into the Badge. Badge/indicator and card tint must never share the same
+visual intensity. Audit each state combination (Badge color vs border/icon
+color vs tint) — and never assume one opacity value is perceptually correct
+for every semantic hue.
+
+Precise rule for state backgrounds on `Card` surfaces:
+
+- Card-level semantic tints are **`*-soft` at 20% opacity WITH the Tailwind
+  prefix `!` important form**: `!bg-warning-soft/20`, `!bg-info-soft/20`,
+  `!bg-success-soft/20`, `!bg-destructive-soft/20`, pinned
+  `!bg-accent-soft/20` (≈ `#fbf7ef` over the card — genuinely subtle). Both
+  halves are required, and each alone is wrong:
+  - **`bg-*-soft/20` without `!`** loses the cascade: Tailwind v4 sorts
+    utilities alphabetically, so the plain rule lands before `Card`'s
+    `bg-surface` and the later rule wins at equal specificity.
+  - **`!bg-*-soft` full-opaque** passes the cascade but renders at the full
+    `-soft` value — the Badge's own background. The card tint becomes as
+    intense as the Badge and the hierarchy collapses.
+  `!w-auto` is the project precedent for the "override the primitive" form.
+- The generated sheet also contains inert companion rules for these utilities
+  (color-mix fallbacks, a full-opacity `!bg-accent-soft`); no component emits
+  those plain classes, so ignore them in audits. Verify presence of the
+  `\!`important `/20` rule for a class, not just any `bg-*-soft` match.
+- **API (single source of truth):** status, priority, and pinned visual
+  classes are pure string constants in `src/constants/cardStatus.js`
+  (`PRIORITY_VARIANT`, `STATUS_VISUALS`, `PINNED_CARD_VISUAL`,
+  `PIN_BUTTON_ACTIVE_CLASSES`).
+  Icons stay in `StatusDropdown` (React components must not live in
+  constants/utils).
+- **Task status card tints (TaskCard — same mapping as StatusDropdown):**
+
+  | Status | Badge variant | Left border | Card tint |
+  | --- | --- | --- | --- |
+  | `unstarted` | `accent` | `border-l-accent/40` (subtle) | none |
+  | `in-progress` | `warning` | `border-l-warning` | `!bg-warning-soft/20` |
+  | `deferred` | `info` | `border-l-info` | `!bg-info-soft/20` |
+  | `done` | `success` | `border-l-success` | `!bg-success-soft/20` |
+  | `cancelled` | `danger` | `border-l-destructive` | `!bg-destructive-soft/20` |
+
+  **`in-progress = warning` is a deliberate product decision from the 07.5
+  regression review** (user instruction; supersedes the earlier "in-progress is
+  accent, warning is time-caution-only" rule). Status meaning is never carried
+  by tint/border/badge alone — icon + text label always accompany the color.
+- **Pinned cards (Notes + Resources, all view modes):** `PINNED_CARD_VISUAL`
+  = `borderClass: border-l-2 border-l-accent` + `bgClass: !bg-accent-soft/20`.
+- **Pinned pin-button active state:** `PIN_BUTTON_ACTIVE_CLASSES` =
+  `!bg-primary-soft text-primary-strong
+  hover:not-disabled:!bg-primary-soft/80` + filled Pin (`fill-current`) +
+  `aria-pressed`. The `!` matters: ghost's `bg-transparent` and
+  `hover:bg-surface-muted` sort later and otherwise win, making the active
+  pin button indistinguishable from the unpinned one. The full `-soft` is
+  correct here — the button is a control/interaction state (must read as
+  active); the "subtle tint" rule applies to card backgrounds, not controls.
+- **Warning semantics:** `warning` maps to the `in-progress` task status
+  (see above) plus the resource `video` category badge. The per-hue 20%
+  is applied uniformly; perceptual strength may vary slightly per `-soft`
+  value — acceptable, since Badges stay opaque and the tint is the weakest
+  rung of the hierarchy either way.
+
 ---
 
 ## 3. Typography
