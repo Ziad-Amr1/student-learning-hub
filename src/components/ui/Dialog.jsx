@@ -19,7 +19,8 @@ export default function Dialog({ open, onClose, title, description, children, cl
     <dialog
       ref={dialogRef}
       className={cx(
-        'm-0 backdrop:bg-scrim p-0 border-0 rounded-2xl shadow-lg max-w-lg w-full',
+        'backdrop:bg-scrim p-0 border-0 rounded-2xl shadow-lg max-w-lg w-full',
+        'fixed inset-0 m-auto max-h-[90dvh]',
         'open:flex flex-col overflow-hidden',
         className
       )}
@@ -28,8 +29,8 @@ export default function Dialog({ open, onClose, title, description, children, cl
         if (e.target === dialogRef.current) onClose()
       }}
     >
-      <div className="bg-surface rounded-2xl border border-border overflow-hidden">
-        <header className="flex items-start justify-between gap-4 px-6 pt-6 pb-0">
+      <div className="bg-surface rounded-2xl border border-border overflow-hidden flex flex-col min-h-0">
+        <header className="flex items-start justify-between gap-4 px-6 pt-6 pb-0 shrink-0">
           <div className="space-y-1 min-w-0">
             <h3 className="font-bold text-foreground">{title}</h3>
             {description && (
@@ -45,7 +46,7 @@ export default function Dialog({ open, onClose, title, description, children, cl
             <X aria-hidden="true" className="w-(--icon-md) h-(--icon-md)" />
           </button>
         </header>
-        <div className="px-6 py-5">
+        <div className="px-6 py-5 overflow-y-auto min-h-0 flex-1">
           {children}
         </div>
       </div>

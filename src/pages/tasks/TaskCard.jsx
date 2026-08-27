@@ -15,19 +15,25 @@ const PRIORITY_VARIANT = {
 const STATUS_VARIANT = {
   todo: 'secondary',
   'in-progress': 'warning',
+  deferred: 'info',
   done: 'success',
+  cancelled: 'danger',
 }
 
 const STATUS_BORDER_CLASS = {
   todo: 'border-l-muted/40',
   'in-progress': 'border-l-warning',
+  deferred: 'border-l-info',
   done: 'border-l-success',
+  cancelled: 'border-l-destructive',
 }
 
 const STATUS_BG_CLASS = {
   todo: '',
-  'in-progress': 'bg-warning-soft/20',
-  done: 'bg-success-soft/20',
+  'in-progress': '!bg-warning-soft/20',
+  deferred: '!bg-info-soft/20',
+  done: '!bg-success-soft/20',
+  cancelled: '!bg-destructive-soft/20',
 }
 
 export default function TaskCard({ task, onEdit, onUpdateStatus, onDelete }) {

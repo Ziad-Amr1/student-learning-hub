@@ -152,7 +152,9 @@ export default function Tasks() {
           <option value="all">All Statuses</option>
           <option value="todo">To Do</option>
           <option value="in-progress">In Progress</option>
+          <option value="deferred">Deferred</option>
           <option value="done">Done</option>
+          <option value="cancelled">Cancelled</option>
         </select>
         <Button variant="primary" size="sm" onClick={handleOpenCreate}>
           <Plus className="w-(--icon-sm) h-(--icon-sm)" />
@@ -232,7 +234,9 @@ export default function Tasks() {
             >
               <option value="todo">To Do</option>
               <option value="in-progress">In Progress</option>
+              <option value="deferred">Deferred</option>
               <option value="done">Done</option>
+              <option value="cancelled">Cancelled</option>
             </select>
           </div>
           <Input

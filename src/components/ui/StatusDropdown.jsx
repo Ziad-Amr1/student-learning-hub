@@ -1,17 +1,21 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
-import { ChevronDown, Circle, Clock, CheckCircle2 } from 'lucide-react'
+import { ChevronDown, Circle, Clock, CheckCircle2, PauseCircle, XCircle } from 'lucide-react'
 import { cx } from '../../utils/cx'
 
 const STATUS_OPTIONS = [
   { value: 'todo', label: 'To Do', Icon: Circle },
   { value: 'in-progress', label: 'In Progress', Icon: Clock },
+  { value: 'deferred', label: 'Deferred', Icon: PauseCircle },
   { value: 'done', label: 'Done', Icon: CheckCircle2 },
+  { value: 'cancelled', label: 'Cancelled', Icon: XCircle },
 ]
 
 const STATUS_ICON_STYLE = {
   todo: 'text-muted-foreground',
   'in-progress': 'text-warning-strong',
+  deferred: 'text-info-strong',
   done: 'text-success-strong',
+  cancelled: 'text-destructive-strong',
 }
 
 export default function StatusDropdown({ value, onChange, taskTitle }) {

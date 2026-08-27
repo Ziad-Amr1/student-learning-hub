@@ -338,6 +338,12 @@ see `docs/COMPONENTS.md`.
 - **Purpose:** modal overlay for confirmations and forms. Thin wrapper around
   native `<dialog>` — Escape key works natively, backdrop click closes.
 - **Props:** `open`, `onClose`, `title`, `description?`, `children`, `className`.
+- **Positioning:** `fixed inset-0 m-auto` — deterministic project-owned
+  centering, not relying on UA `margin: auto` (which `m-0` would break).
+  `max-h-[90dvh]` constrains height for mobile.
+- **Scroll architecture:** inner content div uses `overflow-y-auto min-h-0
+  flex-1`; header uses `shrink-0`. When form content exceeds viewport,
+  the body scrolls while header and close button remain visible.
 - **Scope:** intentionally small for Core Modules hardening. Full Dialog
   primitive with focus trap lands in Sprint 14.
 - **Rules:** use `showModal()` for proper top-layer rendering; never use
@@ -372,10 +378,12 @@ see `docs/COMPONENTS.md`.
   `<select>` with a combobox-pattern dropdown built from existing primitives.
 - **Props:** `value` (current status), `onChange` (callback), `taskTitle`
   (for aria-label).
-- **Visual:** trigger button shows status icon (Circle/Clock/CheckCircle2
-  from lucide-react) + label + chevron; positioned listbox below with
-  option highlight on hover/keyboard; selected option uses
-  `bg-primary-soft text-primary-strong`.
+- **Statuses:** `todo` (Circle, muted-foreground) · `in-progress` (Clock,
+  warning-strong) · `deferred` (PauseCircle, info-strong) · `done`
+  (CheckCircle2, success-strong) · `cancelled` (XCircle, destructive-strong).
+- **Visual:** trigger button shows status icon + label + chevron; positioned
+  listbox below with option highlight on hover/keyboard; selected option
+  uses `bg-primary-soft text-primary-strong`.
 - **A11y:** `role="combobox"` + `aria-expanded` + `aria-haspopup="listbox"`
   on trigger; `role="listbox"` + `aria-selected` per option; full keyboard
   navigation (ArrowUp/Down, Enter/Space, Escape, Tab).

@@ -75,4 +75,22 @@ export const TASKS = [
     dueDate: null,
     createdAt: '2026-08-24T07:55:00.000Z',
   },
+  {
+    id: 'a3f7c8e2-1d44-4b9a-b6e0-9c5d2f8a1e37',
+    title: 'Watch advanced CSS grid tutorial',
+    description: 'Deferred until after the midterm exams are done.',
+    priority: 'medium',
+    status: 'deferred',
+    dueDate: null,
+    createdAt: '2026-08-20T09:00:00.000Z',
+  },
+  {
+    id: 'b8d2e5f1-6a33-4c19-8d7e-2f4a9c6b5018',
+    title: 'Submit optional bonus challenge',
+    description: 'No longer required — instructor dropped the bonus requirement.',
+    priority: 'low',
+    status: 'cancelled',
+    dueDate: null,
+    createdAt: '2026-08-18T11:20:00.000Z',
+  },
 ]
