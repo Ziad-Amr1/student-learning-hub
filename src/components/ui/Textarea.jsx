@@ -1,35 +1,14 @@
-import { useId } from 'react'
-import { cx } from '../../utils/cx'
-import {
-  FIELD_CLASSES,
-  FIELD_CONTROL_CLASSES,
-  FIELD_CONTROL_ERROR_CLASSES,
-  FIELD_ERROR_CLASSES,
-} from './formStyles'
+import React from 'react';
+import { cx } from '../../utils/cx';
 
-export default function Textarea({ label, error, className, id, rows = 4, ...rest }) {
-  const generatedId = useId()
-  const textareaId = id ?? generatedId
-  const errorId = `${textareaId}-error`
-
+export default function Textarea({ className, ...rest }) {
   return (
-    <div className={cx(FIELD_CLASSES, className)}>
-      <label className="text-label" htmlFor={textareaId}>
-        {label}
-      </label>
-      <textarea
-        id={textareaId}
-        rows={rows}
-        className={cx(FIELD_CONTROL_CLASSES, error && FIELD_CONTROL_ERROR_CLASSES)}
-        aria-invalid={error ? true : undefined}
-        aria-describedby={error ? errorId : undefined}
-        {...rest}
-      />
-      {error && (
-        <p className={FIELD_ERROR_CLASSES} id={errorId}>
-          {error}
-        </p>
+    <textarea
+      className={cx(
+        "flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
+        className
       )}
-    </div>
-  )
+      {...rest}
+    />
+  );
 }
