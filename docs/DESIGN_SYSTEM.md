@@ -332,9 +332,38 @@ see `docs/COMPONENTS.md`.
   action buttons row (wraps below title on narrow screens).
 - **Rules:** one per page; do not hardcode any page's content into it.
 
+### Dialog (`components/ui/Dialog.jsx`) ✅ (Sprint 06.5 — interim)
+- **Purpose:** modal overlay for confirmations and forms. Thin wrapper around
+  native `<dialog>` — Escape key works natively, backdrop click closes.
+- **Props:** `open`, `onClose`, `title`, `description?`, `children`, `className`.
+- **Scope:** intentionally small for Core Modules hardening. Full Dialog
+  primitive with focus trap lands in Sprint 14.
+- **Rules:** use `showModal()` for proper top-layer rendering; never use
+  `alert()` or `window.confirm()`.
+
+### ConfirmDialog (`components/ui/ConfirmDialog.jsx`) ✅ (Sprint 06.5)
+- **Purpose:** destructive confirmation (delete actions).
+- **Props:** `open`, `onClose`, `onConfirm`, `title='Confirm'`, `message`,
+  `confirmLabel='Delete'`, `cancelLabel='Cancel'`.
+- **Composes:** Dialog + Button (destructive variant).
+
+### FormDialog (`components/ui/FormDialog.jsx`) ✅ (Sprint 06.5)
+- **Purpose:** create/edit form overlay.
+- **Props:** `open`, `onClose`, `onSubmit`, `title`, `submitLabel='Save'`,
+  `children` (form fields).
+- **Composes:** Dialog + form + Button (primary submit, secondary cancel).
+
+### ModuleToolbar (`components/layout/ModuleToolbar.jsx`) ✅ (Sprint 06.5)
+- **Purpose:** shared sticky toolbar for module pages (Tasks, Notes, Resources).
+  Provides consistent location for search, filters, and action buttons.
+- **Props:** `children`, `className`.
+- **Behavior:** sticky below navbar (`top: var(--layout-navbar-height)`),
+  z-index 5 (below navbar's z-10), translucent background with backdrop blur.
+- **Layout:** `flex flex-wrap items-center gap-3` — controls wrap on narrow
+  viewports.
+
 ### Planned primitives (do not exist yet — build only in their Sprint)
-`AppShell`, `Navbar`, `Sidebar`, `MobileNav` (Sprint 02) · `EmptyState`
-(Sprint 08) · Tooltip/Dropdown/Dialog/Drawer/Toast/Skeleton/Tabs/Breadcrumb
+`EmptyState` (Sprint 08) · Tooltip/Dropdown/Drawer/Toast/Skeleton/Tabs/Breadcrumb
 (Sprint 14, value-permitting).
 
 ---
