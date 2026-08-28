@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useCallback } from 'react'
+import { useState, useRef, useEffect, useCallback, useId } from 'react'
 import { ChevronDown, Circle, Clock, CheckCircle2, PauseCircle, XCircle } from 'lucide-react'
 import { cx } from '../../utils/cx'
 import {
@@ -36,6 +36,9 @@ export default function StatusDropdown({ value, onChange, taskTitle }) {
   const buttonRef = useRef(null)
   const listRef = useRef(null)
   const optionRefs = useRef([])
+  const baseId = useId()
+
+  const listboxId = `${baseId}-listbox`
 
   const currentOption = STATUS_OPTIONS.find(o => o.value === status) ?? STATUS_OPTIONS[0]
 
@@ -62,37 +65,57 @@ export default function StatusDropdown({ value, onChange, taskTitle }) {
     }
   }, [activeIndex, open])
 
+  // ARIA 1.2 combobox: focus stays on the trigger button; the open listbox is
+  // described via aria-activedescendant (the interim pattern — the full
+  // focus-trap Dropdown is Sprint 14 scope).
   const handleButtonKeyDown = (e) => {
-    if (e.key === 'ArrowDown' || e.key === 'Down') {
-      e.preventDefault()
-      setOpen(true)
-      setActiveIndex(STATUS_OPTIONS.findIndex(o => o.value === status))
-    }
-  }
-
-  const handleListKeyDown = (e) => {
+    const currentIndex = STATUS_OPTIONS.findIndex(o => o.value === status)
     switch (e.key) {
       case 'ArrowDown':
       case 'Down':
         e.preventDefault()
-        setActiveIndex(i => (i + 1) % STATUS_OPTIONS.length)
+        if (!open) {
+          setOpen(true)
+          setActiveIndex(currentIndex)
+        } else {
+          setActiveIndex(i => (i + 1) % STATUS_OPTIONS.length)
+        }
         break
       case 'ArrowUp':
       case 'Up':
         e.preventDefault()
-        setActiveIndex(i => (i - 1 + STATUS_OPTIONS.length) % STATUS_OPTIONS.length)
+        if (!open) {
+          setOpen(true)
+          setActiveIndex(currentIndex)
+        } else {
+          setActiveIndex(i => (i - 1 + STATUS_OPTIONS.length) % STATUS_OPTIONS.length)
+        }
+        break
+      case 'Home':
+      case 'End':
+        if (open) {
+          e.preventDefault()
+          setActiveIndex(e.key === 'Home' ? 0 : STATUS_OPTIONS.length - 1)
+        }
         break
       case 'Enter':
       case ' ':
         e.preventDefault()
-        if (activeIndex >= 0) {
-          onChange(STATUS_OPTIONS[activeIndex].value)
+        if (open) {
+          if (activeIndex >= 0) {
+            onChange(STATUS_OPTIONS[activeIndex].value)
+          }
           close()
+        } else {
+          setOpen(true)
+          setActiveIndex(currentIndex)
         }
         break
       case 'Escape':
-        e.preventDefault()
-        close()
+        if (open) {
+          e.preventDefault()
+          close()
+        }
         break
       case 'Tab':
         close()
@@ -110,6 +133,10 @@ export default function StatusDropdown({ value, onChange, taskTitle }) {
         role="combobox"
         aria-expanded={open}
         aria-haspopup="listbox"
+        aria-controls={listboxId}
+        aria-activedescendant={
+          open && activeIndex >= 0 ? `${baseId}-option-${activeIndex}` : undefined
+        }
         aria-label={`Status for "${taskTitle}"`}
         onClick={() => setOpen(o => !o)}
         onKeyDown={handleButtonKeyDown}
@@ -127,14 +154,12 @@ export default function StatusDropdown({ value, onChange, taskTitle }) {
       {open && (
         <ul
           ref={listRef}
+          id={listboxId}
           role="listbox"
           aria-label="Select status"
-          tabIndex={-1}
-          onKeyDown={handleListKeyDown}
           className={cx(
-            'absolute z-50 mt-1 right-0 min-w-[140px]',
-            'bg-surface border border-border rounded-lg shadow-lg py-1',
-            'overflow-hidden focus:outline-none'
+            'absolute z-(--z-dropdown) mt-1 right-0 min-w-[140px] overflow-hidden',
+            'bg-surface border border-border rounded-lg shadow-lg py-1'
           )}
         >
           {STATUS_OPTIONS.map((option, index) => {
@@ -144,6 +169,7 @@ export default function StatusDropdown({ value, onChange, taskTitle }) {
             return (
               <li
                 key={option.value}
+                id={`${baseId}-option-${index}`}
                 ref={(el) => { optionRefs.current[index] = el }}
                 role="option"
                 aria-selected={isSelected}
