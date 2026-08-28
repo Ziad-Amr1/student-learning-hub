@@ -25,7 +25,7 @@ export default function NoteCard({ note, onEdit, onTogglePin, onDelete }) {
             {note.category && <Badge variant="secondary">{note.category}</Badge>}
           </div>
         </div>
-        <p className="text-body-small text-muted-foreground whitespace-pre-wrap">{preview}</p>
+        <p className="text-body-small text-muted-foreground whitespace-pre-wrap wrap-anywhere">{preview}</p>
       </div>
       <div className="flex items-center justify-between pt-2 border-t border-border">
         <span className="text-caption text-muted-foreground">

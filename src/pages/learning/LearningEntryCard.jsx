@@ -41,7 +41,7 @@ export default function LearningEntryCard({
       )}
     >
       <div className="flex items-start justify-between gap-2">
-        <h3 className="min-w-0 text-base font-bold text-foreground">{entry.title}</h3>
+        <h3 className="min-w-0 text-base font-bold text-foreground wrap-anywhere">{entry.title}</h3>
         <div className="flex shrink-0 items-center gap-1">
           <Button
             variant="ghost"
