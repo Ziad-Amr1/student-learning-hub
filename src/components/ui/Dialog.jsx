@@ -1,9 +1,10 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useId, useRef } from 'react'
 import { X } from 'lucide-react'
 import { cx } from '../../utils/cx'
 
 export default function Dialog({ open, onClose, title, description, children, className }) {
   const dialogRef = useRef(null)
+  const titleId = useId()
 
   useEffect(() => {
     const dialog = dialogRef.current
@@ -18,6 +19,7 @@ export default function Dialog({ open, onClose, title, description, children, cl
   return (
     <dialog
       ref={dialogRef}
+      aria-labelledby={titleId}
       className={cx(
         'backdrop:bg-scrim p-0 border-0 rounded-2xl shadow-lg max-w-lg w-full',
         'fixed inset-0 m-auto max-h-[90dvh]',
@@ -32,7 +34,7 @@ export default function Dialog({ open, onClose, title, description, children, cl
       <div className="bg-surface rounded-2xl border border-border overflow-hidden flex flex-col min-h-0">
         <header className="flex items-start justify-between gap-4 px-6 pt-6 pb-0 shrink-0">
           <div className="space-y-1 min-w-0">
-            <h3 className="font-bold text-foreground">{title}</h3>
+            <h3 id={titleId} className="font-bold text-foreground">{title}</h3>
             {description && (
               <p className="text-body-small text-muted-foreground">{description}</p>
             )}

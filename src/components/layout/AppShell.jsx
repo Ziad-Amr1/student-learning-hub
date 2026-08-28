@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { Outlet } from 'react-router-dom'
+import { useEffect, useRef, useState } from 'react'
+import { Outlet, useLocation } from 'react-router-dom'
 import {
   BookOpen,
   CircleUser,
@@ -37,6 +37,12 @@ function readSidebarPreference() {
 export default function AppShell() {
   const [menuOpen, setMenuOpen] = useState(false)
   const [sidebarCollapsed, setSidebarCollapsed] = useState(readSidebarPreference)
+  const mainRef = useRef(null)
+  const { pathname } = useLocation()
+
+  useEffect(() => {
+    mainRef.current?.focus({ preventScroll: true })
+  }, [pathname])
 
   const handleSidebarToggle = () => {
     setSidebarCollapsed((prev) => {
@@ -72,6 +78,7 @@ export default function AppShell() {
         onToggle={handleSidebarToggle}
       />
       <main
+        ref={mainRef}
         id="main-content"
         className="[grid-area:main] outline-none pt-6 md:pt-8 pb-[calc(var(--layout-mobilenav-height)+env(safe-area-inset-bottom,0px)+var(--space-4))] lg:pb-(--layout-section-gap)"
         tabIndex={-1}

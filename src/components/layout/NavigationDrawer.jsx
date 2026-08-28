@@ -51,7 +51,7 @@ export default function NavigationDrawer({ items, open, onClose }) {
           <X aria-hidden="true" className="w-(--icon-lg) h-(--icon-lg)" />
         </button>
       </header>
-      <nav aria-label="Primary">
+      <nav aria-label="Mobile navigation">
         {SECTIONS.map((section, index) => {
           const sectionItems = items.filter((item) => item.section === section.id)
           return (
