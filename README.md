@@ -4,9 +4,6 @@
 manage your learning life in one workspace: tasks, notes, resources, and
 learning progress, plus your own personal learning journey.
 
-Built as the TechMaster course project, practicing React fundamentals and
-clean frontend architecture.
-
 ## Features
 
 - **Dashboard** — stat cards, recent tasks, learning progress, and quick
@@ -58,13 +55,3 @@ src/
   styles/             Design tokens (single source of truth)
 ```
 
-## Documentation
-
-The `docs/` folder is the project's internal source of truth — roadmap,
-architecture, design system, data model, and one document per Sprint.
-Start with `docs/README.md` for the reading order and navigation.
-
-## Course Context
-
-TechMaster is the **educational context** for this project, not the product
-brand. The product itself is **Huby**.

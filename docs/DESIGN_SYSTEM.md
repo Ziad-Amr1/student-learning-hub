@@ -11,7 +11,6 @@ values defined once in the `@theme` block of `src/styles/app.css`.
 > generous whitespace, restrained elevation. Anything that reads as generic
 > enterprise SaaS (cold blue/indigo/purple defaults, dense data grids,
 > aggressive gradients/glassmorphism) is off-brand by definition.
-> TechMaster is the course context, not part of the product identity.
 
 > Source of truth: the `@theme` block in `src/styles/app.css`. Every token
 > there is emitted as a real CSS custom property under its historical name

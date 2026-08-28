@@ -86,7 +86,7 @@ export const LANDING = {
   },
 
   footer: {
-    note: 'Built as the TechMaster course project.',
+    note: 'Built by the Huby team',
     productLinks: [
       { label: 'Dashboard', to: '/dashboard' },
       { label: 'Tasks', to: '/tasks' },
