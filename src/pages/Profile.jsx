@@ -1,16 +1,43 @@
+import { useState } from 'react'
 import PageHeader from '../components/layout/PageHeader'
+import { profileSeed } from '../data/profile'
+import useLocalStorage from '../hooks/useLocalStorage'
+import LearningProgressList from './profile/LearningProgressList'
+import ProfileCard from './profile/ProfileCard'
+import ProfileEditForm from './profile/ProfileEditForm'
 
 export default function Profile() {
+  const [profile, setProfile] = useLocalStorage('student-hub:profile', profileSeed)
+  const [isEditing, setIsEditing] = useState(false)
+
+  const handleSave = (nextProfile) => {
+    setProfile(nextProfile)
+    setIsEditing(false)
+  }
+
   return (
     <article>
-      <PageHeader
-        className="mb-(--layout-section-gap)"
-        title="Profile"
-        description="Your personal learning profile."
-      />
-      <p className="text-body-small text-muted-foreground">
-        Profile features arrive in Sprint 06.
-      </p>
+      <div className="flex flex-col gap-(--layout-section-gap)">
+        <div className="flex flex-col gap-(--space-6)">
+          <PageHeader
+            title="Profile"
+            description="Your personal learning profile."
+          />
+          {isEditing ? (
+            <ProfileEditForm
+              profile={profile}
+              onSave={handleSave}
+              onCancel={() => setIsEditing(false)}
+            />
+          ) : (
+            <ProfileCard
+              profile={profile}
+              onEdit={() => setIsEditing(true)}
+            />
+          )}
+        </div>
+        <LearningProgressList />
+      </div>
     </article>
   )
 }

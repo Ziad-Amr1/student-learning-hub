@@ -5,6 +5,7 @@ import Dashboard from './pages/Dashboard'
 import Tasks from './pages/Tasks'
 import Notes from './pages/Notes'
 import Resources from './pages/Resources'
+import Learning from './pages/Learning'
 import Profile from './pages/Profile'
 import NotFound from './pages/NotFound'
 
@@ -17,6 +18,7 @@ export default function App() {
         <Route path="/tasks" element={<Tasks />} />
         <Route path="/notes" element={<Notes />} />
         <Route path="/resources" element={<Resources />} />
+        <Route path="/learning" element={<Learning />} />
         <Route path="/profile" element={<Profile />} />
       </Route>
       <Route path="*" element={<NotFound />} />

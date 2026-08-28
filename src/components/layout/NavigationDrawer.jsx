@@ -31,7 +31,7 @@ export default function NavigationDrawer({ items, open, onClose }) {
   return (
     <dialog
       ref={dialogRef}
-      className="fixed inset-y-0 right-0 m-0 h-dvh max-h-dvh w-(--layout-sidebar-width) max-w-[calc(100vw_-_var(--space-16))] pt-6 px-3 pb-[calc(var(--space-4)+env(safe-area-inset-bottom,0px))] border-0 border-l border-border bg-surface text-foreground overflow-y-auto overscroll-contain backdrop:bg-scrim"
+      className="fixed inset-y-0 left-auto right-0 m-0 h-dvh max-h-dvh w-(--layout-sidebar-width) max-w-[calc(100vw_-_var(--space-16))] pt-6 px-3 pb-[calc(var(--space-4)+env(safe-area-inset-bottom,0px))] border-0 border-l border-border bg-surface text-foreground overflow-y-auto overscroll-contain backdrop:bg-scrim"
       aria-labelledby="drawer-title"
       onClose={onClose}
       onClick={(event) => {
@@ -51,7 +51,7 @@ export default function NavigationDrawer({ items, open, onClose }) {
           <X aria-hidden="true" className="w-(--icon-lg) h-(--icon-lg)" />
         </button>
       </header>
-      <nav aria-label="Primary">
+      <nav aria-label="Mobile navigation">
         {SECTIONS.map((section, index) => {
           const sectionItems = items.filter((item) => item.section === section.id)
           return (

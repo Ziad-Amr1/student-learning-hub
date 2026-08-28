@@ -65,7 +65,7 @@ soft backgrounds) → `soft` (tinted backgrounds).
 | Destructive | `--color-destructive`, `-hover`, `-strong`, `-soft`, `-foreground` | terracotta | Errors, delete actions |
 | Info | `--color-info`, `-strong`, `-soft` | dusty blue | Neutral-informational states |
 
-Exact values (`tokens.css` is the source of truth — this is a reference):
+Exact values (`src/styles/app.css` is the source of truth — this is a reference):
 
 | Token | Hex |
 | --- | --- |
@@ -105,6 +105,117 @@ Contrast rules:
   perceptual/proportional curve — accessibility wins over strict math here.
   See §11 for the reasoning.
 
+### Semantic card tints & correctness (Sprint 07.5, regression-corrected 2026-08-27)
+
+**Visual hierarchy (project-wide) for every semantic card state:**
+
+    strong semantic Badge / state indicator
+    ↓
+    medium "clear" state border or icon
+    ↓
+    very subtle semantic card background tint
+
+The card background *reinforces* the state; it must never compete with or
+merge into the Badge. Badge/indicator and card tint must never share the same
+visual intensity. Audit each state combination (Badge color vs border/icon
+color vs tint) — and never assume one opacity value is perceptually correct
+for every semantic hue.
+
+Precise rule for state backgrounds on `Card` surfaces:
+
+- Card-level semantic tints are **`*-soft` at 20% opacity WITH the Tailwind
+  prefix `!` important form**: `!bg-warning-soft/20`, `!bg-info-soft/20`,
+  `!bg-success-soft/20`, `!bg-destructive-soft/20`, pinned
+  `!bg-accent-soft/20` (≈ `#fbf7ef` over the card — genuinely subtle). Both
+  halves are required, and each alone is wrong:
+  - **`bg-*-soft/20` without `!`** loses the cascade: Tailwind v4 sorts
+    utilities alphabetically, so the plain rule lands before `Card`'s
+    `bg-surface` and the later rule wins at equal specificity.
+  - **`!bg-*-soft` full-opaque** passes the cascade but renders at the full
+    `-soft` value — the Badge's own background. The card tint becomes as
+    intense as the Badge and the hierarchy collapses.
+  `!w-auto` is the project precedent for the "override the primitive" form.
+- The generated sheet also contains inert companion rules for these utilities
+  (color-mix fallbacks, a full-opacity `!bg-accent-soft`); no component emits
+  those plain classes, so ignore them in audits. Verify presence of the
+  `\!`important `/20` rule for a class, not just any `bg-*-soft` match.
+- **API (single source of truth):** status, priority, and pinned visual
+  classes are pure string constants in `src/constants/cardStatus.js`
+  (`PRIORITY_VARIANT`, `STATUS_VISUALS`, `PINNED_CARD_VISUAL`,
+  `PIN_BUTTON_ACTIVE_CLASSES`).
+  Icons stay in `StatusDropdown` (React components must not live in
+  constants/utils).
+- **Task status card tints (TaskCard — same mapping as StatusDropdown):**
+
+  | Status | Badge variant | Left border | Card tint |
+  | --- | --- | --- | --- |
+  | `unstarted` | `accent` | `border-l-accent/40` (subtle) | none |
+  | `in-progress` | `warning` | `border-l-warning` | `!bg-warning-soft/20` |
+  | `deferred` | `info` | `border-l-info` | `!bg-info-soft/20` |
+  | `done` | `success` | `border-l-success` | `!bg-success-soft/20` |
+  | `cancelled` | `danger` | `border-l-destructive` | `!bg-destructive-soft/20` |
+
+  **`in-progress = warning` is a deliberate product decision from the 07.5
+  regression review** (user instruction; supersedes the earlier "in-progress is
+  accent, warning is time-caution-only" rule). Status meaning is never carried
+  by tint/border/badge alone — icon + text label always accompany the color.
+- **Pinned cards (Notes + Resources, all view modes):** `PINNED_CARD_VISUAL`
+  = `borderClass: border-l-2 border-l-accent` + `bgClass: !bg-accent-soft/20`.
+- **Pinned pin-button active state:** `PIN_BUTTON_ACTIVE_CLASSES` =
+  `!bg-primary-soft text-primary-strong
+  hover:not-disabled:!bg-primary-soft/80` + filled Pin (`fill-current`) +
+  `aria-pressed`. The `!` matters: ghost's `bg-transparent` and
+  `hover:bg-surface-muted` sort later and otherwise win, making the active
+  pin button indistinguishable from the unpinned one. The full `-soft` is
+  correct here — the button is a control/interaction state (must read as
+  active); the "subtle tint" rule applies to card backgrounds, not controls.
+- **Warning semantics:** `warning` maps to the `in-progress` task status
+  (see above) plus the resource `video` category badge. The per-hue 20%
+  is applied uniformly; perceptual strength may vary slightly per `-soft`
+  value — acceptable, since Badges stay opaque and the tint is the weakest
+  rung of the hierarchy either way.
+- **Learning goal statuses (LearningEntry, Sprint 07.6) — single source**
+  `LEARNING_STATUS_VISUALS` in `src/constants/learningStatus.js` (same
+  pure-string-constant pattern as `cardStatus.js`). After the 07.6
+  refinement statuses own **no card border** — the card's accent `border-l-2`
+  + accent tint belong to **pinning exclusively** (`PINNED_CARD_VISUAL`), so
+  a pinned `in-progress` card can never collide with the status accent:
+
+  | Status | Badge variant | Card tint |
+  | --- | --- | --- |
+  | `not-started` | `secondary` | none |
+  | `in-progress` | `accent` (badge only) | none |
+  | `paused` | `info` | `!bg-info-soft/20` |
+  | `completed` | `success` | `!bg-success-soft/20` |
+
+  `in-progress = accent` is a **badge-level** decision here, deliberate and
+  distinct from the task status mapping (no time-caution semantics exist for
+  learning goals, so `warning` stays free). At the **card level**, `accent`
+  means Pinned: `PINNED_CARD_VISUAL` = `border-l-2 border-l-accent` +
+  `!bg-accent-soft/20` — the two accent uses never overlap because
+  `in-progress` carries no card tint and statuses carry no border. Completed
+  goals additionally render their ProgressBar in `success` (and progress is
+  locked at 100 — see DATA_MODEL.md normalization). Cards carry the status
+  Badge text always — color never carries state alone; the Badge > tint
+  hierarchy above holds.
+- **Learning sorting + pinned ordering (07.6 refinement):** the Learning page
+  has a transient module-local sort control — Manual order / Newest first /
+  Recently updated / Progress / Title A–Z — on its ModuleToolbar (Tasks
+  pattern): sorting is UI state only, NOT persisted, and the
+  `student-hub:learning` array keeps storage order. Pinned entries always
+  rank first in any mode (Notes/Resources pattern), then the selected
+  comparator via `sortLearningEntries` in `src/utils/learning.js`
+  (deterministic createdAt/updatedAt tie-breaks). Sorting is applied BEFORE
+  the Currently-Learning / Other status grouping, so both sections share the
+  same ordering.
+- **Learning card rhythm (07.6 refinement):** Row 1 = title + pin/edit/delete
+  actions; Row 2 = category + status Badges (`size="sm"` compact); Row 3 =
+  ProgressBar; Row 4 = context-aware units + updated date; then LinkedItems.
+  Context-aware units (`formatLearningUnits`): course/practice/topic →
+  `"X of Y hrs"`; book → `"X of Y pages"` (completed derived from
+  `progress` × `totalPages`); video → formatted duration of `videoMinutes`
+  e.g. `"2h"`.
+
 ---
 
 ## 3. Typography
@@ -125,11 +236,15 @@ also a spacing token:
 | Body | `--font-size-body` | 16px (`space-4`) | regular | body 1.6 | default — the scale's anchor |
 | Small | `--font-size-small` | 14px | regular | small 1.55 | `.text-body-small` |
 | Caption | `--font-size-caption` | 12px (`space-3`) | medium | small | `.text-caption` |
+| Micro | `--font-size-micro` | 10px | medium | small | Badge `size="sm"` — metadata/UI-only, NOT a body-text level |
 | Label | `--font-size-small` | 14px | medium | small | `.text-label` |
 
 Small (14px) intentionally breaks the pure ratio — going smaller than 14px
 for regular UI text risks legibility, so the scale is capped at body and
 Small/Caption exist as a practical floor rather than a proportion.
+`--font-size-micro` (10px) sits BELOW that floor as a metadata/UI-only rung:
+reserved for compact informational elements such as `Badge size="sm"` —
+never body or heading content. All other text levels stay at or above 12px.
 
 Weights available: `--font-weight-{regular:400, medium:500, semibold:600, bold:700}`.
 Base element styles for `h1–h4` live in `global.css`; utility classes cover the
@@ -200,7 +315,8 @@ reasoning as color lightness steps in §2.
 ## 7. Breakpoints
 
 Mobile-first. Values are repeated as raw px inside `@media` (CSS variables
-don't work there); source of truth = this table + comment block in tokens.css.
+don't work there); source of truth = this table + comment block in
+`src/styles/app.css`.
 Breakpoints follow standard device widths, not a proportional scale.
 
 | Name | Min width | Target |
@@ -223,9 +339,14 @@ breakpoint tokens are defined.
 - `--ring-destructive-soft: rgba(178, 59, 59, 0.14)` — destructive focus
   glow; hue derives from `--color-destructive` (fixes the pre-Tailwind
   drift where the error ring used a non-token red).
-- `--z-nav: 10`, `--z-skip-link: 100` — layering scale for fixed bars and
-  the skip link (previously raw literals); the drawer uses the native
-  dialog top layer.
+- `--z-toolbar: 5` — sticky ModuleToolbar below navbar.
+- `--z-nav: 10` — sticky Navbar.
+- `--z-dropdown: 50` — transient listboxes/dropdowns (StatusDropdown
+  listbox; Sprint 08 — replaces the former raw z value of 50). Above nav,
+  below the skip link.
+- `--z-skip-link: 100` — skip-to-content link.
+- Native `<dialog>` top layer handles modal/drawer stacking.
+- Full layering spec: `docs/LAYERING_SYSTEM.md`.
 
 ## 8. Layout Conventions
 
@@ -300,8 +421,12 @@ see `docs/COMPONENTS.md`.
 ### Badge (`components/ui/Badge.jsx`)
 - **Purpose:** compact status/category labels (task priority/status, resource
   category, learning states).
-- **Variants:** `default` (primary tint) · `secondary` · `success` · `warning`
-  · `danger` · `info` · `outline`.
+- **Variants:** `default` (primary tint) · `secondary` · `accent` · `success` ·
+  `warning` · `danger` · `info` · `outline`.
+- **Sizes:** `md` (default, 3-unit horizontal + ½-unit vertical padding) · `sm`
+  (compact card metadata — 1-unit horizontal + ½-unit vertical padding for
+  breathing room, `--font-size-micro` text: smaller container AND smaller
+  type, intentionally).
 - **Rules:** pick variant by meaning, not looks; caption size, pill radius.
 
 ### Avatar (`components/ui/Avatar.jsx`)
@@ -332,9 +457,85 @@ see `docs/COMPONENTS.md`.
   action buttons row (wraps below title on narrow screens).
 - **Rules:** one per page; do not hardcode any page's content into it.
 
+### Dialog (`components/ui/Dialog.jsx`) ✅ (Sprint 06.5 — interim)
+- **Purpose:** modal overlay for confirmations and forms. Thin wrapper around
+  native `<dialog>` — Escape key works natively, backdrop click closes.
+- **Props:** `open`, `onClose`, `title`, `description?`, `children`, `className`.
+- **Positioning:** `fixed inset-0 m-auto` — deterministic project-owned
+  centering, not relying on UA `margin: auto` (which `m-0` would break).
+  `max-h-[90dvh]` constrains height for mobile.
+- **Scroll architecture:** inner content div uses `overflow-y-auto min-h-0
+  flex-1`; header uses `shrink-0`. When form content exceeds viewport,
+  the body scrolls while header and close button remain visible.
+- **Scope:** intentionally small for Core Modules hardening. Full Dialog
+  primitive with focus trap lands in Sprint 14.
+- **Rules:** use `showModal()` for proper top-layer rendering; never use
+  `alert()` or `window.confirm()`.
+
+### ConfirmDialog (`components/ui/ConfirmDialog.jsx`) ✅ (Sprint 06.5)
+- **Purpose:** destructive confirmation (delete actions).
+- **Props:** `open`, `onClose`, `onConfirm`, `title='Confirm'`, `message`,
+  `confirmLabel='Delete'`, `cancelLabel='Cancel'`.
+- **Composes:** Dialog + Button (destructive variant).
+
+### FormDialog (`components/ui/FormDialog.jsx`) ✅ (Sprint 06.5)
+- **Purpose:** create/edit form overlay.
+- **Props:** `open`, `onClose`, `onSubmit`, `title`, `submitLabel='Save'`,
+  `children` (form fields).
+- **Composes:** Dialog + form + Button (primary submit, secondary cancel).
+
+### ModuleToolbar (`components/layout/ModuleToolbar.jsx`) ✅ (Sprint 06.5)
+- **Purpose:** shared sticky toolbar for module pages (Tasks, Notes, Resources).
+  Provides consistent location for search, filters, and action buttons.
+- **Props:** `children`, `className`.
+- **Behavior:** sticky below navbar (`top: var(--layout-navbar-height)`),
+  z-index `var(--z-toolbar)` (=5, below navbar's z-10), translucent
+  background with backdrop blur.
+- **Layout:** `flex flex-wrap items-center gap-3` — controls wrap on narrow
+  viewports. Resources adds category filter chips inside the sticky area
+  (chips use `w-full` to wrap to a second line).
+- **Layering:** see `docs/LAYERING_SYSTEM.md`.
+
+### StatusDropdown (`components/ui/StatusDropdown.jsx`) ✅ (Sprint 06.5)
+- **Purpose:** accessible status selector for task cards — replaces native
+  `<select>` with a combobox-pattern dropdown built from existing primitives.
+- **Props:** `value` (current status), `onChange` (callback), `taskTitle`
+  (for aria-label).
+- **Statuses & colors (Sprint 07.5 semantic mapping):** `unstarted`
+  (Circle, muted-foreground / secondary neutral) · `in-progress` (Clock,
+  accent-strong — the accent token, NOT warning) · `deferred` (PauseCircle,
+  info-strong) · `done` (CheckCircle2, success-strong) · `cancelled`
+  (XCircle, destructive-strong). `warning` is reserved for time-based
+  caution (e.g. due-soon), not for a task status. Legacy persisted `todo`
+  values render as `unstarted` (alias via `normalizeTaskStatus`) — never
+  color alone: every status keeps its icon + text label.
+- **Visual:** trigger button shows status icon + label + chevron; positioned
+  listbox below with option highlight on hover/keyboard; selected option
+  uses `bg-primary-soft text-primary-strong`.
+- **A11y:** `role="combobox"` + `aria-expanded` + `aria-haspopup="listbox"`
+  on trigger; `role="listbox"` + `aria-selected` per option; full keyboard
+  navigation (ArrowUp/Down, Enter/Space, Escape, Tab).
+- **Scope:** lightweight interim for Sprint 06.5 hardening — full Dropdown
+  with focus trap lands in Sprint 14.
+
+### EmptyState (`components/ui/EmptyState.jsx`) ✅ (Sprint 08)
+- **Purpose:** shared placeholder for empty/zero-result list surfaces (Tasks,
+  Notes, Resources, Learning) and search/filter no-match cases. Removes the
+  hand-rolled `<p>` empty states that drifted between pages.
+- **Props:** `icon` (Lucide component, optional), `title` (required),
+  `description?`, `action?` (node), `className`, standard passthroughs.
+- **Visual:** centered column on a `--color-surface` card (1px border,
+  radius-lg); optional icon in a `--color-primary-soft` circle at `--icon-lg`;
+  title in foreground semibold; description at body-small muted; action slot
+  below. Zero motion — safe under `prefers-reduced-motion`.
+- **A11y:** static placeholder text; icon `aria-hidden`; never a heading —
+  the page's own h1/h2 structure carries meaning. Color never carries state.
+- **Rules:** no feature copy or actions baked into the primitive; consumers
+  pass `title`/`description`/`action`. Purely presentational — never alters
+  the parent's data, CRUD, or persistence behavior.
+
 ### Planned primitives (do not exist yet — build only in their Sprint)
-`AppShell`, `Navbar`, `Sidebar`, `MobileNav` (Sprint 02) · `EmptyState`
-(Sprint 08) · Tooltip/Dropdown/Dialog/Drawer/Toast/Skeleton/Tabs/Breadcrumb
+Tooltip/Dropdown/Drawer/Toast/Skeleton/Tabs/Breadcrumb
 (Sprint 14, value-permitting).
 
 ---

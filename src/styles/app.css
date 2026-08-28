@@ -4,8 +4,9 @@
    Huby — application stylesheet (single CSS entry)
 
    Architecture:
-     1. @theme  → Huby design tokens (values verbatim from the
-                  approved tokens.css). Every variable is emitted
+     1. @theme  → Huby design tokens (single source of truth — this
+                  file, formerly split into a separate tokens.css
+                  until Sprint 02.6). Every variable is emitted
                   as a real CSS custom property on :root under its
                   existing name, so both Tailwind utilities AND
                   plain `var(--token)` consumers read from ONE
@@ -91,9 +92,11 @@
      16px body size and rounded to the 4px spacing grid — each
      step below body shares that grid too, so type and spacing
      are expressions of the same base unit.
-       display 48 → h1 40 → h2 32 → h3 24 → h4 20 → body 16
+     display 48 → h1 40 → h2 32 → h3 24 → h4 20 → body 16
      small/caption break the pure ratio deliberately (legibility
-     floor, not a proportion problem).
+     floor, not a proportion problem). micro is a metadata/UI-only
+     rung BELOW the caption floor (compact badges) — never a body
+     text level.
 
      Size steps intentionally keep their historical
      `--font-size-*` names (emitted verbatim) instead of
@@ -118,6 +121,7 @@
   --font-size-body: 1rem;         /* 16px = --space-4 (anchor) */
   --font-size-small: 0.875rem;    /* 14px — accessibility floor, not on-scale */
   --font-size-caption: 0.75rem;   /* 12px = --space-3 — floor, not on-scale */
+  --font-size-micro: 0.625rem;    /* 10px — metadata/UI-only, below caption floor (compact badges) */
 
   --line-height-tight: 1.15;
   --line-height-heading: 1.25;
@@ -185,11 +189,14 @@
      ---------------------------------------------------------- */
   --ease-standard: ease;
 
-  /* Layering scale — previously hardcoded literals (10 navbar /
-     bottom nav, 100 skip link). Referenced through functional
-     utilities (z-(--z-nav)) which also guarantees emission. */
-  --z-nav: 10;
-  --z-skip-link: 100;
+  /* Layering scale — semantic z-index tokens. Values are intentionally
+     small integers; native <dialog> top-layer and future Toast handle
+     their own stacking without competing with these tokens.
+     Reference via z-(--z-*) utilities in Tailwind v4. */
+  --z-toolbar: 5;      /* sticky ModuleToolbar — below navbar */
+  --z-nav: 10;         /* sticky Navbar */
+  --z-dropdown: 50;    /* transient listboxes/dropdowns (StatusDropdown) — above nav, below skip link */
+  --z-skip-link: 100;  /* skip-to-content link */
 
   /* ----------------------------------------------------------
      LAYOUT

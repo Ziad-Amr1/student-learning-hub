@@ -1,11 +1,12 @@
 import { Link } from 'react-router-dom'
-import { Library, ListTodo, NotebookPen } from 'lucide-react'
+import { BookOpen, Library, ListTodo, NotebookPen } from 'lucide-react'
 import Button from '../../components/ui/Button'
 
 const ACTIONS = [
   { to: '/tasks', label: 'Tasks', Icon: ListTodo },
   { to: '/notes', label: 'Notes', Icon: NotebookPen },
   { to: '/resources', label: 'Resources', Icon: Library },
+  { to: '/learning', label: 'Learning', Icon: BookOpen },
 ]
 
 export default function QuickActions({ className }) {

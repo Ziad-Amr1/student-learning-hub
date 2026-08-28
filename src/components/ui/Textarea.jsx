@@ -26,7 +26,7 @@ export default function Textarea({ label, error, className, id, rows = 4, ...res
         {...rest}
       />
       {error && (
-        <p className={FIELD_ERROR_CLASSES} id={errorId}>
+        <p className={FIELD_ERROR_CLASSES} id={errorId} role="alert">
           {error}
         </p>
       )}

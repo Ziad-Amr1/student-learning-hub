@@ -1,6 +1,7 @@
-import { useState } from 'react'
-import { Outlet } from 'react-router-dom'
+import { useEffect, useRef, useState } from 'react'
+import { Outlet, useLocation } from 'react-router-dom'
 import {
+  BookOpen,
   CircleUser,
   LayoutDashboard,
   Library,
@@ -19,12 +20,39 @@ const NAV_ITEMS = [
   { to: '/tasks', label: 'Tasks', section: 'workspace', Icon: ListTodo },
   { to: '/notes', label: 'Notes', section: 'workspace', Icon: NotebookPen },
   { to: '/resources', label: 'Resources', section: 'workspace', Icon: Library },
+  { to: '/learning', label: 'Learning', section: 'workspace', Icon: BookOpen },
   { to: '/profile', label: 'Profile', section: 'account', Icon: CircleUser },
 ]
 
+const SIDEBAR_KEY = 'student-hub:sidebar-collapsed'
+
+function readSidebarPreference() {
+  try {
+    return localStorage.getItem(SIDEBAR_KEY) === 'true'
+  } catch {
+    return false
+  }
+}
+
 export default function AppShell() {
   const [menuOpen, setMenuOpen] = useState(false)
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(readSidebarPreference)
+  const mainRef = useRef(null)
+  const { pathname } = useLocation()
+
+  useEffect(() => {
+    mainRef.current?.focus({ preventScroll: true })
+  }, [pathname])
+
+  const handleSidebarToggle = () => {
+    setSidebarCollapsed((prev) => {
+      const next = !prev
+      try {
+        localStorage.setItem(SIDEBAR_KEY, String(next))
+      } catch { /* ignore */ }
+      return next
+    })
+  }
 
   return (
     <div
@@ -47,9 +75,10 @@ export default function AppShell() {
       <Sidebar
         items={NAV_ITEMS}
         collapsed={sidebarCollapsed}
-        onToggle={() => setSidebarCollapsed(!sidebarCollapsed)}
+        onToggle={handleSidebarToggle}
       />
       <main
+        ref={mainRef}
         id="main-content"
         className="[grid-area:main] outline-none pt-6 md:pt-8 pb-[calc(var(--layout-mobilenav-height)+env(safe-area-inset-bottom,0px)+var(--space-4))] lg:pb-(--layout-section-gap)"
         tabIndex={-1}

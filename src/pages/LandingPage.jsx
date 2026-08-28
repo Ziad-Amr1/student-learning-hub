@@ -10,8 +10,14 @@ import LandingFooter from './landing/LandingFooter'
 export default function LandingPage() {
   return (
     <div className="flex min-h-screen flex-col">
+      <a
+        className="absolute -top-full left-2 z-(--z-skip-link) py-2 px-4 bg-primary text-primary-foreground rounded-md no-underline font-medium focus:top-2"
+        href="#main-content"
+      >
+        Skip to content
+      </a>
       <LandingHeader />
-      <main id="main-content" className="flex-1">
+      <main id="main-content" tabIndex={-1} className="flex-1">
         <Hero />
         <ValueProps />
         <FeatureGrid />
