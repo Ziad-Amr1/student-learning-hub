@@ -16,7 +16,7 @@ export default function FormDialog({
 
   return (
     <Dialog open={open} onClose={onClose} title={title}>
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} noValidate className="space-y-4">
         {children}
         <div className="flex items-center gap-3 pt-2">
           <Button type="submit" variant="primary">

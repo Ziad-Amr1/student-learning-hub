@@ -30,7 +30,7 @@ export default function ProfileEditForm({ profile, onSave, onCancel }) {
     event.preventDefault()
     const name = form.name.trim()
     if (!name) {
-      setNameError('Name is required.')
+      setNameError('Name is required')
       return
     }
 

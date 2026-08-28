@@ -25,7 +25,7 @@ export default function Input({ label, error, className, id, ...rest }) {
         {...rest}
       />
       {error && (
-        <p className={FIELD_ERROR_CLASSES} id={errorId}>
+        <p className={FIELD_ERROR_CLASSES} id={errorId} role="alert">
           {error}
         </p>
       )}
