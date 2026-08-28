@@ -1,10 +1,11 @@
 import { useState } from 'react'
-import { Plus, LayoutGrid, List, GalleryHorizontalEnd } from 'lucide-react'
+import { LayoutGrid, Library, List, GalleryHorizontalEnd, Plus, Search } from 'lucide-react'
 import { cx } from '../utils/cx'
 import { FIELD_CONTROL_CLASSES } from '../components/ui/formStyles'
 import PageHeader from '../components/layout/PageHeader'
 import ModuleToolbar from '../components/layout/ModuleToolbar'
 import Button from '../components/ui/Button'
+import EmptyState from '../components/ui/EmptyState'
 import Input from '../components/ui/Input'
 import Textarea from '../components/ui/Textarea'
 import FormDialog from '../components/ui/FormDialog'
@@ -194,11 +195,20 @@ export default function Resources() {
           viewMode === 'grid-preview' && 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4'
         )}>
           {filtered.length === 0 ? (
-            <p className="text-muted-foreground col-span-full text-center py-8 bg-surface rounded-lg border border-border">
-              {resources.length === 0
-                ? 'No resources available yet.'
-                : 'No resources match your search or filter.'}
-            </p>
+            <EmptyState
+              className="col-span-full"
+              icon={resources.length === 0 ? Library : Search}
+              title={
+                resources.length === 0
+                  ? 'No resources yet'
+                  : 'No resources match your search or filter'
+              }
+              description={
+                resources.length === 0
+                  ? 'Add your first resource from the toolbar above.'
+                  : undefined
+              }
+            />
           ) : (
             visible.map(resource => (
               <ResourceCard

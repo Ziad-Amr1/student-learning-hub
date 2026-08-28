@@ -1,10 +1,11 @@
 import { useState } from 'react'
-import { Plus } from 'lucide-react'
+import { ListTodo, Plus, Search } from 'lucide-react'
 import { cx } from '../utils/cx'
 import { FIELD_CONTROL_CLASSES } from '../components/ui/formStyles'
 import PageHeader from '../components/layout/PageHeader'
 import ModuleToolbar from '../components/layout/ModuleToolbar'
 import Button from '../components/ui/Button'
+import EmptyState from '../components/ui/EmptyState'
 import Input from '../components/ui/Input'
 import Textarea from '../components/ui/Textarea'
 import FormDialog from '../components/ui/FormDialog'
@@ -182,11 +183,19 @@ export default function Tasks() {
 
       <div className="pt-6 space-y-3">
         {filteredTasks.length === 0 ? (
-          <p className="text-muted-foreground text-center py-8 bg-surface rounded-lg border border-border">
-            {tasks.length === 0
-              ? 'No tasks yet. Create one above.'
-              : 'No tasks match your search or filters.'}
-          </p>
+          <EmptyState
+            icon={tasks.length === 0 ? ListTodo : Search}
+            title={
+              tasks.length === 0
+                ? 'No tasks yet'
+                : 'No tasks match your search or filters'
+            }
+            description={
+              tasks.length === 0
+                ? 'Create your first task from the toolbar above.'
+                : undefined
+            }
+          />
         ) : (
           visibleTasks.map(task => (
             <TaskCard

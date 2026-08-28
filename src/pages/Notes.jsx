@@ -1,8 +1,9 @@
 import { useState } from 'react'
-import { Plus } from 'lucide-react'
+import { NotebookPen, Plus, Search } from 'lucide-react'
 import PageHeader from '../components/layout/PageHeader'
 import ModuleToolbar from '../components/layout/ModuleToolbar'
 import Button from '../components/ui/Button'
+import EmptyState from '../components/ui/EmptyState'
 import Input from '../components/ui/Input'
 import Textarea from '../components/ui/Textarea'
 import FormDialog from '../components/ui/FormDialog'
@@ -145,11 +146,16 @@ export default function Notes() {
 
       <div className="pt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
         {sortedAndFiltered.length === 0 ? (
-          <p className="text-muted-foreground col-span-full text-center py-8">
-            {notes.length === 0
-              ? 'No notes yet. Create one above.'
-              : 'No notes match your search.'}
-          </p>
+          <EmptyState
+            className="col-span-full"
+            icon={notes.length === 0 ? NotebookPen : Search}
+            title={notes.length === 0 ? 'No notes yet' : 'No notes match your search'}
+            description={
+              notes.length === 0
+                ? 'Create your first note from the toolbar above.'
+                : undefined
+            }
+          />
         ) : (
           sortedAndFiltered.map(note => (
             <NoteCard

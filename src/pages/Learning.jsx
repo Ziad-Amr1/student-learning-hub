@@ -1,10 +1,11 @@
 import { useState } from 'react'
-import { Plus } from 'lucide-react'
+import { BookOpen, Plus, Search } from 'lucide-react'
 import { cx } from '../utils/cx'
 import { FIELD_CONTROL_CLASSES } from '../components/ui/formStyles'
 import PageHeader from '../components/layout/PageHeader'
 import ModuleToolbar from '../components/layout/ModuleToolbar'
 import Button from '../components/ui/Button'
+import EmptyState from '../components/ui/EmptyState'
 import Input from '../components/ui/Input'
 import FormDialog from '../components/ui/FormDialog'
 import ConfirmDialog from '../components/ui/ConfirmDialog'
@@ -48,6 +49,13 @@ const parseNumber = (value) => {
   return Number.isFinite(parsed) ? parsed : 0
 }
 
+const checkNumber = (label, value) => {
+  if (value.trim() === '') return null
+  if (!Number.isFinite(Number(value))) return `${label} must be a number`
+  if (Number(value) < 0) return `${label} cannot be negative`
+  return null
+}
+
 const toggleInArray = (array, id) =>
   array.includes(id) ? array.filter((item) => item !== id) : [...array, id]
 
@@ -61,6 +69,7 @@ export default function Learning() {
   const [form, setForm] = useState(EMPTY_FORM)
   const [editingEntry, setEditingEntry] = useState(null)
   const [titleError, setTitleError] = useState('')
+  const [numericError, setNumericError] = useState('')
   const [formOpen, setFormOpen] = useState(false)
   const [entryToDelete, setEntryToDelete] = useState(null)
 
@@ -69,12 +78,16 @@ export default function Learning() {
   const [filterStatus, setFilterStatus] = useState('all')
   const [sortMode, setSortMode] = useState('manual')
 
-  const setField = (name, value) => setForm((prev) => ({ ...prev, [name]: value }))
+  const setField = (name, value) => {
+    setForm((prev) => ({ ...prev, [name]: value }))
+    if (numericError) setNumericError('')
+  }
 
   const resetForm = () => {
     setForm(EMPTY_FORM)
     setEditingEntry(null)
     setTitleError('')
+    setNumericError('')
   }
 
   const handleOpenCreate = () => {
@@ -178,6 +191,22 @@ export default function Learning() {
     }
     setTitleError('')
 
+    const numericError =
+      checkNumber('Progress', form.progress) ||
+      checkNumber('Target hours', form.targetHours) ||
+      checkNumber('Completed hours', form.completedHours) ||
+      checkNumber('Total pages', form.totalPages) ||
+      checkNumber('Video minutes', form.videoMinutes)
+    if (!numericError && form.progress.trim() !== '' && Number(form.progress) > 100) {
+      setNumericError('Progress must be between 0 and 100')
+      return
+    }
+    if (numericError) {
+      setNumericError(numericError)
+      return
+    }
+    setNumericError('')
+
     const next = buildSavePayload()
     if (editingEntry) {
       setEntries(entries.map((entry) => (entry.id === editingEntry.id ? next : entry)))
@@ -232,10 +261,7 @@ export default function Learning() {
   const otherItems = decorate(otherEntries)
   const allItems = decorate(sortLearningEntries(filteredEntries, sortMode))
 
-  const emptyText =
-    entries.length === 0
-      ? 'No learning goals yet. Create one above.'
-      : 'No goals match your search or filters.'
+  const hasNoEntries = entries.length === 0
 
   return (
     <article className="space-y-0">
@@ -298,17 +324,20 @@ export default function Learning() {
       </ModuleToolbar>
 
       <div className="flex flex-col gap-(--layout-section-gap) pt-6">
-        {entries.length === 0 ? (
-          <p className="text-muted-foreground text-center py-8 bg-surface rounded-lg border border-border">
-            No learning goals yet. Create one above.
-          </p>
+        {hasNoEntries ? (
+          <EmptyState
+            icon={BookOpen}
+            title="No learning goals yet"
+            description="Create your first goal from the toolbar above."
+          />
         ) : isFiltering ? (
           <section aria-label="Learning collection">
             <h2 className="sr-only">Learning collection</h2>
             {filteredEntries.length === 0 ? (
-              <p className="text-muted-foreground text-center py-8 bg-surface rounded-lg border border-border">
-                {emptyText}
-              </p>
+              <EmptyState
+                icon={Search}
+                title="No goals match your search or filters"
+              />
             ) : (
               <div className={CARD_GRID_CLASSES}>
                 {allItems.map(({ entry, linkedNotes, linkedResources }) => (
@@ -384,6 +413,7 @@ export default function Learning() {
           notes={notes}
           resources={resources}
           titleError={titleError}
+          numericError={numericError}
           onTitleChange={handleTitleChange}
           onCategoryChange={(value) => setField('category', value)}
           onStatusChange={handleStatusChange}

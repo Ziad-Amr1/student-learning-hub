@@ -26,6 +26,7 @@ export default function LearningEntryForm({
   notes,
   resources,
   titleError,
+  numericError,
   onTitleChange,
   onCategoryChange,
   onStatusChange,
@@ -136,6 +137,11 @@ export default function LearningEntryForm({
           />
         )}
       </div>
+      {numericError && (
+        <p className="text-destructive-strong text-body-small" role="alert">
+          {numericError}
+        </p>
+      )}
       {status === 'completed' && (
         <p className="text-caption text-muted-foreground">
           Progress is locked at 100% while the goal is completed.
