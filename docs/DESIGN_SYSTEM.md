@@ -341,6 +341,9 @@ breakpoint tokens are defined.
   drift where the error ring used a non-token red).
 - `--z-toolbar: 5` — sticky ModuleToolbar below navbar.
 - `--z-nav: 10` — sticky Navbar.
+- `--z-dropdown: 50` — transient listboxes/dropdowns (StatusDropdown
+  listbox; Sprint 08 — replaces the former raw z value of 50). Above nav,
+  below the skip link.
 - `--z-skip-link: 100` — skip-to-content link.
 - Native `<dialog>` top layer handles modal/drawer stacking.
 - Full layering spec: `docs/LAYERING_SYSTEM.md`.
@@ -515,8 +518,24 @@ see `docs/COMPONENTS.md`.
 - **Scope:** lightweight interim for Sprint 06.5 hardening — full Dropdown
   with focus trap lands in Sprint 14.
 
+### EmptyState (`components/ui/EmptyState.jsx`) ✅ (Sprint 08)
+- **Purpose:** shared placeholder for empty/zero-result list surfaces (Tasks,
+  Notes, Resources, Learning) and search/filter no-match cases. Removes the
+  hand-rolled `<p>` empty states that drifted between pages.
+- **Props:** `icon` (Lucide component, optional), `title` (required),
+  `description?`, `action?` (node), `className`, standard passthroughs.
+- **Visual:** centered column on a `--color-surface` card (1px border,
+  radius-lg); optional icon in a `--color-primary-soft` circle at `--icon-lg`;
+  title in foreground semibold; description at body-small muted; action slot
+  below. Zero motion — safe under `prefers-reduced-motion`.
+- **A11y:** static placeholder text; icon `aria-hidden`; never a heading —
+  the page's own h1/h2 structure carries meaning. Color never carries state.
+- **Rules:** no feature copy or actions baked into the primitive; consumers
+  pass `title`/`description`/`action`. Purely presentational — never alters
+  the parent's data, CRUD, or persistence behavior.
+
 ### Planned primitives (do not exist yet — build only in their Sprint)
-`EmptyState` (Sprint 08) · Tooltip/Dropdown/Drawer/Toast/Skeleton/Tabs/Breadcrumb
+Tooltip/Dropdown/Drawer/Toast/Skeleton/Tabs/Breadcrumb
 (Sprint 14, value-permitting).
 
 ---

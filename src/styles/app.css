@@ -195,6 +195,7 @@
      Reference via z-(--z-*) utilities in Tailwind v4. */
   --z-toolbar: 5;      /* sticky ModuleToolbar — below navbar */
   --z-nav: 10;         /* sticky Navbar */
+  --z-dropdown: 50;    /* transient listboxes/dropdowns (StatusDropdown) — above nav, below skip link */
   --z-skip-link: 100;  /* skip-to-content link */
 
   /* ----------------------------------------------------------
