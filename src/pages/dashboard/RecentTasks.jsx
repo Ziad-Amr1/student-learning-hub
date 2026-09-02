@@ -1,8 +1,7 @@
 import { cx } from '../../utils/cx'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/Card'
 import Badge from '../../components/ui/Badge'
-import useLocalStorage from '../../hooks/useLocalStorage'
-import { TASKS } from '../../data/tasks'
+import { useTasks } from '../../hooks/useTasks'
 
 const RECENT_COUNT = 5
 
@@ -13,7 +12,7 @@ const PRIORITY_BADGE_VARIANTS = {
 }
 
 export default function RecentTasks({ className }) {
-  const [tasks] = useLocalStorage('student-hub:tasks', () => [...TASKS])
+  const { tasks } = useTasks()
   const recentTasks = [...tasks]
     .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
     .slice(0, RECENT_COUNT)
