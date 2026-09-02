@@ -9,10 +9,15 @@ import ProfileEditForm from './profile/ProfileEditForm'
 export default function Profile() {
   const { profile, loading, error, save, refresh } = useProfile()
   const [isEditing, setIsEditing] = useState(false)
+  const [saveError, setSaveError] = useState('')
 
-  const handleSave = (nextProfile) => {
-    save(nextProfile)
-    setIsEditing(false)
+  const handleSave = async (nextProfile) => {
+    try {
+      await save(nextProfile)
+      setIsEditing(false)
+    } catch (err) {
+      setSaveError(err.message || 'Could not save your profile.')
+    }
   }
 
   return (
@@ -37,17 +42,26 @@ export default function Profile() {
             </div>
           ) : loading && !profile ? (
             <p className="text-body-small text-muted-foreground">Loading profile…</p>
-          ) : isEditing ? (
-            <ProfileEditForm
-              profile={profile}
-              onSave={handleSave}
-              onCancel={() => setIsEditing(false)}
-            />
           ) : (
-            <ProfileCard
-              profile={profile}
-              onEdit={() => setIsEditing(true)}
-            />
+            <div className="flex flex-col gap-(--space-6)">
+              {saveError && (
+                <p role="alert" className="text-body-small text-destructive-strong">
+                  {saveError}
+                </p>
+              )}
+              {isEditing ? (
+                <ProfileEditForm
+                  profile={profile}
+                  onSave={handleSave}
+                  onCancel={() => setIsEditing(false)}
+                />
+              ) : (
+                <ProfileCard
+                  profile={profile}
+                  onEdit={() => setIsEditing(true)}
+                />
+              )}
+            </div>
           )}
         </div>
         <LearningProgressList />

@@ -79,6 +79,7 @@ export default function Learning() {
   const [editingEntry, setEditingEntry] = useState(null)
   const [titleError, setTitleError] = useState('')
   const [numericError, setNumericError] = useState('')
+  const [actionError, setActionError] = useState('')
   const [formOpen, setFormOpen] = useState(false)
   const [entryToDelete, setEntryToDelete] = useState(null)
 
@@ -97,6 +98,7 @@ export default function Learning() {
     setEditingEntry(null)
     setTitleError('')
     setNumericError('')
+    setActionError('')
   }
 
   const handleOpenCreate = () => {
@@ -119,6 +121,7 @@ export default function Learning() {
       relatedResourceIds: entry.relatedResources || [],
     })
     setTitleError('')
+    setActionError('')
     setFormOpen(true)
   }
 
@@ -198,20 +201,30 @@ export default function Learning() {
       return
     }
     setNumericError('')
+    setActionError('')
 
     const next = buildSavePayload()
-    if (editingEntry) {
-      await updateLearning(editingEntry.id, next)
-    } else {
-      await createLearning(next)
+    try {
+      if (editingEntry) {
+        await updateLearning(editingEntry.id, next)
+      } else {
+        await createLearning(next)
+      }
+      resetForm()
+      setFormOpen(false)
+    } catch (err) {
+      setActionError(err.message || 'Could not save this goal.')
     }
-    resetForm()
-    setFormOpen(false)
   }
 
   const handleConfirmDelete = async () => {
     if (entryToDelete) {
-      await deleteLearning(entryToDelete.id)
+      setActionError('')
+      try {
+        await deleteLearning(entryToDelete.id)
+      } catch (err) {
+        setActionError(err.message || 'Could not delete this goal.')
+      }
       setEntryToDelete(null)
     }
   }
@@ -227,7 +240,12 @@ export default function Learning() {
   const handleTogglePin = async (id) => {
     const target = entries.find((entry) => entry.id === id)
     if (!target) return
-    await updateLearning(id, { pinned: !target.pinned })
+    setActionError('')
+    try {
+      await updateLearning(id, { pinned: !target.pinned })
+    } catch (err) {
+      setActionError(err.message || 'Could not update this goal.')
+    }
   }
 
   const normalizedEntries = entries.map(normalizeLearningEntry)
@@ -336,6 +354,12 @@ export default function Learning() {
         <p role="alert" className="mt-4 text-body-small text-destructive-strong">
           {migrationFailures.length} learning goals could not be imported from the
           previous local data and have been preserved for a retry.
+        </p>
+      )}
+
+      {actionError && (
+        <p role="alert" className="mt-4 text-body-small text-destructive-strong">
+          {actionError}
         </p>
       )}
 

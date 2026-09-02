@@ -39,6 +39,7 @@ export default function Resources() {
   const [editingResource, setEditingResource] = useState(null)
   const [titleError, setTitleError] = useState('')
   const [urlError, setUrlError] = useState('')
+  const [actionError, setActionError] = useState('')
 
   const [searchQuery, setSearchQuery] = useState('')
   const [activeCategory, setActiveCategory] = useState('all')
@@ -55,6 +56,7 @@ export default function Resources() {
     setEditingResource(null)
     setTitleError('')
     setUrlError('')
+    setActionError('')
   }
 
   const handleOpenCreate = () => {
@@ -70,6 +72,7 @@ export default function Resources() {
     setDescription(resource.description || '')
     setTitleError('')
     setUrlError('')
+    setActionError('')
     setFormOpen(true)
   }
 
@@ -86,34 +89,49 @@ export default function Resources() {
     }
     if (hasError) return
 
-    if (editingResource) {
-      await updateResource(editingResource.id, {
-        title: title.trim(),
-        url: url.trim(),
-        category,
-        description: description.trim() || undefined,
-      })
-    } else {
-      await createResource({
-        title: title.trim(),
-        url: url.trim(),
-        category,
-        description: description.trim() || undefined,
-      })
+    setActionError('')
+    try {
+      if (editingResource) {
+        await updateResource(editingResource.id, {
+          title: title.trim(),
+          url: url.trim(),
+          category,
+          description: description.trim() || undefined,
+        })
+      } else {
+        await createResource({
+          title: title.trim(),
+          url: url.trim(),
+          category,
+          description: description.trim() || undefined,
+        })
+      }
+      resetForm()
+      setFormOpen(false)
+    } catch (err) {
+      setActionError(err.message || 'Could not save this resource.')
     }
-    resetForm()
-    setFormOpen(false)
   }
 
   const handleTogglePin = async (id) => {
     const resource = resources.find((r) => r.id === id)
     if (!resource) return
-    await updateResource(id, { pinned: !resource.pinned })
+    setActionError('')
+    try {
+      await updateResource(id, { pinned: !resource.pinned })
+    } catch (err) {
+      setActionError(err.message || 'Could not update this resource.')
+    }
   }
 
   const handleConfirmDelete = async () => {
     if (resourceToDelete) {
-      await deleteResource(resourceToDelete)
+      setActionError('')
+      try {
+        await deleteResource(resourceToDelete)
+      } catch (err) {
+        setActionError(err.message || 'Could not delete this resource.')
+      }
       setResourceToDelete(null)
     }
   }
@@ -204,6 +222,12 @@ export default function Resources() {
         <p role="alert" className="mt-4 text-body-small text-destructive-strong">
           {migrationFailures.length} resources could not be imported from the previous
           local data and have been preserved for a retry.
+        </p>
+      )}
+
+      {actionError && (
+        <p role="alert" className="mt-4 text-body-small text-destructive-strong">
+          {actionError}
         </p>
       )}
 

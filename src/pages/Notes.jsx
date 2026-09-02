@@ -21,6 +21,7 @@ export default function Notes() {
   const [editingNote, setEditingNote] = useState(null)
   const [titleError, setTitleError] = useState('')
   const [contentError, setContentError] = useState('')
+  const [actionError, setActionError] = useState('')
 
   const [searchQuery, setSearchQuery] = useState('')
   const [noteToDelete, setNoteToDelete] = useState(null)
@@ -33,6 +34,7 @@ export default function Notes() {
     setEditingNote(null)
     setTitleError('')
     setContentError('')
+    setActionError('')
   }
 
   const handleOpenCreate = () => {
@@ -47,6 +49,7 @@ export default function Notes() {
     setCategory(note.category || '')
     setTitleError('')
     setContentError('')
+    setActionError('')
     setFormOpen(true)
   }
 
@@ -63,32 +66,47 @@ export default function Notes() {
     }
     if (hasError) return
 
-    if (editingNote) {
-      await updateNote(editingNote.id, {
-        title: title.trim(),
-        content: content.trim(),
-        category: category.trim() || undefined,
-      })
-    } else {
-      await createNote({
-        title: title.trim(),
-        content: content.trim(),
-        category: category.trim() || undefined,
-      })
+    setActionError('')
+    try {
+      if (editingNote) {
+        await updateNote(editingNote.id, {
+          title: title.trim(),
+          content: content.trim(),
+          category: category.trim() || undefined,
+        })
+      } else {
+        await createNote({
+          title: title.trim(),
+          content: content.trim(),
+          category: category.trim() || undefined,
+        })
+      }
+      resetForm()
+      setFormOpen(false)
+    } catch (err) {
+      setActionError(err.message || 'Could not save this note.')
     }
-    resetForm()
-    setFormOpen(false)
   }
 
   const handleTogglePin = async (id) => {
     const note = notes.find((n) => n.id === id)
     if (!note) return
-    await updateNote(id, { pinned: !note.pinned })
+    setActionError('')
+    try {
+      await updateNote(id, { pinned: !note.pinned })
+    } catch (err) {
+      setActionError(err.message || 'Could not update this note.')
+    }
   }
 
   const handleConfirmDelete = async () => {
     if (noteToDelete) {
-      await deleteNote(noteToDelete)
+      setActionError('')
+      try {
+        await deleteNote(noteToDelete)
+      } catch (err) {
+        setActionError(err.message || 'Could not delete this note.')
+      }
       setNoteToDelete(null)
     }
   }
@@ -147,6 +165,12 @@ export default function Notes() {
         <p role="alert" className="mt-4 text-body-small text-destructive-strong">
           {migrationFailures.length} notes could not be imported from the previous
           local data and have been preserved for a retry.
+        </p>
+      )}
+
+      {actionError && (
+        <p role="alert" className="mt-4 text-body-small text-destructive-strong">
+          {actionError}
         </p>
       )}
 
