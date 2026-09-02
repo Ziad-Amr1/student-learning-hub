@@ -9,8 +9,7 @@ import {
 } from '../../components/ui/Card'
 import Button from '../../components/ui/Button'
 import ProgressBar from '../../components/ui/ProgressBar'
-import useLocalStorage from '../../hooks/useLocalStorage'
-import { LEARNING_ENTRIES } from '../../data/learning'
+import { useLearning } from '../../hooks/useLearning'
 import {
   formatLearningUnits,
   normalizeLearningEntry,
@@ -19,10 +18,12 @@ import {
 
 const PREVIEW_COUNT = 5
 
-// Fed by the shared `student-hub:learning` store (Sprint 07.6) — live-syncs
-// with anything the Learning page edits, exactly like Dashboard↔Tasks in 07.5.
+// Fed by the shared backend-backed learning store (Phase D-3, formerly the
+// `student-hub:learning` useLocalStorage store) — live-syncs with anything the
+// Learning page edits, exactly like Dashboard↔Tasks in 07.5.
 export default function LearningProgress({ className }) {
-  const [entries] = useLocalStorage('student-hub:learning', () => [...LEARNING_ENTRIES])
+  const { learning } = useLearning()
+  const entries = learning ?? []
   const items = sortLearningByUpdatedAt(entries.map(normalizeLearningEntry)).slice(0, PREVIEW_COUNT)
 
   return (

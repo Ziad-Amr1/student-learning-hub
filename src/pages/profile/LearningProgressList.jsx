@@ -1,5 +1,4 @@
-import useLocalStorage from '../../hooks/useLocalStorage'
-import { LEARNING_ENTRIES } from '../../data/learning'
+import { useLearning } from '../../hooks/useLearning'
 import { formatLearningUnits, normalizeLearningEntry } from '../../utils/learning'
 import {
   LEARNING_CATEGORY_BADGE_VARIANT,
@@ -17,14 +16,15 @@ import Card, {
 import ProgressBar from '../../components/ui/ProgressBar'
 
 /**
- * Learning-progress section — Fed by the shared `student-hub:learning` store
- * (Sprint 07.6), live-synced with the Learning page. Renders every goal with
+ * Learning-progress section — Fed by the shared backend-backed learning store
+ * (Phase D-3), live-synced with the Learning page. Renders every goal with
  * its status Badge; `completed` items switch their ProgressBar to the success
  * variant. Distinct from the Dashboard `LearningProgress` widget by
  * presentation (COMPONENTS.md), sharing the same data source.
  */
 export default function LearningProgressList() {
-  const [entries] = useLocalStorage('student-hub:learning', () => [...LEARNING_ENTRIES])
+  const { learning } = useLearning()
+  const entries = learning ?? []
   const items = entries.map(normalizeLearningEntry)
 
   return (

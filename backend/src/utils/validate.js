@@ -59,8 +59,12 @@ export function validateAgainst(rules, input, { partial = false } = {}) {
       errors.push(rule.message || `'${field}' must be a valid http(s) URL.`)
       continue
     }
-    if (rule.max != null && typeof value === 'string' && value.length > rule.max) {
-      errors.push(rule.message || `'${field}' must be ${rule.max} characters or fewer.`)
+    if (rule.max != null) {
+      if (typeof value === 'string' && value.length > rule.max) {
+        errors.push(rule.message || `'${field}' must be ${rule.max} characters or fewer.`)
+      } else if (typeof value === 'number' && value > rule.max) {
+        errors.push(rule.message || `'${field}' must be at most ${rule.max}.`)
+      }
     }
     if (rule.min != null && typeof value === 'number' && value < rule.min) {
       errors.push(rule.message || `'${field}' must be at least ${rule.min}.`)
