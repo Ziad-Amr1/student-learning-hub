@@ -11,8 +11,8 @@ import FormDialog from '../components/ui/FormDialog'
 import ConfirmDialog from '../components/ui/ConfirmDialog'
 import useLocalStorage from '../hooks/useLocalStorage'
 import { LEARNING_ENTRIES } from '../data/learning'
-import { NOTES } from '../data/notes'
-import { RESOURCES } from '../data/resources'
+import { useNotes } from '../hooks/useNotes'
+import { useResources } from '../hooks/useResources'
 import {
   LEARNING_CATEGORIES,
   LEARNING_CATEGORY_LABELS,
@@ -63,8 +63,8 @@ const CARD_GRID_CLASSES = 'grid gap-(--layout-card-gap) sm:grid-cols-2 xl:grid-c
 
 export default function Learning() {
   const [entries, setEntries] = useLocalStorage('student-hub:learning', () => [...LEARNING_ENTRIES])
-  const [notes] = useLocalStorage('student-hub:notes', () => [...NOTES])
-  const [resources] = useLocalStorage('student-hub:resources', () => [...RESOURCES])
+  const { notes } = useNotes()
+  const { resources } = useResources()
 
   const [form, setForm] = useState(EMPTY_FORM)
   const [editingEntry, setEditingEntry] = useState(null)
