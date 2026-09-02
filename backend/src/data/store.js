@@ -62,11 +62,6 @@ export class JsonStore {
     this.writeAll(all)
     return true
   }
-
-  replaceAll(records) {
-    this.writeAll(records)
-    return records
-  }
 }
 
 export function createStore(filename) {

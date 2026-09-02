@@ -16,7 +16,7 @@ import { TASK_SORT_OPTIONS, sortTasks } from '../utils/taskSort'
 import TaskCard from './tasks/TaskCard'
 
 export default function Tasks() {
-  const { tasks, loading, error, createTask, updateTask, deleteTask, refresh } =
+  const { tasks, loading, error, createTask, updateTask, deleteTask, refresh, migrationFailures } =
     useTasks()
 
   const [title, setTitle] = useState('')
@@ -199,6 +199,13 @@ export default function Tasks() {
       {actionError && (
         <p role="alert" className="mt-4 text-body-small text-destructive-strong">
           {actionError}
+        </p>
+      )}
+
+      {migrationFailures && migrationFailures.length > 0 && (
+        <p role="alert" className="mt-4 text-body-small text-destructive-strong">
+          {migrationFailures.length} tasks could not be imported from the previous
+          local data and have been preserved for a retry.
         </p>
       )}
 
