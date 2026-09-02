@@ -1,0 +1,12 @@
+# The backend shares the repository-root dependency tree (no local node_modules).
+# This file guards against an accidental nested install and keeps generated
+# runtime data + secrets out of version control.
+
+node_modules/
+
+# Runtime JSON data files — never commit user-modifiable data.
+src/data/*.json
+
+.env
+*.log
+.DS_Store
