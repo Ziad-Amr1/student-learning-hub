@@ -1,4 +1,6 @@
-// Seed task data — first-run defaults for useLocalStorage('student-hub:tasks').
+// Seed task data — first-run defaults imported into the backend when no legacy
+// localStorage source exists (see hooks/useRemoteSeed.js). The backend is the
+// application-data source of truth; localStorage holds UI prefs only.
 // Shape: docs/DATA_MODEL.md → Task. Status values are the canonical
 // five-state set (unstarted | in-progress | deferred | done | cancelled).
 

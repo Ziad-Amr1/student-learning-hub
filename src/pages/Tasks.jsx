@@ -10,14 +10,14 @@ import Input from '../components/ui/Input'
 import Textarea from '../components/ui/Textarea'
 import FormDialog from '../components/ui/FormDialog'
 import ConfirmDialog from '../components/ui/ConfirmDialog'
-import { TASKS } from '../data/tasks'
-import useLocalStorage from '../hooks/useLocalStorage'
+import { useTasks } from '../hooks/useTasks'
 import { normalizeTaskStatus } from '../utils/taskStatus'
 import { TASK_SORT_OPTIONS, sortTasks } from '../utils/taskSort'
 import TaskCard from './tasks/TaskCard'
 
 export default function Tasks() {
-  const [tasks, setTasks] = useLocalStorage('student-hub:tasks', () => [...TASKS])
+  const { tasks, loading, error, createTask, updateTask, deleteTask, refresh, migrationFailures } =
+    useTasks()
 
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
@@ -26,6 +26,7 @@ export default function Tasks() {
   const [dueDateInput, setDueDateInput] = useState('')
   const [editingTask, setEditingTask] = useState(null)
   const [titleError, setTitleError] = useState('')
+  const [actionError, setActionError] = useState('')
 
   const [searchQuery, setSearchQuery] = useState('')
   const [filterPriority, setFilterPriority] = useState('all')
@@ -42,6 +43,7 @@ export default function Tasks() {
     setDueDateInput('')
     setEditingTask(null)
     setTitleError('')
+    setActionError('')
   }
 
   const handleOpenCreate = () => {
@@ -57,10 +59,11 @@ export default function Tasks() {
     setStatus(normalizeTaskStatus(task.status))
     setDueDateInput(task.dueDate ? task.dueDate.slice(0, 16) : '')
     setTitleError('')
+    setActionError('')
     setFormOpen(true)
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
     if (!title.trim()) {
       setTitleError('Title is required')
@@ -71,50 +74,48 @@ export default function Tasks() {
       return
     }
     setTitleError('')
-
-    if (editingTask) {
-      setTasks(tasks.map(t =>
-        t.id === editingTask.id
-          ? {
-              ...t,
-              title: title.trim(),
-              description: description.trim(),
-              priority,
-              status,
-              dueDate: dueDateInput ? new Date(dueDateInput).toISOString() : null,
-            }
-          : t
-      ))
-    } else {
-      const newTask = {
-        id: crypto.randomUUID(),
+    setActionError('')
+    try {
+      const payload = {
         title: title.trim(),
         description: description.trim(),
         priority,
         status,
         dueDate: dueDateInput ? new Date(dueDateInput).toISOString() : null,
-        createdAt: new Date().toISOString(),
       }
-      setTasks([newTask, ...tasks])
-    }
-    resetForm()
-    setFormOpen(false)
-  }
-
-  const handleUpdateStatus = (id, newStatus) => {
-    setTasks(tasks.map(t =>
-      t.id === id ? { ...t, status: newStatus } : t
-    ))
-  }
-
-  const handleConfirmDelete = () => {
-    if (taskToDelete) {
-      setTasks(tasks.filter(t => t.id !== taskToDelete))
-      setTaskToDelete(null)
+      if (editingTask) {
+        await updateTask(editingTask.id, payload)
+      } else {
+        await createTask(payload)
+      }
+      resetForm()
+      setFormOpen(false)
+    } catch (err) {
+      setActionError(err.message || 'Could not save this task.')
     }
   }
 
-  const filteredTasks = tasks.filter(t => {
+  const handleUpdateStatus = async (id, newStatus) => {
+    setActionError('')
+    try {
+      await updateTask(id, { status: newStatus })
+    } catch (err) {
+      setActionError(err.message || 'Could not update this task.')
+    }
+  }
+
+  const handleConfirmDelete = async () => {
+    if (!taskToDelete) return
+    setActionError('')
+    try {
+      await deleteTask(taskToDelete)
+    } catch (err) {
+      setActionError(err.message || 'Could not delete this task.')
+    }
+    setTaskToDelete(null)
+  }
+
+  const filteredTasks = tasks.filter((t) => {
     const matchesSearch = t.title.toLowerCase().includes(searchQuery.toLowerCase())
     const matchesPriority = filterPriority === 'all' || t.priority === filterPriority
     const matchesStatus = filterStatus === 'all' || normalizeTaskStatus(t.status) === filterStatus
@@ -181,8 +182,37 @@ export default function Tasks() {
         </Button>
       </ModuleToolbar>
 
+      {error && (
+        <div
+          role="alert"
+          className="mt-4 flex flex-col gap-3 rounded-lg border border-destructive-soft bg-destructive-soft/20 p-4 sm:flex-row sm:items-center sm:justify-between"
+        >
+          <p className="text-body-small text-foreground">
+            {error} — make sure the Huby backend is running.
+          </p>
+          <Button variant="outline" size="sm" onClick={refresh}>
+            Retry
+          </Button>
+        </div>
+      )}
+
+      {actionError && (
+        <p role="alert" className="mt-4 text-body-small text-destructive-strong">
+          {actionError}
+        </p>
+      )}
+
+      {migrationFailures && migrationFailures.length > 0 && (
+        <p role="alert" className="mt-4 text-body-small text-destructive-strong">
+          {migrationFailures.length} tasks could not be imported from the previous
+          local data and have been preserved for a retry.
+        </p>
+      )}
+
       <div className="pt-6 space-y-3">
-        {filteredTasks.length === 0 ? (
+        {loading && tasks.length === 0 ? (
+          <p className="text-body-small text-muted-foreground">Loading tasks…</p>
+        ) : filteredTasks.length === 0 ? (
           <EmptyState
             icon={tasks.length === 0 ? ListTodo : Search}
             title={
@@ -197,7 +227,7 @@ export default function Tasks() {
             }
           />
         ) : (
-          visibleTasks.map(task => (
+          visibleTasks.map((task) => (
             <TaskCard
               key={task.id}
               task={task}

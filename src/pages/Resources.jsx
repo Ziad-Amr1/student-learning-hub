@@ -10,8 +10,7 @@ import Input from '../components/ui/Input'
 import Textarea from '../components/ui/Textarea'
 import FormDialog from '../components/ui/FormDialog'
 import ConfirmDialog from '../components/ui/ConfirmDialog'
-import { RESOURCES } from '../data/resources'
-import useLocalStorage from '../hooks/useLocalStorage'
+import { useResources } from '../hooks/useResources'
 import ResourceCard from './resources/ResourceCard'
 
 const VIEW_OPTIONS = [
@@ -21,7 +20,16 @@ const VIEW_OPTIONS = [
 ]
 
 export default function Resources() {
-  const [resources, setResources] = useLocalStorage('student-hub:resources', () => [...RESOURCES])
+  const {
+    resources,
+    loading,
+    error,
+    createResource,
+    updateResource,
+    deleteResource,
+    refresh,
+    migrationFailures,
+  } = useResources()
   const [viewMode, setViewMode] = useState('list')
 
   const [title, setTitle] = useState('')
@@ -31,6 +39,7 @@ export default function Resources() {
   const [editingResource, setEditingResource] = useState(null)
   const [titleError, setTitleError] = useState('')
   const [urlError, setUrlError] = useState('')
+  const [actionError, setActionError] = useState('')
 
   const [searchQuery, setSearchQuery] = useState('')
   const [activeCategory, setActiveCategory] = useState('all')
@@ -47,6 +56,7 @@ export default function Resources() {
     setEditingResource(null)
     setTitleError('')
     setUrlError('')
+    setActionError('')
   }
 
   const handleOpenCreate = () => {
@@ -62,10 +72,11 @@ export default function Resources() {
     setDescription(resource.description || '')
     setTitleError('')
     setUrlError('')
+    setActionError('')
     setFormOpen(true)
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
     let hasError = false
     if (!title.trim()) {
@@ -78,43 +89,49 @@ export default function Resources() {
     }
     if (hasError) return
 
-    if (editingResource) {
-      setResources(resources.map(r =>
-        r.id === editingResource.id
-          ? {
-              ...r,
-              title: title.trim(),
-              url: url.trim(),
-              category,
-              description: description.trim() || undefined,
-            }
-          : r
-      ))
-    } else {
-      const newResource = {
-        id: crypto.randomUUID(),
-        title: title.trim(),
-        url: url.trim(),
-        category,
-        description: description.trim() || undefined,
-        pinned: false,
-        createdAt: new Date().toISOString(),
+    setActionError('')
+    try {
+      if (editingResource) {
+        await updateResource(editingResource.id, {
+          title: title.trim(),
+          url: url.trim(),
+          category,
+          description: description.trim() || undefined,
+        })
+      } else {
+        await createResource({
+          title: title.trim(),
+          url: url.trim(),
+          category,
+          description: description.trim() || undefined,
+        })
       }
-      setResources([newResource, ...resources])
+      resetForm()
+      setFormOpen(false)
+    } catch (err) {
+      setActionError(err.message || 'Could not save this resource.')
     }
-    resetForm()
-    setFormOpen(false)
   }
 
-  const handleTogglePin = (id) => {
-    setResources(resources.map(r =>
-      r.id === id ? { ...r, pinned: !r.pinned } : r
-    ))
+  const handleTogglePin = async (id) => {
+    const resource = resources.find((r) => r.id === id)
+    if (!resource) return
+    setActionError('')
+    try {
+      await updateResource(id, { pinned: !resource.pinned })
+    } catch (err) {
+      setActionError(err.message || 'Could not update this resource.')
+    }
   }
 
-  const handleConfirmDelete = () => {
+  const handleConfirmDelete = async () => {
     if (resourceToDelete) {
-      setResources(resources.filter(r => r.id !== resourceToDelete))
+      setActionError('')
+      try {
+        await deleteResource(resourceToDelete)
+      } catch (err) {
+        setActionError(err.message || 'Could not delete this resource.')
+      }
       setResourceToDelete(null)
     }
   }
@@ -187,6 +204,33 @@ export default function Resources() {
         </div>
       </ModuleToolbar>
 
+      {error && (
+        <div
+          role="alert"
+          className="mt-4 flex flex-col gap-3 rounded-lg border border-destructive-soft bg-destructive-soft/20 p-4 sm:flex-row sm:items-center sm:justify-between"
+        >
+          <p className="text-body-small text-foreground">
+            We couldn't load your resources. {error} — make sure the Huby backend is running.
+          </p>
+          <Button variant="outline" size="sm" onClick={refresh}>
+            Retry
+          </Button>
+        </div>
+      )}
+
+      {migrationFailures && migrationFailures.length > 0 && (
+        <p role="alert" className="mt-4 text-body-small text-destructive-strong">
+          {migrationFailures.length} resources could not be imported from the previous
+          local data and have been preserved for a retry.
+        </p>
+      )}
+
+      {actionError && (
+        <p role="alert" className="mt-4 text-body-small text-destructive-strong">
+          {actionError}
+        </p>
+      )}
+
       <div className="pt-3">
 
         <div className={cx(
@@ -194,7 +238,9 @@ export default function Resources() {
           viewMode === 'grid' && 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4',
           viewMode === 'grid-preview' && 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4'
         )}>
-          {filtered.length === 0 ? (
+          {loading && resources.length === 0 ? (
+            <p className="text-body-small text-muted-foreground col-span-full">Loading resources…</p>
+          ) : filtered.length === 0 ? (
             <EmptyState
               className="col-span-full"
               icon={resources.length === 0 ? Library : Search}

@@ -8,12 +8,12 @@ import Input from '../components/ui/Input'
 import Textarea from '../components/ui/Textarea'
 import FormDialog from '../components/ui/FormDialog'
 import ConfirmDialog from '../components/ui/ConfirmDialog'
-import { NOTES } from '../data/notes'
-import useLocalStorage from '../hooks/useLocalStorage'
+import { useNotes } from '../hooks/useNotes'
 import NoteCard from './notes/NoteCard'
 
 export default function Notes() {
-  const [notes, setNotes] = useLocalStorage('student-hub:notes', () => [...NOTES])
+  const { notes, loading, error, createNote, updateNote, deleteNote, refresh, migrationFailures } =
+    useNotes()
 
   const [title, setTitle] = useState('')
   const [content, setContent] = useState('')
@@ -21,6 +21,7 @@ export default function Notes() {
   const [editingNote, setEditingNote] = useState(null)
   const [titleError, setTitleError] = useState('')
   const [contentError, setContentError] = useState('')
+  const [actionError, setActionError] = useState('')
 
   const [searchQuery, setSearchQuery] = useState('')
   const [noteToDelete, setNoteToDelete] = useState(null)
@@ -33,6 +34,7 @@ export default function Notes() {
     setEditingNote(null)
     setTitleError('')
     setContentError('')
+    setActionError('')
   }
 
   const handleOpenCreate = () => {
@@ -47,10 +49,11 @@ export default function Notes() {
     setCategory(note.category || '')
     setTitleError('')
     setContentError('')
+    setActionError('')
     setFormOpen(true)
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
     let hasError = false
     if (!title.trim()) {
@@ -63,47 +66,47 @@ export default function Notes() {
     }
     if (hasError) return
 
-    const now = new Date().toISOString()
-
-    if (editingNote) {
-      setNotes(
-        notes.map(n =>
-          n.id === editingNote.id
-            ? {
-                ...n,
-                title: title.trim(),
-                content: content.trim(),
-                category: category.trim() || undefined,
-                updatedAt: now,
-              }
-            : n
-        )
-      )
-    } else {
-      const newNote = {
-        id: crypto.randomUUID(),
-        title: title.trim(),
-        content: content.trim(),
-        category: category.trim() || undefined,
-        pinned: false,
-        createdAt: now,
-        updatedAt: now,
+    setActionError('')
+    try {
+      if (editingNote) {
+        await updateNote(editingNote.id, {
+          title: title.trim(),
+          content: content.trim(),
+          category: category.trim() || undefined,
+        })
+      } else {
+        await createNote({
+          title: title.trim(),
+          content: content.trim(),
+          category: category.trim() || undefined,
+        })
       }
-      setNotes([newNote, ...notes])
+      resetForm()
+      setFormOpen(false)
+    } catch (err) {
+      setActionError(err.message || 'Could not save this note.')
     }
-    resetForm()
-    setFormOpen(false)
   }
 
-  const handleTogglePin = (id) => {
-    setNotes(notes.map(n =>
-      n.id === id ? { ...n, pinned: !n.pinned } : n
-    ))
+  const handleTogglePin = async (id) => {
+    const note = notes.find((n) => n.id === id)
+    if (!note) return
+    setActionError('')
+    try {
+      await updateNote(id, { pinned: !note.pinned })
+    } catch (err) {
+      setActionError(err.message || 'Could not update this note.')
+    }
   }
 
-  const handleConfirmDelete = () => {
+  const handleConfirmDelete = async () => {
     if (noteToDelete) {
-      setNotes(notes.filter(n => n.id !== noteToDelete))
+      setActionError('')
+      try {
+        await deleteNote(noteToDelete)
+      } catch (err) {
+        setActionError(err.message || 'Could not delete this note.')
+      }
       setNoteToDelete(null)
     }
   }
@@ -144,8 +147,37 @@ export default function Notes() {
         </Button>
       </ModuleToolbar>
 
+      {error && (
+        <div
+          role="alert"
+          className="mt-4 flex flex-col gap-3 rounded-lg border border-destructive-soft bg-destructive-soft/20 p-4 sm:flex-row sm:items-center sm:justify-between"
+        >
+          <p className="text-body-small text-foreground">
+            We couldn't load your notes. {error} — make sure the Huby backend is running.
+          </p>
+          <Button variant="outline" size="sm" onClick={refresh}>
+            Retry
+          </Button>
+        </div>
+      )}
+
+      {migrationFailures && migrationFailures.length > 0 && (
+        <p role="alert" className="mt-4 text-body-small text-destructive-strong">
+          {migrationFailures.length} notes could not be imported from the previous
+          local data and have been preserved for a retry.
+        </p>
+      )}
+
+      {actionError && (
+        <p role="alert" className="mt-4 text-body-small text-destructive-strong">
+          {actionError}
+        </p>
+      )}
+
       <div className="pt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
-        {sortedAndFiltered.length === 0 ? (
+        {loading && notes.length === 0 ? (
+          <p className="text-body-small text-muted-foreground col-span-full">Loading notes…</p>
+        ) : sortedAndFiltered.length === 0 ? (
           <EmptyState
             className="col-span-full"
             icon={notes.length === 0 ? NotebookPen : Search}

@@ -9,10 +9,9 @@ import EmptyState from '../components/ui/EmptyState'
 import Input from '../components/ui/Input'
 import FormDialog from '../components/ui/FormDialog'
 import ConfirmDialog from '../components/ui/ConfirmDialog'
-import useLocalStorage from '../hooks/useLocalStorage'
-import { LEARNING_ENTRIES } from '../data/learning'
-import { NOTES } from '../data/notes'
-import { RESOURCES } from '../data/resources'
+import { useNotes } from '../hooks/useNotes.js'
+import { useResources } from '../hooks/useResources.js'
+import { useLearning } from '../hooks/useLearning.js'
 import {
   LEARNING_CATEGORIES,
   LEARNING_CATEGORY_LABELS,
@@ -62,14 +61,25 @@ const toggleInArray = (array, id) =>
 const CARD_GRID_CLASSES = 'grid gap-(--layout-card-gap) sm:grid-cols-2 xl:grid-cols-3'
 
 export default function Learning() {
-  const [entries, setEntries] = useLocalStorage('student-hub:learning', () => [...LEARNING_ENTRIES])
-  const [notes] = useLocalStorage('student-hub:notes', () => [...NOTES])
-  const [resources] = useLocalStorage('student-hub:resources', () => [...RESOURCES])
+  const {
+    learning,
+    loading,
+    error,
+    createLearning,
+    updateLearning,
+    deleteLearning,
+    refresh,
+    migrationFailures,
+  } = useLearning()
+  const { notes } = useNotes()
+  const { resources } = useResources()
+  const entries = learning ?? []
 
   const [form, setForm] = useState(EMPTY_FORM)
   const [editingEntry, setEditingEntry] = useState(null)
   const [titleError, setTitleError] = useState('')
   const [numericError, setNumericError] = useState('')
+  const [actionError, setActionError] = useState('')
   const [formOpen, setFormOpen] = useState(false)
   const [entryToDelete, setEntryToDelete] = useState(null)
 
@@ -88,6 +98,7 @@ export default function Learning() {
     setEditingEntry(null)
     setTitleError('')
     setNumericError('')
+    setActionError('')
   }
 
   const handleOpenCreate = () => {
@@ -110,6 +121,7 @@ export default function Learning() {
       relatedResourceIds: entry.relatedResources || [],
     })
     setTitleError('')
+    setActionError('')
     setFormOpen(true)
   }
 
@@ -124,16 +136,16 @@ export default function Learning() {
   }
 
   const buildSavePayload = () => {
-    const now = new Date().toISOString()
     const { status, progress, targetHours, completedHours } = form
 
-    // normalizeLearningEntry centralizes the progress<->status rule (decision 4).
-    let next = normalizeLearningEntry({
+    // normalizeLearningEntry centralizes the progress<->status rule (decision 4);
+    // the backend Learning model re-normalizes authoritatively on create/update.
+    const next = normalizeLearningEntry({
       status,
       progress: parseNumber(progress),
     })
 
-    const base = {
+    return {
       title: form.title.trim(),
       category: form.category,
       status: next.status,
@@ -159,26 +171,9 @@ export default function Learning() {
       relatedNotes: form.relatedNoteIds,
       relatedResources: form.relatedResourceIds,
     }
-
-    if (editingEntry) {
-      next = { ...editingEntry, ...base, updatedAt: now }
-      if (!next.startedAt && next.status === 'in-progress') next.startedAt = now
-      next.completedAt = next.status === 'completed' ? (next.completedAt ?? now) : null
-      return next
-    }
-
-    next = {
-      ...base,
-      id: crypto.randomUUID(),
-      createdAt: now,
-      updatedAt: now,
-      startedAt: next.status === 'in-progress' ? now : null,
-      completedAt: next.status === 'completed' ? now : null,
-    }
-    return next
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
     const title = form.title.trim()
     if (!title) {
@@ -206,20 +201,30 @@ export default function Learning() {
       return
     }
     setNumericError('')
+    setActionError('')
 
     const next = buildSavePayload()
-    if (editingEntry) {
-      setEntries(entries.map((entry) => (entry.id === editingEntry.id ? next : entry)))
-    } else {
-      setEntries([next, ...entries])
+    try {
+      if (editingEntry) {
+        await updateLearning(editingEntry.id, next)
+      } else {
+        await createLearning(next)
+      }
+      resetForm()
+      setFormOpen(false)
+    } catch (err) {
+      setActionError(err.message || 'Could not save this goal.')
     }
-    resetForm()
-    setFormOpen(false)
   }
 
-  const handleConfirmDelete = () => {
+  const handleConfirmDelete = async () => {
     if (entryToDelete) {
-      setEntries(entries.filter((entry) => entry.id !== entryToDelete.id))
+      setActionError('')
+      try {
+        await deleteLearning(entryToDelete.id)
+      } catch (err) {
+        setActionError(err.message || 'Could not delete this goal.')
+      }
       setEntryToDelete(null)
     }
   }
@@ -232,8 +237,16 @@ export default function Learning() {
   // Pinned is persisted as part of the entity; toggling does NOT bump
   // updatedAt (Notes/Resources precedent — a pin is an organization action,
   // not a content edit).
-  const handleTogglePin = (id) =>
-    setEntries(entries.map((entry) => (entry.id === id ? { ...entry, pinned: !entry.pinned } : entry)))
+  const handleTogglePin = async (id) => {
+    const target = entries.find((entry) => entry.id === id)
+    if (!target) return
+    setActionError('')
+    try {
+      await updateLearning(id, { pinned: !target.pinned })
+    } catch (err) {
+      setActionError(err.message || 'Could not update this goal.')
+    }
+  }
 
   const normalizedEntries = entries.map(normalizeLearningEntry)
   const orderedEntries = sortLearningEntries(normalizedEntries, sortMode)
@@ -323,8 +336,37 @@ export default function Learning() {
         </Button>
       </ModuleToolbar>
 
+      {error && (
+        <div
+          role="alert"
+          className="mt-4 flex flex-col gap-3 rounded-lg border border-destructive-soft bg-destructive-soft/20 p-4 sm:flex-row sm:items-center sm:justify-between"
+        >
+          <p className="text-body-small text-foreground">
+            We couldn't load your learning goals. {error} — make sure the Huby backend is running.
+          </p>
+          <Button variant="outline" size="sm" onClick={refresh}>
+            Retry
+          </Button>
+        </div>
+      )}
+
+      {migrationFailures && migrationFailures.length > 0 && (
+        <p role="alert" className="mt-4 text-body-small text-destructive-strong">
+          {migrationFailures.length} learning goals could not be imported from the
+          previous local data and have been preserved for a retry.
+        </p>
+      )}
+
+      {actionError && (
+        <p role="alert" className="mt-4 text-body-small text-destructive-strong">
+          {actionError}
+        </p>
+      )}
+
       <div className="flex flex-col gap-(--layout-section-gap) pt-6">
-        {hasNoEntries ? (
+        {loading && entries.length === 0 ? (
+          <p className="text-body-small text-muted-foreground">Loading learning goals…</p>
+        ) : hasNoEntries ? (
           <EmptyState
             icon={BookOpen}
             title="No learning goals yet"

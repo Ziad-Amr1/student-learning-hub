@@ -1,4 +1,6 @@
-// Seed note data — Sprint 05 Notes CRUD.
+// Seed note data — first-run defaults imported into the backend when no legacy
+// localStorage source exists (see hooks/useRemoteSeed.js). The backend is the
+// application-data source of truth; localStorage holds UI prefs only.
 // Shape: docs/DATA_MODEL.md → Note.
 
 export const NOTES = [

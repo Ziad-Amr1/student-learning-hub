@@ -1,7 +1,6 @@
 import PageHeader from '../components/layout/PageHeader'
 import { getGreeting } from '../utils/greeting'
-import useLocalStorage from '../hooks/useLocalStorage'
-import { TASKS } from '../data/tasks'
+import { useTasks } from '../hooks/useTasks'
 import { normalizeTaskStatus } from '../utils/taskStatus'
 import { STATUS_VISUALS } from '../constants/cardStatus'
 import { CircleCheckBig, CircleDashed, CircleDot, ListTodo } from 'lucide-react'
@@ -11,7 +10,7 @@ import RecentTasks from './dashboard/RecentTasks'
 import LearningProgress from './dashboard/LearningProgress'
 
 export default function Dashboard() {
-  const [tasks] = useLocalStorage('student-hub:tasks', () => [...TASKS])
+  const { tasks } = useTasks()
   const total = tasks.length
   const stats = [
     { label: 'Total tasks', value: total, Icon: ListTodo },
