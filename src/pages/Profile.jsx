@@ -40,7 +40,7 @@ export default function Profile() {
                 Retry
               </Button>
             </div>
-          ) : loading && !profile ? (
+          ) : !profile || loading ? (
             <p className="text-body-small text-muted-foreground">Loading profile…</p>
           ) : (
             <div className="flex flex-col gap-(--space-6)">

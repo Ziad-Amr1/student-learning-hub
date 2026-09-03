@@ -16,7 +16,7 @@ export default function ProfileEditForm({ profile, onSave, onCancel }) {
     university: profile.university ?? '',
     major: profile.major ?? '',
     bio: profile.bio ?? '',
-    skills: profile.skills.join(', '),
+    skills: (profile.skills ?? []).join(', '),
   }))
   const [nameError, setNameError] = useState('')
 
