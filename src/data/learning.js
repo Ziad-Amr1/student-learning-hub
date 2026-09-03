@@ -1,5 +1,6 @@
-// Seed learning-entry data — first-run defaults for
-// useLocalStorage('student-hub:learning') (Sprint 07.6).
+// Seed learning-entry data — first-run defaults imported into the backend when
+// no legacy localStorage source exists (see hooks/useRemoteSeed.js). The backend
+// is the application-data source of truth; localStorage holds UI prefs only.
 // Shape: docs/DATA_MODEL.md → LearningEntry. Keeps the historical
 // LearningProgress id/title/category/progress/hours/updatedAt fields so the
 // Dashboard + Profile widgets render unchanged, and adds the Sprint 07.6
