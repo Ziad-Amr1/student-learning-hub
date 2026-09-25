@@ -99,4 +99,19 @@ export const MIGRATIONS = [
       }
     },
   },
+  {
+    // Application metadata (key/value). Hosts the legacy JSON → SQLite
+    // migration-completion marker — the schema-owned home for the backend's
+    // persistent migration state (see db/legacyMigration.js).
+    id: 2,
+    name: 'create_app_meta',
+    up: (db) => {
+      db.exec(`
+        CREATE TABLE app_meta (
+          key   TEXT PRIMARY KEY,
+          value TEXT NOT NULL
+        )
+      `)
+    },
+  },
 ]

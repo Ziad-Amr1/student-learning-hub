@@ -40,7 +40,11 @@ npm run dev
 served under the `/student-learning-hub/` base path; the API is a
 JSON envelope at `/api` (health-check: `http://localhost:5000/api/health`).
 On first boot the server creates the SQLite database `backend/data/huby.db`
-(auto-created directory, gitignored; override the path with `HUBY_DB_PATH`).
+(auto-created directory, gitignored; override the path with `HUBY_DB_PATH`),
+then — before listening — migrates the legacy JSON domain files
+(`backend/src/data/*.json`) into it in one crash-safe transaction
+(originals are backed up to `backend/data/backups/<timestamp>/` and never
+modified; a pristine install with no JSON starts normally with empty tables).
 
 ## Scripts
 
@@ -52,7 +56,7 @@ On first boot the server creates the SQLite database `backend/data/huby.db`
 | `npm run server` | Start only the Express API server (`node --watch`) |
 | `npm run build` | Build the production frontend bundle to `dist/` |
 | `npm run preview` | Preview the production build locally |
-| `npm test` | Run the backend `node:test` suite (SQLite foundation) |
+| `npm test` | Run the backend `node:test` suite (SQLite foundation, store, migrations, legacy JSON migration) |
 
 Run the frontend alone with `npm run client` (expects the API elsewhere), and
 the API alone with `npm run server`. Configure the API URL the browser calls
@@ -73,14 +77,14 @@ src/
   constants/          Pure static constant maps
   styles/             Design tokens (single source of truth)
 backend/
-  server.js           Express entry point (calls initDatabase() at boot)
+  server.js           Express entry point (db init → legacy JSON→SQLite migration → listen)
   src/app.js          App wiring (middleware, routes, error handling)
   src/routes/         Route definitions per domain
   src/controllers/    Request handling per domain
   src/models/         Data model + validation rules per domain
   src/data/store.js   SqliteStore — entity-agnostic persistence seam (only layer that touches SQL via db/*)
-  src/data/legacyStore.js  Old JSON store, preserved as the pending JSON→SQLite migration reader
-  src/db/             SQLite bootstrap: paths, init (DatabaseSync + WAL), schema (v1 DDL), migrations
+  src/data/legacyStore.js  Old JSON store, PRESERVED (not used by the live app; S3 reader)
+  src/db/             SQLite bootstrap: paths, init (DatabaseSync + WAL), schema (v1 DDL + v2 app_meta), migrations, legacyMigration (S2)
   src/middleware/     Express middleware
   src/utils/          Shared helpers (id, ApiError…)
 ```
