@@ -3,7 +3,7 @@ import { newId } from '../utils/id.js'
 import { validateAgainst } from '../utils/validate.js'
 import { ValidationError } from '../utils/ValidationError.js'
 
-const store = createStore('notes.json')
+const store = createStore('notes')
 
 // Shared domain validation rules — owned by the Model and enforced by it in
 // create()/update(). `required` fields are enforced on create; update

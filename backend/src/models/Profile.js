@@ -2,7 +2,7 @@ import { createStore } from '../data/store.js'
 import { validateAgainst } from '../utils/validate.js'
 import { ValidationError } from '../utils/ValidationError.js'
 
-const store = createStore('profile.json')
+const store = createStore('profile')
 const PROFILE_ID = 'profile'
 
 // Shared domain validation rules — owned by the Model. Profile is a SINGLETON

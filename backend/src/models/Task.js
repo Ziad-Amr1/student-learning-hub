@@ -3,7 +3,7 @@ import { newId } from '../utils/id.js'
 import { validateAgainst } from '../utils/validate.js'
 import { ValidationError } from '../utils/ValidationError.js'
 
-const store = createStore('tasks.json')
+const store = createStore('tasks')
 
 export const TASK_STATUSES = ['unstarted', 'in-progress', 'deferred', 'done', 'cancelled']
 export const TASK_PRIORITIES = ['low', 'medium', 'high']

@@ -3,7 +3,7 @@ import { newId } from '../utils/id.js'
 import { validateAgainst } from '../utils/validate.js'
 import { ValidationError } from '../utils/ValidationError.js'
 
-const store = createStore('resources.json')
+const store = createStore('resources')
 
 export const RESOURCE_CATEGORIES = ['article', 'video', 'course', 'book', 'tool', 'other']
 

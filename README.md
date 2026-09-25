@@ -22,8 +22,9 @@ learning progress, plus your own personal learning journey.
 - **React Router** — single-page routing
 - **Tailwind CSS v4** — CSS-first design tokens (`@theme` in
   `src/styles/app.css`)
-- **Express** — minimal JSON API backend (Phase D), the single source of
-  truth for application data
+- **Express** — minimal API backend (Phase D + SQLite foundation), the
+  single source of truth for application data, persisting to a local
+  **SQLite** database (`backend/data/huby.db`; `node:sqlite`, no new deps)
 - **Local Storage** — browser-local UI preferences only; app data lives in
   the backend
 
@@ -38,6 +39,8 @@ npm run dev
 `:5000`, `node --watch` auto-reload) and the Vite dev client. The web app is
 served under the `/student-learning-hub/` base path; the API is a
 JSON envelope at `/api` (health-check: `http://localhost:5000/api/health`).
+On first boot the server creates the SQLite database `backend/data/huby.db`
+(auto-created directory, gitignored; override the path with `HUBY_DB_PATH`).
 
 ## Scripts
 
@@ -49,6 +52,7 @@ JSON envelope at `/api` (health-check: `http://localhost:5000/api/health`).
 | `npm run server` | Start only the Express API server (`node --watch`) |
 | `npm run build` | Build the production frontend bundle to `dist/` |
 | `npm run preview` | Preview the production build locally |
+| `npm test` | Run the backend `node:test` suite (SQLite foundation) |
 
 Run the frontend alone with `npm run client` (expects the API elsewhere), and
 the API alone with `npm run server`. Configure the API URL the browser calls
@@ -69,12 +73,14 @@ src/
   constants/          Pure static constant maps
   styles/             Design tokens (single source of truth)
 backend/
-  server.js           Express entry point
+  server.js           Express entry point (calls initDatabase() at boot)
   src/app.js          App wiring (middleware, routes, error handling)
   src/routes/         Route definitions per domain
   src/controllers/    Request handling per domain
   src/models/         Data model + validation rules per domain
-  src/data/           JSON-file store (only layer that touches the filesystem)
+  src/data/store.js   SqliteStore — entity-agnostic persistence seam (only layer that touches SQL via db/*)
+  src/data/legacyStore.js  Old JSON store, preserved as the pending JSON→SQLite migration reader
+  src/db/             SQLite bootstrap: paths, init (DatabaseSync + WAL), schema (v1 DDL), migrations
   src/middleware/     Express middleware
   src/utils/          Shared helpers (id, ApiError…)
 ```
