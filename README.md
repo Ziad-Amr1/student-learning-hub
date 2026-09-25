@@ -45,6 +45,8 @@ then — before listening — migrates the legacy JSON domain files
 (`backend/src/data/*.json`) into it in one crash-safe transaction
 (originals are backed up to `backend/data/backups/<timestamp>/` and never
 modified; a pristine install with no JSON starts normally with empty tables).
+A skipped re-run (marker already set) changes nothing and creates no new
+backup.
 
 ## Scripts
 
@@ -56,7 +58,7 @@ modified; a pristine install with no JSON starts normally with empty tables).
 | `npm run server` | Start only the Express API server (`node --watch`) |
 | `npm run build` | Build the production frontend bundle to `dist/` |
 | `npm run preview` | Preview the production build locally |
-| `npm test` | Run the backend `node:test` suite (SQLite foundation, store, migrations, legacy JSON migration) |
+| `npm test` | Run the backend `node:test` suite (SQLite foundation, store, models, legacy JSON migration, API-level parity) |
 
 Run the frontend alone with `npm run client` (expects the API elsewhere), and
 the API alone with `npm run server`. Configure the API URL the browser calls
@@ -83,8 +85,8 @@ backend/
   src/controllers/    Request handling per domain
   src/models/         Data model + validation rules per domain
   src/data/store.js   SqliteStore — entity-agnostic persistence seam (only layer that touches SQL via db/*)
-  src/data/legacyStore.js  Old JSON store, PRESERVED (not used by the live app; S3 reader)
-  src/db/             SQLite bootstrap: paths, init (DatabaseSync + WAL), schema (v1 DDL + v2 app_meta), migrations, legacyMigration (S2)
+  src/data/legacyStore.js  Old JSON store, PRESERVED (not used by the live app; the migration reads the JSON via fs)
+  src/db/             SQLite bootstrap: paths, init (DatabaseSync + WAL), schema (v1 DDL + v2 app_meta), migrations, legacyMigration (S2/S3)
   src/middleware/     Express middleware
   src/utils/          Shared helpers (id, ApiError…)
 ```
