@@ -406,3 +406,13 @@ test('profile stays a singleton across migration and skipped re-run', () => {
   assert.equal(getDatabase().prepare('SELECT MAX(id) AS id FROM profile').get().id, 'profile')
   assert.equal(Profile.get().name, 'Kayn Shah')
 })
+
+test('S3 hardening: empty-string optionals are model-canonicalized without failing parity', () => {
+  writeSource('profile', [fullProfile({ avatarUrl: '', bio: '' })])
+  writeSource('notes', [note('n1', { category: '' })])
+  const result = runLegacyJsonMigration({ sourceDir, backupDir: backupRoot })
+  assert.equal(result.status, 'migrated')
+  assert.equal(Profile.get().avatarUrl, undefined)
+  assert.equal(Profile.get().bio, undefined)
+  assert.equal(Note.findById('n1').category, undefined)
+})

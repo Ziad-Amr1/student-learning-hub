@@ -35,6 +35,7 @@ import { copyFileSync, existsSync, mkdirSync, readFileSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import assert from 'node:assert/strict'
+import { isDeepStrictEqual } from 'node:util'
 import { getDatabase } from './init.js'
 import { createStore } from '../data/store.js'
 import { ValidationError } from '../utils/ValidationError.js'
@@ -203,6 +204,19 @@ function importDomain(name, domain, records) {
   }
 }
 
+// S3 hardening: the Models deliberately normalize empty optional strings to
+// NULL/undefined (e.g. Profile.avatarUrl '', Note.category '', Resource
+// description ''). Parity therefore treats '' ≡ null/undefined — comparing
+// against strict values would fail a faithful import just because the Model
+// canonicalized an empty optional, and a non-empty value still fails only when
+// it is genuinely lost.
+
+function valuesEqual(mine, theirs) {
+  const empty = (value) => value === undefined || value === null || value === ''
+  if (empty(mine) && empty(theirs)) return true
+  return isDeepStrictEqual(theirs, mine)
+}
+
 function assertParity(domainName, expectedRecords, dbRecords) {
   assert.equal(
     dbRecords.length,
@@ -219,7 +233,7 @@ function assertParity(domainName, expectedRecords, dbRecords) {
       if (key === 'id') continue
       const mine = expected[key] === undefined ? null : expected[key]
       const theirs = dbRecord[key] === undefined ? null : dbRecord[key]
-      assert.deepEqual(theirs, mine, `${domainName}.${expected.id}.${key} mismatch after migration`)
+      assert.ok(valuesEqual(mine, theirs), `${domainName}.${expected.id}.${key} mismatch after migration`)
     }
   }
 }
@@ -233,7 +247,7 @@ function assertProfileParity(expected, dbProfile) {
     if (key === 'id') continue
     const mine = expected[key] === undefined ? null : expected[key]
     const theirs = dbProfile[key] === undefined ? null : dbProfile[key]
-    assert.deepEqual(theirs, mine, `profile.${key} mismatch after migration`)
+    assert.ok(valuesEqual(mine, theirs), `profile.${key} mismatch after migration`)
   }
 }
 
