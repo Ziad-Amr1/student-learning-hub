@@ -1,11 +1,18 @@
 import { useState } from 'react'
 import { LayoutGrid, Library, List, GalleryHorizontalEnd, Plus, Search } from 'lucide-react'
 import { cx } from '../utils/cx'
-import { FIELD_CONTROL_CLASSES } from '../components/ui/formStyles'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '../components/ui/Select'
 import PageHeader from '../components/layout/PageHeader'
 import ModuleToolbar from '../components/layout/ModuleToolbar'
 import Button from '../components/ui/Button'
 import EmptyState from '../components/ui/EmptyState'
+import ErrorBanner from '../components/ui/ErrorBanner'
 import Input from '../components/ui/Input'
 import Textarea from '../components/ui/Textarea'
 import FormDialog from '../components/ui/FormDialog'
@@ -205,17 +212,11 @@ export default function Resources() {
       </ModuleToolbar>
 
       {error && (
-        <div
-          role="alert"
-          className="mt-4 flex flex-col gap-3 rounded-lg border border-destructive-soft bg-destructive-soft/20 p-4 sm:flex-row sm:items-center sm:justify-between"
-        >
-          <p className="text-body-small text-foreground">
-            We couldn't load your resources. {error} — make sure the Huby backend is running.
-          </p>
-          <Button variant="outline" size="sm" onClick={refresh}>
-            Retry
-          </Button>
-        </div>
+        <ErrorBanner
+          className="mt-4"
+          message={`We couldn't load your resources. ${error} — make sure the Huby backend is running.`}
+          onRetry={refresh}
+        />
       )}
 
       {migrationFailures && migrationFailures.length > 0 && (
@@ -304,20 +305,19 @@ export default function Resources() {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="flex flex-col gap-2">
             <label className="text-label text-foreground" htmlFor="resource-category">Category</label>
-            <select
-              id="resource-category"
-              name="category"
-              value={category}
-              onChange={(e) => setCategory(e.target.value)}
-              className={cx(FIELD_CONTROL_CLASSES, 'w-full text-sm cursor-pointer')}
-            >
-              <option value="article">Article</option>
-              <option value="video">Video</option>
-              <option value="course">Course</option>
-              <option value="book">Book</option>
-              <option value="tool">Tool</option>
-              <option value="other">Other</option>
-            </select>
+            <Select value={category} onValueChange={setCategory} name="category">
+              <SelectTrigger id="resource-category" className="w-full px-3 py-2 text-sm">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="article">Article</SelectItem>
+                <SelectItem value="video">Video</SelectItem>
+                <SelectItem value="course">Course</SelectItem>
+                <SelectItem value="book">Book</SelectItem>
+                <SelectItem value="tool">Tool</SelectItem>
+                <SelectItem value="other">Other</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
           <Textarea
             label="Description"

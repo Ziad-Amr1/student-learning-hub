@@ -1,11 +1,18 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { ListTodo, Plus, Search } from 'lucide-react'
-import { cx } from '../utils/cx'
-import { FIELD_CONTROL_CLASSES } from '../components/ui/formStyles'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '../components/ui/Select'
 import PageHeader from '../components/layout/PageHeader'
 import ModuleToolbar from '../components/layout/ModuleToolbar'
 import Button from '../components/ui/Button'
 import EmptyState from '../components/ui/EmptyState'
+import ErrorBanner from '../components/ui/ErrorBanner'
 import Input from '../components/ui/Input'
 import Textarea from '../components/ui/Textarea'
 import FormDialog from '../components/ui/FormDialog'
@@ -34,6 +41,7 @@ export default function Tasks() {
   const [sortBy, setSortBy] = useState('manual')
   const [taskToDelete, setTaskToDelete] = useState(null)
   const [formOpen, setFormOpen] = useState(false)
+  const [searchParams, setSearchParams] = useSearchParams()
 
   const resetForm = () => {
     setTitle('')
@@ -62,6 +70,19 @@ export default function Tasks() {
     setActionError('')
     setFormOpen(true)
   }
+
+  // Opening the edit dialog when arriving from the Dashboard's recent-tasks
+  // list (?edit=<id>) — reuses the card Edit flow, no new route/backend.
+  useEffect(() => {
+    const editId = searchParams.get('edit')
+    if (!editId) return
+    const task = tasks.find((t) => t.id === editId)
+    if (!task) return
+    handleStartEdit(task)
+    const next = new URLSearchParams(searchParams)
+    next.delete('edit')
+    setSearchParams(next, { replace: true })
+  }, [searchParams, tasks])
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -140,42 +161,42 @@ export default function Tasks() {
           placeholder="Search tasks..."
           className="flex-1 min-w-[120px] [&>label]:sr-only"
         />
-        <select
-          value={filterPriority}
-          onChange={(e) => setFilterPriority(e.target.value)}
-          className={cx(FIELD_CONTROL_CLASSES, '!w-auto text-sm cursor-pointer')}
-          aria-label="Filter by priority"
-        >
-          <option value="all">All Priorities</option>
-          <option value="low">Low</option>
-          <option value="medium">Medium</option>
-          <option value="high">High</option>
-        </select>
-        <select
-          value={filterStatus}
-          onChange={(e) => setFilterStatus(e.target.value)}
-          className={cx(FIELD_CONTROL_CLASSES, '!w-auto text-sm cursor-pointer')}
-          aria-label="Filter by status"
-        >
-          <option value="all">All Statuses</option>
-          <option value="unstarted">Unstarted</option>
-          <option value="in-progress">In Progress</option>
-          <option value="deferred">Deferred</option>
-          <option value="done">Done</option>
-          <option value="cancelled">Cancelled</option>
-        </select>
-        <select
-          value={sortBy}
-          onChange={(e) => setSortBy(e.target.value)}
-          className={cx(FIELD_CONTROL_CLASSES, '!w-auto text-sm cursor-pointer')}
-          aria-label="Sort tasks"
-        >
-          {TASK_SORT_OPTIONS.map((option) => (
-            <option key={option.value} value={option.value}>
-              {option.label}
-            </option>
-          ))}
-        </select>
+        <Select value={filterPriority} onValueChange={setFilterPriority}>
+          <SelectTrigger aria-label="Filter by priority" className="px-3 py-2 text-sm">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Priorities</SelectItem>
+            <SelectItem value="low">Low</SelectItem>
+            <SelectItem value="medium">Medium</SelectItem>
+            <SelectItem value="high">High</SelectItem>
+          </SelectContent>
+        </Select>
+        <Select value={filterStatus} onValueChange={setFilterStatus}>
+          <SelectTrigger aria-label="Filter by status" className="px-3 py-2 text-sm">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Statuses</SelectItem>
+            <SelectItem value="unstarted">Unstarted</SelectItem>
+            <SelectItem value="in-progress">In Progress</SelectItem>
+            <SelectItem value="deferred">Deferred</SelectItem>
+            <SelectItem value="done">Done</SelectItem>
+            <SelectItem value="cancelled">Cancelled</SelectItem>
+          </SelectContent>
+        </Select>
+        <Select value={sortBy} onValueChange={setSortBy}>
+          <SelectTrigger aria-label="Sort tasks" className="px-3 py-2 text-sm">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {TASK_SORT_OPTIONS.map((option) => (
+              <SelectItem key={option.value} value={option.value}>
+                {option.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
         <Button variant="primary" size="sm" onClick={handleOpenCreate}>
           <Plus className="w-(--icon-sm) h-(--icon-sm)" />
           <span className="hidden sm:inline">Add Task</span>
@@ -183,17 +204,11 @@ export default function Tasks() {
       </ModuleToolbar>
 
       {error && (
-        <div
-          role="alert"
-          className="mt-4 flex flex-col gap-3 rounded-lg border border-destructive-soft bg-destructive-soft/20 p-4 sm:flex-row sm:items-center sm:justify-between"
-        >
-          <p className="text-body-small text-foreground">
-            {error} — make sure the Huby backend is running.
-          </p>
-          <Button variant="outline" size="sm" onClick={refresh}>
-            Retry
-          </Button>
-        </div>
+        <ErrorBanner
+          className="mt-4"
+          message={`${error} — make sure the Huby backend is running.`}
+          onRetry={refresh}
+        />
       )}
 
       {actionError && (
@@ -268,33 +283,31 @@ export default function Tasks() {
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div className="flex flex-col gap-2">
             <label className="text-label text-foreground" htmlFor="task-priority">Priority</label>
-            <select
-              id="task-priority"
-              name="priority"
-              value={priority}
-              onChange={(e) => setPriority(e.target.value)}
-              className={cx(FIELD_CONTROL_CLASSES, 'w-full text-sm cursor-pointer')}
-            >
-              <option value="low">Low</option>
-              <option value="medium">Medium</option>
-              <option value="high">High</option>
-            </select>
+            <Select value={priority} onValueChange={setPriority} name="priority">
+              <SelectTrigger id="task-priority" className="w-full px-3 py-2 text-sm">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="low">Low</SelectItem>
+                <SelectItem value="medium">Medium</SelectItem>
+                <SelectItem value="high">High</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
           <div className="flex flex-col gap-2">
             <label className="text-label text-foreground" htmlFor="task-status">Status</label>
-            <select
-              id="task-status"
-              name="status"
-              value={status}
-              onChange={(e) => setStatus(e.target.value)}
-              className={cx(FIELD_CONTROL_CLASSES, 'w-full text-sm cursor-pointer')}
-            >
-              <option value="unstarted">Unstarted</option>
-              <option value="in-progress">In Progress</option>
-              <option value="deferred">Deferred</option>
-              <option value="done">Done</option>
-              <option value="cancelled">Cancelled</option>
-            </select>
+            <Select value={status} onValueChange={setStatus} name="status">
+              <SelectTrigger id="task-status" className="w-full px-3 py-2 text-sm">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="unstarted">Unstarted</SelectItem>
+                <SelectItem value="in-progress">In Progress</SelectItem>
+                <SelectItem value="deferred">Deferred</SelectItem>
+                <SelectItem value="done">Done</SelectItem>
+                <SelectItem value="cancelled">Cancelled</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
           <Input
             label="Due Date"

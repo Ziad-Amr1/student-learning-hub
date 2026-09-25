@@ -1,7 +1,28 @@
+import { CheckCircle2, Circle, Clock, PauseCircle, XCircle } from 'lucide-react'
+
 export const PRIORITY_VARIANT = {
   low: 'outline',
   medium: 'info',
   high: 'danger',
+}
+
+// Status icons + their color styles — shared by TaskCard and the read-only
+// task details dialog. `in-progress` uses the warning color deliberately
+// (active attention), NOT the task-status warning conflation rule.
+export const STATUS_ICON_BY_STATUS = {
+  unstarted: Circle,
+  'in-progress': Clock,
+  deferred: PauseCircle,
+  done: CheckCircle2,
+  cancelled: XCircle,
+}
+
+export const STATUS_ICON_STYLE = {
+  unstarted: 'text-muted-foreground',
+  'in-progress': 'text-warning-strong',
+  deferred: 'text-info-strong',
+  done: 'text-success-strong',
+  cancelled: 'text-destructive-strong',
 }
 
 export const STATUS_VISUALS = {

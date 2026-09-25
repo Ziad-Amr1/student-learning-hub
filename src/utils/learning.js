@@ -64,8 +64,8 @@ export function resolveLinkedIds(ids, items) {
 // --- Transient sorting (mirrors utils/taskSort.js) ---
 // Pinned entries always rank first (Notes/Resources pattern); the selected
 // mode orders the rest. Operates on copies only — never mutates the persisted
-// array order. Sorts are NOT persisted (transient toolbar state; the shared
-// useLocalStorage value stays in storage order).
+// array order. Sorts are NOT persisted (transient toolbar state; the remote
+// store value stays in storage order).
 
 export const LEARNING_SORT_OPTIONS = [
   { value: 'manual', label: 'Manual order' },
@@ -115,7 +115,7 @@ export function sortLearningEntries(entries, mode) {
 // `videoMinutes` — so a book's completed-page count is derived from `progress`
 // × `totalPages` rather than being stored. All target fields are optional;
 // absent targets fall back to a bare % in the card.
-export function formatDuration(minutes) {
+function formatDuration(minutes) {
   const total = Math.max(0, Math.round(Number(minutes) || 0))
   const h = Math.floor(total / 60)
   const m = total % 60

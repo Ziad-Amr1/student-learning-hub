@@ -1,5 +1,10 @@
-import { cx } from '../../utils/cx'
-import { FIELD_CONTROL_CLASSES } from '../../components/ui/formStyles'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '../../components/ui/Select'
 import Input from '../../components/ui/Input'
 import {
   LEARNING_CATEGORIES,
@@ -38,11 +43,11 @@ export default function LearningEntryForm({
   onToggleNote,
   onToggleResource,
 }) {
-  const selectClass = cx(FIELD_CONTROL_CLASSES, 'text-sm cursor-pointer')
   // Category-aware metadata (07.6 refinement): course/practice/topic track
   // hours, books track total pages, videos an informational duration — the
   // extra fields only ever appear for their own category.
   const trackHours = category !== 'book' && category !== 'video'
+  const selectFieldClass = 'w-full px-3 py-2 text-sm'
 
   return (
     <>
@@ -61,35 +66,35 @@ export default function LearningEntryForm({
           <label className="text-label text-foreground" htmlFor="learning-category">
             Category
           </label>
-          <select
-            id="learning-category"
-            value={category}
-            onChange={(e) => onCategoryChange(e.target.value)}
-            className={selectClass}
-          >
-            {LEARNING_CATEGORIES.map((item) => (
-              <option key={item} value={item}>
-                {LEARNING_CATEGORY_LABELS[item]}
-              </option>
-            ))}
-          </select>
+          <Select value={category} onValueChange={onCategoryChange}>
+            <SelectTrigger id="learning-category" className={selectFieldClass}>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {LEARNING_CATEGORIES.map((item) => (
+                <SelectItem key={item} value={item}>
+                  {LEARNING_CATEGORY_LABELS[item]}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
         <div className="flex flex-col gap-2">
           <label className="text-label text-foreground" htmlFor="learning-status">
             Status
           </label>
-          <select
-            id="learning-status"
-            value={status}
-            onChange={(e) => onStatusChange(e.target.value)}
-            className={selectClass}
-          >
-            {LEARNING_STATUSES.map((item) => (
-              <option key={item} value={item}>
-                {LEARNING_STATUS_LABELS[item]}
-              </option>
-            ))}
-          </select>
+          <Select value={status} onValueChange={onStatusChange}>
+            <SelectTrigger id="learning-status" className={selectFieldClass}>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {LEARNING_STATUSES.map((item) => (
+                <SelectItem key={item} value={item}>
+                  {LEARNING_STATUS_LABELS[item]}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
       </div>
 

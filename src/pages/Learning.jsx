@@ -1,11 +1,17 @@
 import { useState } from 'react'
 import { BookOpen, Plus, Search } from 'lucide-react'
-import { cx } from '../utils/cx'
-import { FIELD_CONTROL_CLASSES } from '../components/ui/formStyles'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '../components/ui/Select'
 import PageHeader from '../components/layout/PageHeader'
 import ModuleToolbar from '../components/layout/ModuleToolbar'
 import Button from '../components/ui/Button'
 import EmptyState from '../components/ui/EmptyState'
+import ErrorBanner from '../components/ui/ErrorBanner'
 import Input from '../components/ui/Input'
 import FormDialog from '../components/ui/FormDialog'
 import ConfirmDialog from '../components/ui/ConfirmDialog'
@@ -292,44 +298,44 @@ export default function Learning() {
           placeholder="Search learning..."
           className="flex-1 min-w-[120px] [&>label]:sr-only"
         />
-        <select
-          value={filterCategory}
-          onChange={(e) => setFilterCategory(e.target.value)}
-          className={cx(FIELD_CONTROL_CLASSES, '!w-auto text-sm cursor-pointer')}
-          aria-label="Filter by category"
-        >
-          <option value="all">All Categories</option>
-          {LEARNING_CATEGORIES.map((category) => (
-            <option key={category} value={category}>
-              {LEARNING_CATEGORY_LABELS[category]}
-            </option>
-          ))}
-        </select>
-        <select
-          value={filterStatus}
-          onChange={(e) => setFilterStatus(e.target.value)}
-          className={cx(FIELD_CONTROL_CLASSES, '!w-auto text-sm cursor-pointer')}
-          aria-label="Filter by status"
-        >
-          <option value="all">All Statuses</option>
-          {LEARNING_STATUSES.map((status) => (
-            <option key={status} value={status}>
-              {LEARNING_STATUS_LABELS[status]}
-            </option>
-          ))}
-        </select>
-        <select
-          value={sortMode}
-          onChange={(e) => setSortMode(e.target.value)}
-          className={cx(FIELD_CONTROL_CLASSES, '!w-auto text-sm cursor-pointer')}
-          aria-label="Sort learning"
-        >
-          {LEARNING_SORT_OPTIONS.map((option) => (
-            <option key={option.value} value={option.value}>
-              {option.label}
-            </option>
-          ))}
-        </select>
+        <Select value={filterCategory} onValueChange={setFilterCategory}>
+          <SelectTrigger aria-label="Filter by category" className="px-3 py-2 text-sm">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Categories</SelectItem>
+            {LEARNING_CATEGORIES.map((category) => (
+              <SelectItem key={category} value={category}>
+                {LEARNING_CATEGORY_LABELS[category]}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <Select value={filterStatus} onValueChange={setFilterStatus}>
+          <SelectTrigger aria-label="Filter by status" className="px-3 py-2 text-sm">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Statuses</SelectItem>
+            {LEARNING_STATUSES.map((status) => (
+              <SelectItem key={status} value={status}>
+                {LEARNING_STATUS_LABELS[status]}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <Select value={sortMode} onValueChange={setSortMode}>
+          <SelectTrigger aria-label="Sort learning" className="px-3 py-2 text-sm">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {LEARNING_SORT_OPTIONS.map((option) => (
+              <SelectItem key={option.value} value={option.value}>
+                {option.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
         <Button variant="primary" size="sm" onClick={handleOpenCreate}>
           <Plus className="w-(--icon-sm) h-(--icon-sm)" />
           <span className="hidden sm:inline">Add Goal</span>
@@ -337,17 +343,11 @@ export default function Learning() {
       </ModuleToolbar>
 
       {error && (
-        <div
-          role="alert"
-          className="mt-4 flex flex-col gap-3 rounded-lg border border-destructive-soft bg-destructive-soft/20 p-4 sm:flex-row sm:items-center sm:justify-between"
-        >
-          <p className="text-body-small text-foreground">
-            We couldn't load your learning goals. {error} — make sure the Huby backend is running.
-          </p>
-          <Button variant="outline" size="sm" onClick={refresh}>
-            Retry
-          </Button>
-        </div>
+        <ErrorBanner
+          className="mt-4"
+          message={`We couldn't load your learning goals. ${error} — make sure the Huby backend is running.`}
+          onRetry={refresh}
+        />
       )}
 
       {migrationFailures && migrationFailures.length > 0 && (

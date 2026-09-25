@@ -12,6 +12,7 @@ import Badge from '../../components/ui/Badge'
 import Button from '../../components/ui/Button'
 import Card from '../../components/ui/Card'
 import ProgressBar from '../../components/ui/ProgressBar'
+import { Tooltip, TooltipContent, TooltipTrigger } from '../../components/ui/Tooltip'
 import LinkedItems from './LinkedItems'
 
 // Card rhythm (07.6 refinement): Row 1 = title + pin/edit/delete actions;
@@ -43,32 +44,47 @@ export default function LearningEntryCard({
       <div className="flex items-start justify-between gap-2">
         <h3 className="min-w-0 text-base font-bold text-foreground wrap-anywhere">{entry.title}</h3>
         <div className="flex shrink-0 items-center gap-1">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => onTogglePin(entry.id)}
-            aria-label={entry.pinned ? 'Unpin learning goal' : 'Pin learning goal'}
-            aria-pressed={entry.pinned}
-            className={cx(entry.pinned && PIN_BUTTON_ACTIVE_CLASSES)}
-          >
-            <Pin className={cx('w-(--icon-sm) h-(--icon-sm)', entry.pinned && 'fill-current')} />
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => onEdit(entry)}
-            aria-label={`Edit learning goal: ${entry.title}`}
-          >
-            <Pencil className="w-(--icon-sm) h-(--icon-sm)" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => onDelete(entry)}
-            aria-label={`Delete learning goal: ${entry.title}`}
-          >
-            <Trash2 className="w-(--icon-sm) h-(--icon-sm)" />
-          </Button>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => onTogglePin(entry.id)}
+                aria-label={entry.pinned ? 'Unpin learning goal' : 'Pin learning goal'}
+                aria-pressed={entry.pinned}
+                className={cx(entry.pinned && PIN_BUTTON_ACTIVE_CLASSES)}
+              >
+                <Pin className={cx('w-(--icon-sm) h-(--icon-sm)', entry.pinned && 'fill-current')} />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>{entry.pinned ? 'Unpin' : 'Pin'}</TooltipContent>
+          </Tooltip>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => onEdit(entry)}
+                aria-label={`Edit learning goal: ${entry.title}`}
+              >
+                <Pencil className="w-(--icon-sm) h-(--icon-sm)" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>Edit</TooltipContent>
+          </Tooltip>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => onDelete(entry)}
+                aria-label={`Delete learning goal: ${entry.title}`}
+              >
+                <Trash2 className="w-(--icon-sm) h-(--icon-sm)" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>Delete</TooltipContent>
+          </Tooltip>
         </div>
       </div>
 

@@ -142,9 +142,10 @@ Precise rule for state backgrounds on `Card` surfaces:
   classes are pure string constants in `src/constants/cardStatus.js`
   (`PRIORITY_VARIANT`, `STATUS_VISUALS`, `PINNED_CARD_VISUAL`,
   `PIN_BUTTON_ACTIVE_CLASSES`).
-  Icons stay in `StatusDropdown` (React components must not live in
+  Icons stay in the task-card status switcher (`TaskCard.jsx` — React
+  components must not live in
   constants/utils).
-- **Task status card tints (TaskCard — same mapping as StatusDropdown):**
+- **Task status card tints (TaskCard — same mapping as the task status switcher):**
 
   | Status | Badge variant | Left border | Card tint |
   | --- | --- | --- | --- |
@@ -340,9 +341,9 @@ breakpoint tokens are defined.
   drift where the error ring used a non-token red).
 - `--z-toolbar: 5` — sticky ModuleToolbar below navbar.
 - `--z-nav: 10` — sticky Navbar.
-- `--z-dropdown: 50` — transient listboxes/dropdowns (StatusDropdown
-  listbox; Sprint 08 — replaces the former raw z value of 50). Above nav,
-  below the skip link.
+- `--z-dropdown: 50` — transient listboxes/dropdowns (Select listboxes +
+  Popover/Tooltip overlays; Sprint 08 — replaces the former raw z value of
+  50). Above nav, below the skip link.
 - `--z-skip-link: 100` — skip-to-content link.
 - Native `<dialog>` top layer handles modal/drawer stacking.
 - Full layering spec: `docs/LAYERING_SYSTEM.md`.
@@ -495,27 +496,93 @@ see `docs/COMPONENTS.md`.
   (chips use `w-full` to wrap to a second line).
 - **Layering:** see `docs/LAYERING_SYSTEM.md`.
 
-### StatusDropdown (`components/ui/StatusDropdown.jsx`) ✅ (Sprint 06.5)
-- **Purpose:** accessible status selector for task cards — replaces native
-  `<select>` with a combobox-pattern dropdown built from existing primitives.
-- **Props:** `value` (current status), `onChange` (callback), `taskTitle`
-  (for aria-label).
-- **Statuses & colors (Sprint 07.5 semantic mapping):** `unstarted`
-  (Circle, muted-foreground / secondary neutral) · `in-progress` (Clock,
-  accent-strong — the accent token, NOT warning) · `deferred` (PauseCircle,
-  info-strong) · `done` (CheckCircle2, success-strong) · `cancelled`
-  (XCircle, destructive-strong). `warning` is reserved for time-based
-  caution (e.g. due-soon), not for a task status. Legacy persisted `todo`
-  values render as `unstarted` (alias via `normalizeTaskStatus`) — never
-  color alone: every status keeps its icon + text label.
-- **Visual:** trigger button shows status icon + label + chevron; positioned
-  listbox below with option highlight on hover/keyboard; selected option
-  uses `bg-primary-soft text-primary-strong`.
-- **A11y:** `role="combobox"` + `aria-expanded` + `aria-haspopup="listbox"`
-  on trigger; `role="listbox"` + `aria-selected` per option; full keyboard
-  navigation (ArrowUp/Down, Enter/Space, Escape, Tab).
-- **Scope:** lightweight interim for Sprint 06.5 hardening — full Dropdown
-  with focus trap lands in Sprint 14.
+### Select (`components/ui/Select.jsx`) ✅ (Sprint 06.5 → shared, 2026-09-25)
+- **Purpose:** shared single-value select (JS port of the shadcn/ui select on
+  `@radix-ui/react-select`) — supersedes native `<select>` (module filters +
+  form fields) and the interim StatusDropdown (task-card status switcher).
+- **API:** compound — `Select` (Root: `value`, `onValueChange`,
+  `name`) → `SelectTrigger` (+ `SelectValue`; accepts `id`/`aria-label`) →
+  `SelectContent` → `SelectItem` (`value`); `SelectGroup`/`SelectLabel`/
+  `SelectSeparator` exported.
+- **Adopted on:** Tasks toolbar (priority/status/sort) + Task form, Learning
+  toolbar (category/status/sort) + LearningEntryForm, Resources form
+  (category), and the task-card status switcher.
+- **Sizing contract:** the trigger bakes in NO width/padding — consumers own
+  it (`w-full px-3 py-2` forms · `px-3 py-2` toolbar filters ·
+  `px-2.5 py-1.5` card status). Chevron rotates on open.
+- **Task status colors (preserved):** icons per status live in
+  `src/constants/cardStatus.js` via `STATUS_ICON_BY_STATUS`/`STATUS_ICON_STYLE`
+  (shared by TaskCard + the dashboard task details dialog) — `in-progress` =
+  warning (substantiates the 07.5 regression decision, NOT accent; icon +
+  text label always accompany color). Legacy persisted `todo` renders as
+  `unstarted` (alias via `normalizeTaskStatus`). The task-card trigger shows
+  the selected status as a compact single row (icon beside the label, chevron
+  right) via `SelectValue` children.
+- **Visual:** trigger = shared field-control look (border, surface, focus
+  soft ring); listbox popper layers at `--z-dropdown`, matches trigger width
+  via `--radix-select-trigger-width`, highlight `bg-surface-muted`. Options are
+  single-line rows; the selected option's check (primary-strong) sits at the
+  RIGHT end (`pl-3 pr-8` item padding, indicator `right-2` — finalization
+  2026-09-25, applies to every Select).
+- **A11y:** Radix combobox (arrows, typeahead, Home/End, Enter/Space, Escape;
+  focus stays on the trigger). Form labels via `htmlFor` → trigger id;
+  toolbar/card triggers use `aria-label`.
+
+### StatusDropdown ✅ RETIRED (2026-09-25)
+- Superseded by the shared `Select` primitive (shadcn cleanup). Its only
+  consumer, the task-card status switcher, now renders a Select whose options
+  keep the per-status icons/colors. `src/components/ui/StatusDropdown.jsx`
+  deleted; keyboard/a11y behavior is now Radix's built-in combobox. The
+  earlier sprint text above is archived in git history (Sprint 06.5).
+
+### Popover (`components/ui/Popover.jsx`) ✅ (Sprint 08 token → shared, 2026-09-25)
+- **Purpose:** lightweight overlay anchored to a trigger for secondary
+  content (JS port of the shadcn/ui popover on `@radix-ui/react-popover`).
+- **API:** `Popover` → `PopoverTrigger` → `PopoverContent` (`align`,
+  `sideOffset`; content owns its own `w-*`/`p-*`) plus `PopoverAnchor`.
+- **Visual:** surface card (border, radius-lg, shadow-lg), content padding
+  decided by the consumer, layers at `--z-dropdown`; small gap from the
+  trigger (side offset = 4).
+- **Scope (2026-09-25): deliberately NO consumer yet** — the shared-primitives
+  cleanup keeps popover-shaped interactions out of scope (menus/dialogs stay
+  native; filters are Selects). Ready for the future Calendar feature and any
+  overlay content.
+- **Rules:** nothing essential may hide behind hover; keyboard must reach the
+  content (Radix focus management). No color-only state.
+
+### Tooltip (`components/ui/Tooltip.jsx`) ✅ (2026-09-25)
+- **Purpose:** supplementary hover label for icon-only controls (JS port of
+  the shadcn/ui tooltip on `@radix-ui/react-tooltip`).
+- **API:** `TooltipProvider` (one per app root, in `src/main.jsx`,
+  delay 300ms) → `Tooltip` → `TooltipTrigger asChild` → `TooltipContent`.
+- **Visual:** inverse pill (`bg-foreground text-background`, radius-md,
+  shadow-md, caption text-xs), layers at `--z-dropdown`, pointer-events none.
+- **Adopted on:** icon-only Pin / Edit / Delete / Visit buttons on Task, Note,
+  Resource, Learning cards. `aria-label` stays the accessible name — the
+  tooltip is a hover-only affordance, never the sole identifier; touch
+  users are unaffected (no essential hover-only functionality per §7).
+
+### Calendar (`components/ui/Calendar.jsx`) ✅ (2026-09-25 — no consumer yet)
+- **Purpose:** multi-day month-grid selection surface (shadcn-style port on
+  `react-day-picker` **v10** — `DayPicker` + `classNames`/`components` props)
+  + lucide chevrons.
+- **Visual (Huby tokens):** month grid; `day_button` is the focusable control
+  (w/h `--icon` scale, rounded-md, semibold none) — selected = primary,
+  today = accent, hover = surface-muted, outside/disabled muted; weekday
+  labels in caption/muted; nav buttons outline (border-input, surface,
+  icon-sm chevrons).
+- **Scope: deliberately NO consumer yet** — the Tasks due date stays a
+  `datetime-local` input (a day-only picker would drop the stored time
+  component; a data-model decision). Ready for the future Calendar feature
+  (PROJECT_PLAN → Future Product Direction, group 4).
+
+### DatePicker (`components/ui/DatePicker.jsx`) ✅ (2026-09-25 — no consumer yet)
+- **Purpose:** single-day date field composed from `Popover` + `Calendar` +
+  `date-fns` (canonical shadcn pattern); `mode="single"`.
+- **Props:** `value` (`Date | undefined`), `onChange`, `placeholder`,
+  `className`. Trigger styled like the shared field controls; content `w-auto
+  p-2`.
+- **No consumer yet** for the same reason as Calendar (due-date semantics).
 
 ### EmptyState (`components/ui/EmptyState.jsx`) ✅ (Sprint 08)
 - **Purpose:** shared placeholder for empty/zero-result list surfaces (Tasks,
@@ -533,8 +600,25 @@ see `docs/COMPONENTS.md`.
   pass `title`/`description`/`action`. Purely presentational — never alters
   the parent's data, CRUD, or persistence behavior.
 
+### ErrorBanner (`components/ui/ErrorBanner.jsx`) ✅ (post-audit cleanup)
+- **Purpose:** shared load-error banner with optional Retry — the pages' load
+  failure surface (`role="alert"`). Replaces the hand-rolled banner block
+  that was duplicated (with drift) across Tasks, Notes, Resources, Learning,
+  and Profile. Task copy is consumer-owned.
+- **Props:** `message` (required), `onRetry?` (callback; renders the outline
+  Retry button when present), `className`, standard passthroughs.
+- **Visual:** `role="alert"`; `flex flex-col gap-3 rounded-lg
+  border border-destructive-soft bg-destructive-soft/20 p-4
+  sm:flex-row sm:items-center sm:justify-between`; message at body-small
+  foreground. Container class is consumer-supplied (`mt-4` on list pages;
+  Profile renders inside its flex-gap page container without it). No motion.
+- **A11y:** real `role="alert"`; Retry is a real button; message is plain
+  text (no heading needed — page structure carries the h1).
+- **Rules:** no feature copy or error strings baked into the primitive —
+  consumers pass the full `message` and decide whether a Retry is offered.
+
 ### Planned primitives (do not exist yet — build only in their Sprint)
-Tooltip/Dropdown/Drawer/Toast/Skeleton/Tabs/Breadcrumb
+Dropdown/Drawer/Toast/Skeleton/Tabs/Breadcrumb
 (Sprint 14, value-permitting).
 
 ---

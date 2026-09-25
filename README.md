@@ -22,7 +22,7 @@ learning progress, plus your own personal learning journey.
 - **React Router** — single-page routing
 - **Tailwind CSS v4** — CSS-first design tokens (`@theme` in
   `src/styles/app.css`)
-- **Express** — minimal JSON API backend (Phase D-1), the single source of
+- **Express** — minimal JSON API backend (Phase D), the single source of
   truth for application data
 - **Local Storage** — browser-local UI preferences only; app data lives in
   the backend
@@ -64,7 +64,7 @@ src/
   components/layout/  Shell & navigation (AppShell, Navbar, MobileNav…)
   pages/              Route-level pages and feature components
   data/               Seed/mock product data
-  hooks/              Reusable stateful React logic (useLocalStorage, useRemote, useTasks…)
+  hooks/              Reusable stateful React logic (useRemote, useTasks…)
   utils/              Pure helpers
   constants/          Pure static constant maps
   styles/             Design tokens (single source of truth)
@@ -75,7 +75,6 @@ backend/
   src/controllers/    Request handling per domain
   src/models/         Data model + validation rules per domain
   src/data/           JSON-file store (only layer that touches the filesystem)
-  src/data/seed/      First-run seed data
   src/middleware/     Express middleware
   src/utils/          Shared helpers (id, ApiError…)
 ```

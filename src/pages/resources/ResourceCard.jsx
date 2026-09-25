@@ -4,6 +4,7 @@ import { PINNED_CARD_VISUAL, PIN_BUTTON_ACTIVE_CLASSES } from '../../constants/c
 import Button from '../../components/ui/Button'
 import Badge from '../../components/ui/Badge'
 import Card from '../../components/ui/Card'
+import { Tooltip, TooltipContent, TooltipTrigger } from '../../components/ui/Tooltip'
 
 const CATEGORY_VARIANT = {
   article: 'info',
@@ -17,45 +18,65 @@ const CATEGORY_VARIANT = {
 function ResourceActions({ resource, onTogglePin, onEdit, onDelete }) {
   return (
     <div className="flex items-center gap-1">
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={() => onTogglePin(resource.id)}
-        aria-label={resource.pinned ? 'Unpin resource' : 'Pin resource'}
-        aria-pressed={resource.pinned}
-        className={cx(
-          resource.pinned && PIN_BUTTON_ACTIVE_CLASSES
-        )}
-      >
-        <Pin className={cx('w-(--icon-sm) h-(--icon-sm)', resource.pinned && 'fill-current')} />
-      </Button>
-      <Button
-        as="a"
-        href={resource.url}
-        target="_blank"
-        rel="noopener noreferrer"
-        variant="ghost"
-        size="sm"
-        aria-label={`Visit ${resource.title}`}
-      >
-        <ExternalLink className="w-(--icon-sm) h-(--icon-sm)" />
-      </Button>
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={() => onEdit(resource)}
-        aria-label={`Edit resource: ${resource.title}`}
-      >
-        <Pencil className="w-(--icon-sm) h-(--icon-sm)" />
-      </Button>
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={() => onDelete(resource.id)}
-        aria-label={`Delete resource: ${resource.title}`}
-      >
-        <Trash2 className="w-(--icon-sm) h-(--icon-sm)" />
-      </Button>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => onTogglePin(resource.id)}
+            aria-label={resource.pinned ? 'Unpin resource' : 'Pin resource'}
+            aria-pressed={resource.pinned}
+            className={cx(
+              resource.pinned && PIN_BUTTON_ACTIVE_CLASSES
+            )}
+          >
+            <Pin className={cx('w-(--icon-sm) h-(--icon-sm)', resource.pinned && 'fill-current')} />
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent>{resource.pinned ? 'Unpin' : 'Pin'}</TooltipContent>
+      </Tooltip>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button
+            as="a"
+            href={resource.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            variant="ghost"
+            size="sm"
+            aria-label={`Visit ${resource.title}`}
+          >
+            <ExternalLink className="w-(--icon-sm) h-(--icon-sm)" />
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent>Visit</TooltipContent>
+      </Tooltip>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => onEdit(resource)}
+            aria-label={`Edit resource: ${resource.title}`}
+          >
+            <Pencil className="w-(--icon-sm) h-(--icon-sm)" />
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent>Edit</TooltipContent>
+      </Tooltip>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => onDelete(resource.id)}
+            aria-label={`Delete resource: ${resource.title}`}
+          >
+            <Trash2 className="w-(--icon-sm) h-(--icon-sm)" />
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent>Delete</TooltipContent>
+      </Tooltip>
     </div>
   )
 }

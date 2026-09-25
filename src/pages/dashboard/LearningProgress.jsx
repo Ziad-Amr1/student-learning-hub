@@ -18,9 +18,8 @@ import {
 
 const PREVIEW_COUNT = 5
 
-// Fed by the shared backend-backed learning store (Phase D-3, formerly the
-// `student-hub:learning` useLocalStorage store) — live-syncs with anything the
-// Learning page edits, exactly like Dashboard↔Tasks in 07.5.
+// Fed by the shared backend-backed learning store (Phase D-3) — live-syncs
+// with anything the Learning page edits, exactly like Dashboard↔Tasks in 07.5.
 export default function LearningProgress({ className }) {
   const { learning } = useLearning()
   const entries = learning ?? []

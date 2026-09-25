@@ -2,7 +2,7 @@ import { useCallback, useEffect, useSyncExternalStore } from 'react'
 
 // Module-level stores keyed by string (e.g. 'tasks'). Every consumer of the
 // same key reads the same cache and is notified on change — the same
-// same-tab live-sync model as useLocalStorage, but for backend-backed data:
+// same-tab live-sync model, but for backend-backed data:
 //   { data, loading, error, refresh, setData }
 //
 // Fetch is deliberately NOT fire-and-forget per render. The first consumer to
@@ -19,13 +19,15 @@ function readInitial(seed) {
 function ensureStore(key, seed) {
   let store = stores.get(key)
   if (!store) {
+    const data = readInitial(seed)
     store = {
-      data: readInitial(seed),
+      data,
       loading: false,
       error: null,
       fetched: false,
       promise: null,
       listeners: new Set(),
+      snapshot: { data, loading: false, error: null },
     }
     stores.set(key, store)
   }
@@ -45,9 +47,10 @@ export default function useRemote(key, fetchList, { seed = [] } = {}) {
     [store],
   )
 
-  const getSnapshot = useCallback(() => store.data, [store])
+  const getSnapshot = useCallback(() => store.snapshot, [store])
 
   const notify = useCallback(() => {
+    store.snapshot = { data: store.data, loading: store.loading, error: store.error }
     for (const listener of store.listeners) listener()
   }, [store])
 
@@ -95,12 +98,12 @@ export default function useRemote(key, fetchList, { seed = [] } = {}) {
     return doFetch()
   }, [store, doFetch])
 
-  const data = useSyncExternalStore(subscribe, getSnapshot)
+  const snapshot = useSyncExternalStore(subscribe, getSnapshot)
 
   return {
-    data,
-    loading: store.loading,
-    error: store.error,
+    data: snapshot.data,
+    loading: snapshot.loading,
+    error: snapshot.error,
     setData,
     refresh,
   }

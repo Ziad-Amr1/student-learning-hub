@@ -4,6 +4,7 @@ import PageHeader from '../components/layout/PageHeader'
 import ModuleToolbar from '../components/layout/ModuleToolbar'
 import Button from '../components/ui/Button'
 import EmptyState from '../components/ui/EmptyState'
+import ErrorBanner from '../components/ui/ErrorBanner'
 import Input from '../components/ui/Input'
 import Textarea from '../components/ui/Textarea'
 import FormDialog from '../components/ui/FormDialog'
@@ -148,17 +149,11 @@ export default function Notes() {
       </ModuleToolbar>
 
       {error && (
-        <div
-          role="alert"
-          className="mt-4 flex flex-col gap-3 rounded-lg border border-destructive-soft bg-destructive-soft/20 p-4 sm:flex-row sm:items-center sm:justify-between"
-        >
-          <p className="text-body-small text-foreground">
-            We couldn't load your notes. {error} — make sure the Huby backend is running.
-          </p>
-          <Button variant="outline" size="sm" onClick={refresh}>
-            Retry
-          </Button>
-        </div>
+        <ErrorBanner
+          className="mt-4"
+          message={`We couldn't load your notes. ${error} — make sure the Huby backend is running.`}
+          onRetry={refresh}
+        />
       )}
 
       {migrationFailures && migrationFailures.length > 0 && (

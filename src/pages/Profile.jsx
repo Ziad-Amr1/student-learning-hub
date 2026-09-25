@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import PageHeader from '../components/layout/PageHeader'
-import Button from '../components/ui/Button'
+import ErrorBanner from '../components/ui/ErrorBanner'
 import { useProfile } from '../hooks/useProfile'
 import LearningProgressList from './profile/LearningProgressList'
 import ProfileCard from './profile/ProfileCard'
@@ -29,17 +29,10 @@ export default function Profile() {
             description="Your personal learning profile."
           />
           {error ? (
-            <div
-              role="alert"
-              className="flex flex-col gap-3 rounded-lg border border-destructive-soft bg-destructive-soft/20 p-4 sm:flex-row sm:items-center sm:justify-between"
-            >
-              <p className="text-body-small text-foreground">
-                We couldn't load your profile. {error} — make sure the Huby backend is running.
-              </p>
-              <Button variant="outline" size="sm" onClick={refresh}>
-                Retry
-              </Button>
-            </div>
+            <ErrorBanner
+              message={`We couldn't load your profile. ${error} — make sure the Huby backend is running.`}
+              onRetry={refresh}
+            />
           ) : !profile || loading ? (
             <p className="text-body-small text-muted-foreground">Loading profile…</p>
           ) : (

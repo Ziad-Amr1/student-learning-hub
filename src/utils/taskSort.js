@@ -1,4 +1,4 @@
-export const TASK_PRIORITY_RANK = { high: 3, medium: 2, low: 1 }
+const TASK_PRIORITY_RANK = { high: 3, medium: 2, low: 1 }
 
 export const TASK_SORT_OPTIONS = [
   { value: 'manual', label: 'Manual order' },

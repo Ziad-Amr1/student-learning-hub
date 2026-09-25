@@ -5,6 +5,7 @@ import { PINNED_CARD_VISUAL, PIN_BUTTON_ACTIVE_CLASSES } from '../../constants/c
 import Button from '../../components/ui/Button'
 import Badge from '../../components/ui/Badge'
 import Card from '../../components/ui/Card'
+import { Tooltip, TooltipContent, TooltipTrigger } from '../../components/ui/Tooltip'
 
 export default function NoteCard({ note, onEdit, onTogglePin, onDelete }) {
   const preview = note.content.length > 160 ? note.content.slice(0, 160) + '...' : note.content
@@ -34,34 +35,49 @@ export default function NoteCard({ note, onEdit, onTogglePin, onDelete }) {
             : `Created ${timeAgo(note.createdAt)}`}
         </span>
         <div className="flex items-center gap-1">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => onTogglePin(note.id)}
-            aria-label={note.pinned ? 'Unpin note' : 'Pin note'}
-            aria-pressed={note.pinned}
-            className={cx(
-              note.pinned && PIN_BUTTON_ACTIVE_CLASSES
-            )}
-          >
-            <Pin className={cx('w-(--icon-sm) h-(--icon-sm)', note.pinned && 'fill-current')} />
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => onEdit(note)}
-            aria-label={`Edit note: ${note.title}`}
-          >
-            <Pencil className="w-(--icon-sm) h-(--icon-sm)" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => onDelete(note.id)}
-            aria-label={`Delete note: ${note.title}`}
-          >
-            <Trash2 className="w-(--icon-sm) h-(--icon-sm)" />
-          </Button>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => onTogglePin(note.id)}
+                aria-label={note.pinned ? 'Unpin note' : 'Pin note'}
+                aria-pressed={note.pinned}
+                className={cx(
+                  note.pinned && PIN_BUTTON_ACTIVE_CLASSES
+                )}
+              >
+                <Pin className={cx('w-(--icon-sm) h-(--icon-sm)', note.pinned && 'fill-current')} />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>{note.pinned ? 'Unpin' : 'Pin'}</TooltipContent>
+          </Tooltip>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => onEdit(note)}
+                aria-label={`Edit note: ${note.title}`}
+              >
+                <Pencil className="w-(--icon-sm) h-(--icon-sm)" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>Edit</TooltipContent>
+          </Tooltip>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => onDelete(note.id)}
+                aria-label={`Delete note: ${note.title}`}
+              >
+                <Trash2 className="w-(--icon-sm) h-(--icon-sm)" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>Delete</TooltipContent>
+          </Tooltip>
         </div>
       </div>
     </Card>

@@ -2,6 +2,7 @@ import { NavLink } from 'react-router-dom'
 import { PanelLeftClose, PanelLeftOpen } from 'lucide-react'
 import { cx } from '../../utils/cx'
 import Separator from '../ui/Separator'
+import { Tooltip, TooltipTrigger, TooltipContent } from '../ui/Tooltip'
 
 const SECTIONS = [
   { id: 'workspace', label: 'Workspace' },
@@ -39,12 +40,11 @@ export default function Sidebar({ items, collapsed = false, onToggle }) {
               >
                 {section.label}
               </p>
-              <ul>
-                {sectionItems.map((item) => (
-                  <li key={item.to}>
+              <ul className={cx(collapsed && 'space-y-2')}>
+                {sectionItems.map((item) => {
+                  const link = (
                     <NavLink
                       to={item.to}
-                      title={item.label}
                       aria-label={collapsed ? item.label : undefined}
                       className={({ isActive }) =>
                         cx(
@@ -60,30 +60,56 @@ export default function Sidebar({ items, collapsed = false, onToggle }) {
                       />
                       <span className={cx(collapsed && 'hidden')}>{item.label}</span>
                     </NavLink>
-                  </li>
-                ))}
+                  )
+                  return (
+                    <li key={item.to}>
+                      {collapsed ? (
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <span className="block">{link}</span>
+                          </TooltipTrigger>
+                          <TooltipContent side="right">{item.label}</TooltipContent>
+                        </Tooltip>
+                      ) : (
+                        link
+                      )}
+                    </li>
+                  )
+                })}
               </ul>
             </div>
           )
         })}
       </nav>
-      <button
-        type="button"
-        aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-        title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-        onClick={onToggle}
-        className={cx(
-          'flex items-center gap-3 w-full min-h-10 p-2 border-none rounded-md bg-transparent text-muted-foreground text-(--font-size-small) font-medium text-left whitespace-nowrap cursor-pointer hover:text-foreground hover:bg-surface-muted',
-          collapsed && 'justify-center'
-        )}
-      >
-        {collapsed ? (
-          <PanelLeftOpen aria-hidden="true" className="w-(--icon-md) h-(--icon-md) shrink-0" />
-        ) : (
+      {collapsed ? (
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <button
+              type="button"
+              aria-label="Expand sidebar"
+              onClick={onToggle}
+              className={cx(
+                'flex items-center gap-3 w-full min-h-10 p-2 border-none rounded-md bg-transparent text-muted-foreground text-(--font-size-small) font-medium text-left whitespace-nowrap cursor-pointer hover:text-foreground hover:bg-surface-muted',
+                collapsed && 'justify-center'
+              )}
+            >
+              <PanelLeftOpen aria-hidden="true" className="w-(--icon-md) h-(--icon-md) shrink-0" />
+              <span className="hidden">Collapse</span>
+            </button>
+          </TooltipTrigger>
+          <TooltipContent side="right">Expand sidebar</TooltipContent>
+        </Tooltip>
+      ) : (
+        <button
+          type="button"
+          aria-label="Collapse sidebar"
+          onClick={onToggle}
+          className="flex items-center gap-3 w-full min-h-10 p-2 border-none rounded-md bg-transparent text-muted-foreground text-(--font-size-small) font-medium text-left whitespace-nowrap cursor-pointer hover:text-foreground hover:bg-surface-muted"
+        >
           <PanelLeftClose aria-hidden="true" className="w-(--icon-md) h-(--icon-md) shrink-0" />
-        )}
-        <span className={cx(collapsed && 'hidden')}>Collapse</span>
-      </button>
+          <span>Collapse</span>
+        </button>
+      )}
     </aside>
   )
 }
