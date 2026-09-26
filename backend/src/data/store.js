@@ -1,69 +1,93 @@
-import { existsSync, readFileSync, writeFileSync, mkdirSync } from 'node:fs'
-import { dirname, resolve } from 'node:path'
-import { fileURLToPath } from 'node:url'
+// LOW-LEVEL SQLite-backed store. This is THE persistence seam: the only module
+// Models reach for storage, and the only module that knows the database
+// exists. The public surface is byte-compatible with the previous JSON store —
+// findAll / findById / insert / update / remove, all synchronous — so Models,
+// Controllers, Routes, and the frontend API are untouched.
+//
+// The store is entity-agnostic: domain shape, defaults, and normalization live
+// in the models, not here. It maps one table to one domain; column names are
+// the model field names; JSON-array model fields (see db/schema.js JSON_COLUMNS)
+// are serialized to TEXT and deserialized back to JS arrays on read.
+// SQL is confined to this module + the db layer (db/init.js, db/schema.js,
+// db/migrations.js); parameterized statements are used for every value.
+import { getDatabase } from '../db/init.js'
+import { JSON_COLUMNS } from '../db/schema.js'
 
-const CURRENT_DIR = dirname(fileURLToPath(import.meta.url))
+function toDbValue(value) {
+  if (value === undefined || value === null) return null
+  if (Array.isArray(value)) return JSON.stringify(value)
+  if (typeof value === 'boolean') return value ? 1 : 0
+  return value
+}
 
-// LOW-LEVEL file-backed store. This is the ONLY module in the project that
-// touches the filesystem / knows about JSON files. It is intentionally
-// entity-agnostic: domain shape, defaults, and normalization live in the
-// models, not here. Swapping JSON persistence for a real database later would
-// only require replacing this one file's internals.
-export class JsonStore {
-  constructor(filename) {
-    this.file = resolve(CURRENT_DIR, filename)
-    if (!existsSync(this.file)) {
-      mkdirSync(dirname(this.file), { recursive: true })
-      writeFileSync(this.file, JSON.stringify([], null, 2), 'utf-8')
-    }
+export class SqliteStore {
+  constructor(table) {
+    this.table = table
+    this.jsonColumns = JSON_COLUMNS[table] ?? []
   }
 
-  readAll() {
-    try {
-      return JSON.parse(readFileSync(this.file, 'utf-8'))
-    } catch {
-      return []
-    }
+  get db() {
+    return getDatabase()
   }
 
-  writeAll(records) {
-    writeFileSync(this.file, JSON.stringify(records, null, 2), 'utf-8')
+  decode(row) {
+    if (!row) return row
+    for (const column of this.jsonColumns) {
+      const value = row[column]
+      if (typeof value === 'string') {
+        try {
+          row[column] = JSON.parse(value)
+        } catch {
+          row[column] = []
+        }
+      }
+    }
+    return row
   }
 
   findAll() {
-    return this.readAll()
+    return this.db
+      .prepare(`SELECT * FROM "${this.table}" ORDER BY rowid`)
+      .all()
+      .map((row) => this.decode(row))
   }
 
   findById(id) {
-    return this.readAll().find((record) => String(record.id) === String(id)) || null
+    const row = this.db.prepare(`SELECT * FROM "${this.table}" WHERE "id" = ?`).get(id)
+    return this.decode(row) ?? null
   }
 
   insert(record) {
-    const all = this.readAll()
-    all.push(record)
-    this.writeAll(all)
+    const keys = Object.keys(record)
+    const values = keys.map((key) => toDbValue(record[key]))
+    this.db
+      .prepare(
+        `INSERT INTO "${this.table}" (${keys.map((key) => `"${key}"`).join(', ')})
+         VALUES (${keys.map(() => '?').join(', ')})`,
+      )
+      .run(...values)
     return record
   }
 
-  update(id, patch) {
-    const all = this.readAll()
-    const index = all.findIndex((record) => String(record.id) === String(id))
-    if (index === -1) return null
-    all[index] = { ...all[index], ...patch, id: all[index].id }
-    this.writeAll(all)
-    return all[index]
+  update(id, record) {
+    const keys = Object.keys(record).filter((key) => key !== 'id')
+    const values = keys.map((key) => toDbValue(record[key]))
+    const result = this.db
+      .prepare(
+        `UPDATE "${this.table}" SET ${keys.map((key) => `"${key}" = ?`).join(', ')}
+         WHERE "id" = ?`,
+      )
+      .run(...values, id)
+    if (result.changes === 0) return null
+    return { ...record, id }
   }
 
   remove(id) {
-    const all = this.readAll()
-    const index = all.findIndex((record) => String(record.id) === String(id))
-    if (index === -1) return false
-    all.splice(index, 1)
-    this.writeAll(all)
-    return true
+    const result = this.db.prepare(`DELETE FROM "${this.table}" WHERE "id" = ?`).run(id)
+    return result.changes > 0
   }
 }
 
-export function createStore(filename) {
-  return new JsonStore(filename)
+export function createStore(table) {
+  return new SqliteStore(table)
 }

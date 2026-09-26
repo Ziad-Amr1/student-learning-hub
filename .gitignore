@@ -22,6 +22,9 @@ dist-ssr
 # Local files
 *.local
 
+# SQLite database files (runtime data, never committed)
+backend/data/
+
 # Internal agent/project documentation — kept local, NOT committed.
 # Exception: docs/DESIGN_SYSTEM.md remains tracked in the repository.
 /AGENTS.md
