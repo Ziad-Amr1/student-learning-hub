@@ -1,12 +1,9 @@
 import { cx } from '../../utils/cx'
 
-export default function PageHeader({ title, description, actions, className }) {
+export default function PageHeader({ title, description, className }) {
   return (
     <header className={cx('flex flex-col gap-2', className)}>
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <h1>{title}</h1>
-        {actions && <div className="flex flex-wrap items-center gap-3">{actions}</div>}
-      </div>
+      <h1>{title}</h1>
       {description && (
         <p className="text-body-small text-muted-foreground max-w-[60ch]">{description}</p>
       )}

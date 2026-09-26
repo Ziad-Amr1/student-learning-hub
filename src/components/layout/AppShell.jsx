@@ -71,7 +71,7 @@ export default function AppShell() {
       >
         Skip to content
       </a>
-      <Navbar items={NAV_ITEMS} onMenuClick={() => setMenuOpen(true)} />
+      <Navbar onMenuClick={() => setMenuOpen(true)} />
       <Sidebar
         items={NAV_ITEMS}
         collapsed={sidebarCollapsed}

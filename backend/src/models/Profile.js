@@ -10,10 +10,10 @@ const PROFILE_ID = 'profile'
 // every upsert, matching the entity's contract.
 export const PROFILE_RULES = [
   { field: 'name', required: true, type: 'string', message: "'name' is required and must be a non-empty string." },
-  { field: 'avatarUrl', type: 'string', format: 'url' },
-  { field: 'university', type: 'string' },
-  { field: 'major', type: 'string' },
-  { field: 'bio', type: 'string' },
+  { field: 'avatarUrl', type: 'string', format: 'url', nullable: true },
+  { field: 'university', type: 'string', nullable: true },
+  { field: 'major', type: 'string', nullable: true },
+  { field: 'bio', type: 'string', nullable: true },
   { field: 'skills', arrayOf: 'string' },
 ]
 

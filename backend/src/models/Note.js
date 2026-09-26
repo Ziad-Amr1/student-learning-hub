@@ -11,7 +11,7 @@ const store = createStore('notes')
 export const NOTE_RULES = [
   { field: 'title', required: true, type: 'string', max: 120, message: "'title' is required and must be a non-empty string (max 120 characters)." },
   { field: 'content', required: true, type: 'string', message: "'content' is required and must be a non-empty string." },
-  { field: 'category', type: 'string', max: 60 },
+  { field: 'category', type: 'string', max: 60, nullable: true },
   { field: 'pinned', type: 'boolean' },
 ]
 

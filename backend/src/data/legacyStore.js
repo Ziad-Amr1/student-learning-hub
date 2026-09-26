@@ -1,7 +1,8 @@
-// LEGACY JSON-backed store — PRESERVED (unchanged) only to serve as the
-// reader for the pending JSON → SQLite data migration (S2/S3). Nothing in the
-// running application uses it anymore; the Store seam (data/store.js) now
-// persists to the SQLite database.
+// LEGACY JSON-backed store — PRESERVED (unchanged) for historical reference.
+// Nothing in the running application uses it; the Store seam (data/store.js)
+// persists to the SQLite database, and the S2/S3 legacy JSON → SQLite startup
+// migration (db/legacyMigration.js) is COMPLETE (it reads the source JSON
+// files directly via fs, not through this class).
 import { existsSync, readFileSync, writeFileSync, mkdirSync } from 'node:fs'
 import { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'

@@ -14,7 +14,7 @@ export const RESOURCE_RULES = [
   { field: 'title', required: true, type: 'string', max: 120, message: "'title' is required and must be a non-empty string (max 120 characters)." },
   { field: 'url', required: true, type: 'string', format: 'url', message: "'url' is required and must be a valid http(s) URL." },
   { field: 'category', required: true, type: 'string', oneOf: RESOURCE_CATEGORIES, message: `'category' must be one of: ${RESOURCE_CATEGORIES.join(', ')}.` },
-  { field: 'description', type: 'string', max: 500 },
+  { field: 'description', type: 'string', max: 500, nullable: true },
   { field: 'pinned', type: 'boolean' },
 ]
 

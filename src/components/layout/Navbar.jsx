@@ -1,7 +1,7 @@
 import { NavLink } from 'react-router-dom'
 import { Menu } from 'lucide-react'
 
-export default function Navbar({ items, onMenuClick }) {
+export default function Navbar({ onMenuClick }) {
   return (
     <header className="[grid-area:navbar] sticky top-0 z-(--z-nav) h-(--layout-navbar-height) bg-surface border-b border-border">
       <div className="h-full px-4 md:px-6 lg:px-8 flex items-center justify-between gap-2">
