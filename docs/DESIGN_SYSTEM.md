@@ -376,7 +376,8 @@ breakpoint tokens are defined.
   Popover/Tooltip overlays; Sprint 08 — replaces the former raw z value of
   50). Above nav, below the skip link.
 - `--z-skip-link: 100` — skip-to-content link.
-- Native `<dialog>` top layer handles modal/drawer stacking.
+- Modal dialogs use `--z-dropdown` (scrim + card share it, ordered by DOM); the
+  native `<dialog>` top layer is now used by `NavigationDrawer` only — see §Dialog.
 - Full layering spec: `docs/LAYERING_SYSTEM.md`.
 
 ## 8. Layout Conventions
@@ -519,20 +520,42 @@ see `docs/COMPONENTS.md`.
   action buttons row (wraps below title on narrow screens).
 - **Rules:** one per page; do not hardcode any page's content into it.
 
-### Dialog (`components/ui/Dialog.jsx`) ✅ (Sprint 06.5 — interim)
-- **Purpose:** modal overlay for confirmations and forms. Thin wrapper around
-  native `<dialog>` — Escape key works natively, backdrop click closes.
-- **Props:** `open`, `onClose`, `title`, `description?`, `children`, `className`.
+### Dialog (`components/ui/Dialog.jsx`) ✅ (Sprint 06.5 — rebuilt on Radix 2026-09-27)
+- **Purpose:** the shared modal for confirmations and forms. Composed by
+  `FormDialog`, `ConfirmDialog` and `TaskDetailsDialog`, therefore by every
+  add/edit dialog in Tasks, Notes, Resources, Learning and Library.
+- **Implementation:** `@radix-ui/react-dialog` (Portal + Overlay + Content) —
+  **not** a native `<dialog>`. A native modal dialog occupies the browser top
+  layer, which makes everything outside it **inert**; Radix
+  `Select`/`Popover`/`Calendar` portal to `document.body`, so their content
+  rendered inside it but could not be clicked, and Radix's `aria-hidden` pass was
+  refused by the browser (`Blocked aria-hidden on an element because its
+  descendant retained focus`). This was a pre-existing app-wide defect, not a My
+  Library bug — it appeared when Radix `Select` replaced the native `<select>`.
+- **Props:** `open`, `onClose`, `title`, `description?`, `children`, `className`
+  (unchanged across the rebuild).
 - **Positioning:** `fixed inset-0 m-auto` — deterministic project-owned
   centering, not relying on UA `margin: auto` (which `m-0` would break).
-  `max-h-[90dvh]` constrains height for mobile.
+  `max-h-[90dvh]` constrains height for mobile; full-bleed on small screens,
+  capped at `max-w-lg` on desktop.
+- **Layering:** Overlay and Content **share `--z-dropdown` and rely on DOM
+  order** (Content is later, so it paints above its own scrim). Nested Select
+  listboxes / Popover / Tooltip use the same token and are portalled later
+  still, so they sit above both. **Never give the scrim a higher z-index than
+  the card** — it will swallow every click inside the dialog.
 - **Scroll architecture:** inner content div uses `overflow-y-auto min-h-0
   flex-1`; header uses `shrink-0`. When form content exceeds viewport,
-  the body scrolls while header and close button remain visible.
-- **Scope:** intentionally small for Core Modules hardening. Full Dialog
-  primitive with focus trap lands in Sprint 14.
-- **Rules:** use `showModal()` for proper top-layer rendering; never use
-  `alert()` or `window.confirm()`.
+  the body scrolls while header and close button remain visible. Radix adds
+  background scroll locking; the body uses `scrollbar-hub`.
+- **Accessibility:** focus enters on open, is trapped while open, and **returns
+  to the opener on close** — a controlled Radix `Dialog` has no trigger, so the
+  primitive captures `document.activeElement` on the open transition and restores
+  it. Escape and backdrop click close. Radix hides outside content with
+  `aria-hidden` + focus scope; it deliberately does **not** set `aria-modal`.
+- **Scope:** the "interim" caveat and the deferred focus trap are **closed** —
+  the focus trap shipped with this rebuild.
+- **Rules:** never use `alert()` or `window.confirm()`; never revert this
+  primitive to `<dialog>` + `showModal()` (see LAYERING_SYSTEM.md rule 3).
 
 ### ConfirmDialog (`components/ui/ConfirmDialog.jsx`) ✅ (Sprint 06.5)
 - **Purpose:** destructive confirmation (delete actions).
