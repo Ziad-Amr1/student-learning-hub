@@ -1,8 +1,8 @@
 # Huby
 
 **Your Personal Hub for Students** — a calm, modern, organized place to
-manage your learning life in one workspace: tasks, notes, resources, and
-learning progress, plus your own personal learning journey.
+manage your learning life in one workspace: tasks, notes, resources, learning
+progress, a personal reading library, plus your own personal learning journey.
 
 ## Features
 
@@ -13,6 +13,9 @@ learning progress, plus your own personal learning journey.
 - **Resources** — collect and pin study resources and links.
 - **Learning** — track learning goals by type (course, book, practice,
   video, topic) with progress, pages, minutes, and pinning.
+- **My Library** — track books you want to read, are reading, finished, or
+  didn't finish, with progress, rating, notes, quotes, and optional links to
+  matching Resources / Learning goals.
 - **Profile** — edit your personal profile.
 - **Landing page** — a public introduction to the app.
 

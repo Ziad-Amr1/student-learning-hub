@@ -14,3 +14,11 @@ export const FIELD_CONTROL_ERROR_CLASSES =
   'border-destructive focus:border-destructive focus:shadow-[0_0_0_3px_var(--ring-destructive-soft)]'
 
 export const FIELD_ERROR_CLASSES = 'text-destructive-strong text-body-small'
+
+// Required-field marker. The asterisk is a real character, not a background or
+// border, so the required state survives a monochrome / high-contrast rendering
+// and never depends on color alone (WCAG 1.4.1). Consumers pair it with
+// `aria-required` on the control so screen readers announce the requirement
+// too — the visual marker is redundant reinforcement, not the only signal.
+export const FIELD_REQUIRED_CLASSES = 'text-destructive-strong font-bold'
+
