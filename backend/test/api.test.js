@@ -450,6 +450,78 @@ test('S4 §8 — error envelope and status behavior', async () => {
   assert.ok(unknownRoute.json.message.startsWith('Route not found'))
 })
 
+test('Sprint 09 N1/N2 — explicit null payloads return 400 and never persist literal "null"', async () => {
+  freshEnv()
+
+  const created = await request('/tasks', {
+    method: 'POST',
+    body: { title: 'Pay tuition', priority: 'high', status: 'unstarted', dueDate: '2026-09-20T00:00:00.000Z' },
+  })
+  assert.equal(created.status, 201)
+  const taskId = created.json.data.id
+
+  const badTaskCreate = await request('/tasks', { method: 'POST', body: { title: null } })
+  assert.equal(badTaskCreate.status, 400)
+  assert.equal(badTaskCreate.json.success, false)
+  assert.ok(badTaskCreate.json.message.includes('title'), `validation message names the field (${badTaskCreate.json.message})`)
+
+  const badTitle = await request(`/tasks/${taskId}`, { method: 'PUT', body: { title: null } })
+  assert.equal(badTitle.status, 400, 'null title on update must be a client error, never a 500')
+  assert.equal(badTitle.json.success, false)
+  assert.ok(badTitle.json.message.includes('title'))
+
+  const tasks = await request('/tasks')
+  const stored = tasks.json.data.find((t) => t.id === taskId)
+  assert.equal(stored.title, 'Pay tuition', 'stored title is untouched — no literal "null" was persisted')
+
+  const clearedDate = await request(`/tasks/${taskId}`, { method: 'PUT', body: { status: 'done', dueDate: null } })
+  assert.equal(clearedDate.status, 200, 'explicit null on a nullable column is a valid clear')
+  assert.equal(clearedDate.json.data.dueDate, null)
+
+  // Notes — create + update nulls
+  const note = await request('/notes', { method: 'POST', body: { title: 'React hooks', content: 'rule #1' } })
+  const noteId = note.json.data.id
+  assert.equal(await request(`/notes/${noteId}`, { method: 'PUT', body: { title: null } }).then((r) => r.status), 400)
+  assert.equal(await request('/notes', { method: 'POST', body: { title: 'x', content: null } }).then((r) => r.status), 400)
+
+  // Resources — required url null
+  const resource = await request('/resources', {
+    method: 'POST',
+    body: { title: 'MDN', url: 'https://developer.mozilla.org/', category: 'article' },
+  })
+  const resourceId = resource.json.data.id
+  const badUrl = await request(`/resources/${resourceId}`, { method: 'PUT', body: { url: null } })
+  assert.equal(badUrl.status, 400)
+  assert.ok(badUrl.json.message.includes('url'))
+
+  // Learning — array fields (create + update) and NOT NULL progress
+  const learning = await request('/learning', {
+    method: 'POST',
+    body: { title: 'Deep Work', category: 'book', status: 'in-progress', progress: 20 },
+  })
+  const learningId = learning.json.data.id
+  const badRelated = await request(`/learning/${learningId}`, { method: 'PUT', body: { relatedNotes: null } })
+  assert.equal(badRelated.status, 400)
+  assert.ok(badRelated.json.message.includes('relatedNotes'))
+  const badLearningCreate = await request('/learning', {
+    method: 'POST',
+    body: { title: 'X', category: 'book', status: 'not-started', progress: 0, relatedResources: null },
+  })
+  assert.equal(badLearningCreate.status, 400)
+
+  // Profile — required name and skills array can never be null
+  const seeded = await request('/profile', {
+    method: 'PUT',
+    body: { name: 'Kayn S.', university: 'Cairo University', skills: ['React'] },
+  })
+  assert.equal(seeded.status, 200)
+  const badProfile = await request('/profile', { method: 'PUT', body: { name: 'Broken', skills: null } })
+  assert.equal(badProfile.status, 400)
+  assert.ok(badProfile.json.message.includes('skills'))
+  const profileAfter = await request('/profile')
+  assert.equal(profileAfter.json.data.name, 'Kayn S.', 'rejected upsert leaves the stored profile untouched')
+})
+
 test('S4 §11 — raw implementation details do not leak to the HTTP client', async () => {
   freshEnv()
 

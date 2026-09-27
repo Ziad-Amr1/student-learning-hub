@@ -169,3 +169,89 @@ test('Profile upsert validates, stays a singleton, and preserves a fixed id', ()
   initDatabase({ path: dbPath })
   assert.equal(Profile.get().name, 'Ziad Amr', 'profile must survive a connection reopen')
 })
+
+// --- Sprint 09 N1/N2 — explicit null hardening at the model layer ---------------
+
+test('Task rejects a literal null title and never persists the string "null"', () => {
+  assert.throws(
+    () => Task.create({ title: null }),
+    (error) => error instanceof ValidationError && error.message.includes('title'),
+  )
+
+  const created = Task.create({ title: 'Keep me' })
+  assert.throws(
+    () => Task.update(created.id, { title: null }),
+    (error) => error instanceof ValidationError && error.message.includes('title'),
+  )
+  assert.equal(Task.findById(created.id).title, 'Keep me', 'stored title is untouched after a rejected null update')
+})
+
+test('Task accepts an explicit null dueDate to clear the optional value', () => {
+  const created = Task.create({ title: 'Plan week', dueDate: '2026-09-30T00:00:00.000Z' })
+  assert.equal(created.dueDate, '2026-09-30T00:00:00.000Z')
+
+  const cleared = Task.update(created.id, { dueDate: null })
+  assert.equal(cleared.dueDate, null)
+  assert.equal(Task.findById(created.id).dueDate, null)
+})
+
+test('Note rejects null title/content and accepts null to clear the optional category', () => {
+  assert.throws(() => Note.create({ title: null, content: 'x' }), ValidationError)
+  assert.throws(() => Note.create({ title: 'x', content: null }), ValidationError)
+
+  const created = Note.create({ title: 'A note', content: 'body', category: 'React' })
+  assert.throws(() => Note.update(created.id, { title: null }), ValidationError)
+  assert.equal(Note.findById(created.id).title, 'A note')
+
+  const cleared = Note.update(created.id, { category: null })
+  assert.equal(cleared.category, undefined, 'explicit null clears an optional category')
+})
+
+test('Resource rejects null title/url and accepts null to clear the optional description', () => {
+  assert.throws(
+    () => Resource.create({ title: null, url: 'https://example.com', category: 'article' }),
+    ValidationError,
+  )
+  assert.throws(
+    () => Resource.create({ title: 'Docs', url: null, category: 'article' }),
+    ValidationError,
+  )
+  assert.throws(() => Resource.update('some-id', { url: null }), ValidationError)
+
+  const created = Resource.create({
+    title: 'Docs',
+    url: 'https://example.com',
+    category: 'article',
+    description: 'desc',
+  })
+  const cleared = Resource.update(created.id, { description: null })
+  assert.equal(cleared.description, undefined, 'explicit null clears an optional description')
+})
+
+test('Learning rejects null on NOT NULL fields while nullable numerics keep stored values', () => {
+  const required = { title: 'X', category: 'book', status: 'not-started', progress: 0 }
+  assert.throws(() => Learning.create({ ...required, relatedNotes: null }), ValidationError)
+  assert.throws(() => Learning.create({ ...required, relatedResources: null }), ValidationError)
+  assert.throws(() => Learning.create({ ...required, progress: null }), ValidationError)
+
+  const created = Learning.create({ ...required, totalPages: 304 })
+  assert.throws(() => Learning.update(created.id, { relatedNotes: null }), ValidationError)
+  assert.equal(Learning.findById(created.id).totalPages, 304)
+
+  const kept = Learning.update(created.id, { totalPages: null })
+  assert.equal(
+    kept.totalPages,
+    304,
+    'a null on a nullable numeric is accepted and preserves the stored value (numberOrUndefined semantics)',
+  )
+})
+
+test('Profile rejects null name/skills and accepts null to clear optional text fields', () => {
+  assert.throws(() => Profile.upsert({ name: null }), ValidationError)
+  assert.throws(() => Profile.upsert({ name: 'Ziad', skills: null }), ValidationError)
+
+  Profile.upsert({ name: 'Ziad', university: 'Cairo University', skills: ['React'] })
+  const cleared = Profile.upsert({ name: 'Ziad', university: null })
+  assert.equal(cleared.university, undefined, 'explicit null clears an optional profile field')
+  assert.deepEqual(Profile.get().skills, ['React'])
+})

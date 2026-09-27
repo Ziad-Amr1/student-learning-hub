@@ -23,7 +23,7 @@ export const TASK_RULES = [
   { field: 'description', type: 'string' },
   { field: 'priority', type: 'string', oneOf: TASK_PRIORITIES },
   { field: 'status', type: 'string', oneOf: TASK_STATUSES },
-  { field: 'dueDate', type: 'string' },
+  { field: 'dueDate', type: 'string', nullable: true },
 ]
 
 function toDate(value) {
