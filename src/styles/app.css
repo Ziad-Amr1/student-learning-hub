@@ -190,8 +190,11 @@
   --ease-standard: ease;
 
   /* Layering scale — semantic z-index tokens. Values are intentionally
-     small integers; native <dialog> top-layer and future Toast handle
-     their own stacking without competing with these tokens.
+     small integers; the native <dialog> top-layer used by NavigationDrawer
+     and a future Toast handle their own stacking without competing with
+     these tokens. Modal dialogs are NOT in the top layer: they are Radix
+     portals, so their overlay shares --z-dropdown with the Select listboxes
+     and Popover/Tooltip overlays they host.
      Reference via z-(--z-*) utilities in Tailwind v4. */
   --z-toolbar: 5;      /* sticky ModuleToolbar — below navbar */
   --z-nav: 10;         /* sticky Navbar */
@@ -214,6 +217,20 @@
   --layout-sidebar-width: 15rem;      /* 240px, expanded */
   --layout-sidebar-width-collapsed: 4rem; /* 64px, icon-only rail */
   --layout-mobilenav-height: 4rem;    /* 64px */
+
+  /* ----------------------------------------------------------
+     SCROLLBAR
+     One consistent, on-brand scrollbar for every scrollable
+     surface (dialogs, the checkbox pickers, the long text
+     areas). Token-driven so both the Firefox
+     (`scrollbar-color`) and WebKit/Blink rules below read from
+     the same values. `scrollbar-hub` is applied per element
+     rather than globally so the document scrollbar stays
+     native.
+     ---------------------------------------------------------- */
+  --scrollbar-hub-width: 0.625rem;         /* 10px */
+  --scrollbar-hub-thumb: var(--color-border);
+  --scrollbar-hub-thumb-hover: var(--color-input);
 }
 
 /* ============================================================
@@ -297,4 +314,34 @@
   font-size: var(--font-size-small);
   line-height: var(--line-height-small);
   font-weight: var(--font-weight-medium);
+}
+
+/* ---------- Scrollable surfaces ---------- */
+
+/* Applied per element (see the FormDialog body and the Library link pickers).
+   Thin, unobtrusive, and on-brand: the track is transparent so it never
+   competes with the surface, the thumb is a border tone, and it darkens on
+   hover. Scrollbars are decorative, so nothing functional depends on them —
+   every scrollable surface also scrolls by keyboard and touch. */
+@utility scrollbar-hub {
+  scrollbar-width: thin;
+  scrollbar-color: var(--scrollbar-hub-thumb) transparent;
+
+  &::-webkit-scrollbar {
+    width: var(--scrollbar-hub-width);
+    height: var(--scrollbar-hub-width);
+  }
+
+  &::-webkit-scrollbar-track {
+    background-color: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background-color: var(--scrollbar-hub-thumb);
+    border-radius: 9999px;
+  }
+
+  &::-webkit-scrollbar-thumb:hover {
+    background-color: var(--scrollbar-hub-thumb-hover);
+  }
 }

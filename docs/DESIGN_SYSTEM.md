@@ -215,6 +215,37 @@ Precise rule for state backgrounds on `Card` surfaces:
   `"X of Y hrs"`; book → `"X of Y pages"` (completed derived from
   `progress` × `totalPages`); video → formatted duration of `videoMinutes`
   e.g. `"2h"`.
+- **My Library statuses (LibraryEntry, 2026-09-27) — single source**
+  `LIBRARY_STATUS_VISUALS` in `src/constants/libraryStatus.js` (same
+  pure-string-constant pattern as `cardStatus.js`/`learningStatus.js`). My
+  Library has **no pinning in v1**, so there is no `PINNED_CARD_VISUAL` accent
+  border to collide with; like Learning, statuses still own **no border**, and
+  only the ending states carry a tint:
+
+  | Status | Badge variant | Card tint |
+  | --- | --- | --- |
+  | `want-to-read` | `secondary` | none |
+  | `reading` | `accent` (badge only) | none |
+  | `finished` | `success` | `!bg-success-soft/20` |
+  | `dnf` | `info` | `!bg-info-soft/20` |
+
+  `reading = accent` mirrors the Learning `in-progress` badge-level decision
+  (active state, not a caution) and keeps `warning` free — the task-status
+  time-caution mapping is unrelated. `finished` additionally renders its
+  ProgressBar in `success` (progress locked at 100, DATA_MODEL normalization);
+  `dnf` shows the progress bar neutrally. **Rating stars** are the exception to
+  the "color never carries state" rule and carry an `aria-label`
+  (`"Rated 4 of 5 stars"`) with `role="img"`; filled stars = `text-warning-strong`,
+  unfilled = `text-border` — the label carries the value for assistive tech.
+- **My Library card rhythm (2026-09-27):** Row 1 = title + the details
+  expand/collapse toggle, edit, and delete actions; Row 2 = status `sm` Badge +
+  rating stars (when set); Row 3 = author caption; Row 4 = ProgressBar (success
+  on `finished`); Row 5 = started/finished date + updated date; then the inline
+  expandable detail panel (character notes + quotes) with its own Resources /
+  Learning link groups. Details expand inline on the card
+  (`expandedIds` toggle, `aria-expanded`) — no separate details route per the
+  approved scope decision. Rated as filter/sort/toolbar controls follow the
+  ModuleToolbar + Select patterns below.
 
 ---
 
@@ -345,7 +376,8 @@ breakpoint tokens are defined.
   Popover/Tooltip overlays; Sprint 08 — replaces the former raw z value of
   50). Above nav, below the skip link.
 - `--z-skip-link: 100` — skip-to-content link.
-- Native `<dialog>` top layer handles modal/drawer stacking.
+- Modal dialogs use `--z-dropdown` (scrim + card share it, ordered by DOM); the
+  native `<dialog>` top layer is now used by `NavigationDrawer` only — see §Dialog.
 - Full layering spec: `docs/LAYERING_SYSTEM.md`.
 
 ## 8. Layout Conventions
@@ -417,6 +449,37 @@ see `docs/COMPONENTS.md`.
 - **A11y:** `<label htmlFor>` always rendered; errors linked via
   `aria-describedby` + `aria-invalid`. No complete forms are built by these
   components themselves.
+- **Required marker (2026-09-27):** a native `required` prop renders a visible
+  `*` after the label (`FIELD_REQUIRED_CLASSES`). It is a *cue only* —
+  `FormDialog` sets `noValidate`, so the page's validator is the single authority
+  and owns the messages, the first-invalid focus, and the submitted values.
+- **Form error convention (2026-09-27, project-wide):**
+  1. **Field problems** are messages keyed by field name, rendered by the control
+     itself (`Input`/`Textarea` `error`, or a `FIELD_ERROR_CLASSES` paragraph
+     for a `Select`/custom control) and linked with `aria-describedby` +
+     `aria-invalid`.
+  2. Errors appear only **after a submit attempt** (or once the user edits that
+     field) — never while a pristine form sits untouched. One submit reports
+     **every** invalid field, then focus moves to the first one in visual order.
+  3. **General failures** (network, API, an operation that partly failed) are a
+     single `role="alert"` block rendered **inside the dialog**, never behind it
+     and never dressed up as a field error. Field-level API attribution is not
+     available — the error envelope carries only `{ success, message }` — so
+     client-side rules stay the field authority.
+
+### Scrollbars (`styles/app.css`)
+- **Tokens** (in the `@theme` block): `--scrollbar-hub-width` (10px),
+  `--scrollbar-hub-thumb` (= `--color-border`), `--scrollbar-hub-thumb-hover`
+  (= `--color-input`).
+- **Usage:** the `scrollbar-hub` utility (`@utility` in `app.css`) is applied
+  **per scrollable element**, not globally, so the document scrollbar stays
+  native. It sets `scrollbar-width: thin` + `scrollbar-color` for Firefox and
+  the `::-webkit-scrollbar*` rules for WebKit/Blink: transparent track, rounded
+  pill thumb that darkens on hover.
+- **Applied to:** the `Dialog` body (the one scroll region of every dialog) and
+  the Library link pickers.
+- **Never functional:** a scrollbar is decorative, so nothing may depend on it.
+  Every scrollable surface must also scroll by keyboard, wheel, and touch.
 
 ### Badge (`components/ui/Badge.jsx`)
 - **Purpose:** compact status/category labels (task priority/status, resource
@@ -457,20 +520,42 @@ see `docs/COMPONENTS.md`.
   action buttons row (wraps below title on narrow screens).
 - **Rules:** one per page; do not hardcode any page's content into it.
 
-### Dialog (`components/ui/Dialog.jsx`) ✅ (Sprint 06.5 — interim)
-- **Purpose:** modal overlay for confirmations and forms. Thin wrapper around
-  native `<dialog>` — Escape key works natively, backdrop click closes.
-- **Props:** `open`, `onClose`, `title`, `description?`, `children`, `className`.
+### Dialog (`components/ui/Dialog.jsx`) ✅ (Sprint 06.5 — rebuilt on Radix 2026-09-27)
+- **Purpose:** the shared modal for confirmations and forms. Composed by
+  `FormDialog`, `ConfirmDialog` and `TaskDetailsDialog`, therefore by every
+  add/edit dialog in Tasks, Notes, Resources, Learning and Library.
+- **Implementation:** `@radix-ui/react-dialog` (Portal + Overlay + Content) —
+  **not** a native `<dialog>`. A native modal dialog occupies the browser top
+  layer, which makes everything outside it **inert**; Radix
+  `Select`/`Popover`/`Calendar` portal to `document.body`, so their content
+  rendered inside it but could not be clicked, and Radix's `aria-hidden` pass was
+  refused by the browser (`Blocked aria-hidden on an element because its
+  descendant retained focus`). This was a pre-existing app-wide defect, not a My
+  Library bug — it appeared when Radix `Select` replaced the native `<select>`.
+- **Props:** `open`, `onClose`, `title`, `description?`, `children`, `className`
+  (unchanged across the rebuild).
 - **Positioning:** `fixed inset-0 m-auto` — deterministic project-owned
   centering, not relying on UA `margin: auto` (which `m-0` would break).
-  `max-h-[90dvh]` constrains height for mobile.
+  `max-h-[90dvh]` constrains height for mobile; full-bleed on small screens,
+  capped at `max-w-lg` on desktop.
+- **Layering:** Overlay and Content **share `--z-dropdown` and rely on DOM
+  order** (Content is later, so it paints above its own scrim). Nested Select
+  listboxes / Popover / Tooltip use the same token and are portalled later
+  still, so they sit above both. **Never give the scrim a higher z-index than
+  the card** — it will swallow every click inside the dialog.
 - **Scroll architecture:** inner content div uses `overflow-y-auto min-h-0
   flex-1`; header uses `shrink-0`. When form content exceeds viewport,
-  the body scrolls while header and close button remain visible.
-- **Scope:** intentionally small for Core Modules hardening. Full Dialog
-  primitive with focus trap lands in Sprint 14.
-- **Rules:** use `showModal()` for proper top-layer rendering; never use
-  `alert()` or `window.confirm()`.
+  the body scrolls while header and close button remain visible. Radix adds
+  background scroll locking; the body uses `scrollbar-hub`.
+- **Accessibility:** focus enters on open, is trapped while open, and **returns
+  to the opener on close** — a controlled Radix `Dialog` has no trigger, so the
+  primitive captures `document.activeElement` on the open transition and restores
+  it. Escape and backdrop click close. Radix hides outside content with
+  `aria-hidden` + focus scope; it deliberately does **not** set `aria-modal`.
+- **Scope:** the "interim" caveat and the deferred focus trap are **closed** —
+  the focus trap shipped with this rebuild.
+- **Rules:** never use `alert()` or `window.confirm()`; never revert this
+  primitive to `<dialog>` + `showModal()` (see LAYERING_SYSTEM.md rule 3).
 
 ### ConfirmDialog (`components/ui/ConfirmDialog.jsx`) ✅ (Sprint 06.5)
 - **Purpose:** destructive confirmation (delete actions).
@@ -506,7 +591,10 @@ see `docs/COMPONENTS.md`.
   `SelectSeparator` exported.
 - **Adopted on:** Tasks toolbar (priority/status/sort) + Task form, Learning
   toolbar (category/status/sort) + LearningEntryForm, Resources form
-  (category), and the task-card status switcher.
+  (category), My Library toolbar (status filter + sort) + LibraryEntryForm
+  (status only — `progress` and `rating` are numeric `Input`s, not selects),
+  and the task-card status switcher. My Library cards carry a read-only status
+  `Badge`, not a card status switcher.
 - **Sizing contract:** the trigger bakes in NO width/padding — consumers own
   it (`w-full px-3 py-2` forms · `px-3 py-2` toolbar filters ·
   `px-2.5 py-1.5` card status). Chevron rotates on open.

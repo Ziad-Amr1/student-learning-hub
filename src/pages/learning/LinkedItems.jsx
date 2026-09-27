@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { Library, NotebookPen } from 'lucide-react'
+import { FolderOpen, NotebookPen } from 'lucide-react'
 
 // Read-only derived relationship panel (mind-map-lite, decision 6): groups the
 // entry's linked notes/resources into a plain list. NO canvas/SVG/editor.
@@ -41,7 +41,7 @@ export default function LinkedItems({ notes = [], resources = [], notesLabel = '
             {resources.map((resource) => (
               <li key={resource.id}>
                 <Link to="/resources" className={linkClass} title={resource.title}>
-                  <Library
+                  <FolderOpen
                     className="h-(--icon-sm) w-(--icon-sm) shrink-0 text-muted-foreground"
                     aria-hidden="true"
                   />

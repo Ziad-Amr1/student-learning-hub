@@ -3,6 +3,7 @@ import { Outlet, useLocation } from 'react-router-dom'
 import {
   BookOpen,
   CircleUser,
+  FolderOpen,
   LayoutDashboard,
   Library,
   ListTodo,
@@ -19,7 +20,8 @@ const NAV_ITEMS = [
   { to: '/dashboard', label: 'Dashboard', section: 'workspace', Icon: LayoutDashboard },
   { to: '/tasks', label: 'Tasks', section: 'workspace', Icon: ListTodo },
   { to: '/notes', label: 'Notes', section: 'workspace', Icon: NotebookPen },
-  { to: '/resources', label: 'Resources', section: 'workspace', Icon: Library },
+  { to: '/resources', label: 'Resources', section: 'workspace', Icon: FolderOpen },
+  { to: '/library', label: 'Library', section: 'workspace', Icon: Library },
   { to: '/learning', label: 'Learning', section: 'workspace', Icon: BookOpen },
   { to: '/profile', label: 'Profile', section: 'account', Icon: CircleUser },
 ]

@@ -10,9 +10,10 @@
     "start": "concurrently -k -n server,client -c blue,green \"npm:server\" \"npm:client\"",
     "build": "vite build",
     "preview": "vite preview",
-    "test": "node --test \"backend/test/**/*.test.js\""
+    "test": "node --test \"backend/test/**/*.test.js\" \"src/test/**/*.test.js\""
   },
   "dependencies": {
+    "@radix-ui/react-dialog": "^1.1.23",
     "@radix-ui/react-popover": "^1.1.23",
     "@radix-ui/react-select": "^2.3.7",
     "@radix-ui/react-tooltip": "^1.2.16",

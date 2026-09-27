@@ -1,6 +1,6 @@
 import {
   ChartNoAxesColumn,
-  Library,
+  FolderOpen,
   ListTodo,
   NotebookPen,
 } from 'lucide-react'
@@ -17,7 +17,7 @@ import {
 const FEATURE_ICONS = {
   tasks: ListTodo,
   notes: NotebookPen,
-  resources: Library,
+  resources: FolderOpen,
   progress: ChartNoAxesColumn,
 }
 

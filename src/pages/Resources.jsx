@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { LayoutGrid, Library, List, GalleryHorizontalEnd, Plus, Search } from 'lucide-react'
+import { FolderOpen, LayoutGrid, List, GalleryHorizontalEnd, Plus, Search } from 'lucide-react'
 import { cx } from '../utils/cx'
 import {
   Select,
@@ -244,7 +244,7 @@ export default function Resources() {
           ) : filtered.length === 0 ? (
             <EmptyState
               className="col-span-full"
-              icon={resources.length === 0 ? Library : Search}
+              icon={resources.length === 0 ? FolderOpen : Search}
               title={
                 resources.length === 0
                   ? 'No resources yet'
