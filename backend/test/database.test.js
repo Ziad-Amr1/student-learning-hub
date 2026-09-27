@@ -43,20 +43,26 @@ test('creates the database file and applies the initial schema', () => {
 test('records applied migrations in schema_migrations', () => {
   const db = initDatabase({ path: dbPath })
   const rows = db.prepare('SELECT id, name, applied_at FROM schema_migrations ORDER BY id').all()
-  assert.equal(rows.length, 2)
+  assert.equal(rows.length, 4)
   assert.equal(rows[0].id, 1)
   assert.equal(rows[0].name, 'create_initial_domains')
   assert.equal(rows[1].id, 2)
   assert.equal(rows[1].name, 'create_app_meta')
+  assert.equal(rows[2].id, 3)
+  assert.equal(rows[2].name, 'create_library')
+  assert.equal(rows[3].id, 4)
+  assert.equal(rows[3].name, 'add_library_total_pages')
   assert.ok(typeof rows[0].applied_at === 'string' && rows[0].applied_at.length > 0)
   assert.ok(typeof rows[1].applied_at === 'string' && rows[1].applied_at.length > 0)
+  assert.ok(typeof rows[2].applied_at === 'string' && rows[2].applied_at.length > 0)
+  assert.ok(typeof rows[3].applied_at === 'string' && rows[3].applied_at.length > 0)
 })
 
 test('is idempotent when migrations are applied twice', () => {
   const db = initDatabase({ path: dbPath })
   runMigrations(db, MIGRATIONS)
   const rows = db.prepare('SELECT id FROM schema_migrations').all()
-  assert.equal(rows.length, 2)
+  assert.equal(rows.length, 4)
   assert.deepEqual(tableNames(db).sort(), [...TABLES, 'schema_migrations', 'app_meta'].sort())
 })
 

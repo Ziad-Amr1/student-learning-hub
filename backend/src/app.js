@@ -5,6 +5,7 @@ import taskRoutes from './routes/task.js'
 import noteRoutes from './routes/note.js'
 import resourceRoutes from './routes/resource.js'
 import learningRoutes from './routes/learning.js'
+import libraryRoutes from './routes/library.js'
 import profileRoutes from './routes/profile.js'
 import { notFound } from './middleware/notFound.js'
 import { errorHandler } from './middleware/errorHandler.js'
@@ -24,6 +25,7 @@ app.use('/api/tasks', taskRoutes)
 app.use('/api/notes', noteRoutes)
 app.use('/api/resources', resourceRoutes)
 app.use('/api/learning', learningRoutes)
+app.use('/api/library', libraryRoutes)
 app.use('/api/profile', profileRoutes)
 
 app.use(notFound)
