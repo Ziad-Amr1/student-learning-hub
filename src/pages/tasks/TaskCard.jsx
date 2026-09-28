@@ -1,6 +1,6 @@
 import { Pencil, Trash2 } from 'lucide-react'
 import { cx } from '../../utils/cx'
-import { formatDueDate } from '../../utils/date'
+import { getDueState } from '../../utils/dueDate'
 import {
   normalizeTaskStatus,
   TASK_STATUSES,
@@ -30,6 +30,14 @@ const STATUS_OPTIONS = TASK_STATUSES.map((value) => ({
   Icon: STATUS_ICON_BY_STATUS[value],
 }))
 
+// Text-only due treatment (D2): overdue keeps the destructive token, due-soon
+// uses the warning token, everything else stays muted. No danger/warning badges.
+const DUE_TONE_CLASS = {
+  overdue: 'text-destructive-strong',
+  warning: 'text-warning-strong',
+  muted: 'text-muted-foreground',
+}
+
 // Status is chosen via the shared shadcn-style Select; actions are icon-only
 // ghost buttons whose accessible names stay on aria-label, with a Tooltip as
 // a supplementary hover affordance.
@@ -38,7 +46,7 @@ export default function TaskCard({ task, onEdit, onUpdateStatus, onDelete }) {
   const StatusIcon = STATUS_ICON_BY_STATUS[status] ?? STATUS_ICON_BY_STATUS.unstarted
   const statusLabel = TASK_STATUS_LABELS[status] ?? status
   const statusVisual = STATUS_VISUALS[status] ?? STATUS_VISUALS.unstarted
-  const due = formatDueDate(task.dueDate)
+  const due = getDueState({ dueDate: task.dueDate, status })
 
   return (
     <Card
@@ -56,12 +64,13 @@ export default function TaskCard({ task, onEdit, onUpdateStatus, onDelete }) {
           <Badge variant={statusVisual.badgeVariant}>
             {TASK_STATUS_LABELS[status] ?? status}
           </Badge>
+          {task.category && <Badge variant="secondary">{task.category}</Badge>}
         </div>
         {task.description && (
           <p className="text-body-small text-muted-foreground">{task.description}</p>
         )}
         {due && (
-          <span className={`text-caption block pt-1 ${due.overdue ? 'text-destructive-strong' : 'text-muted-foreground'}`}>
+          <span className={`text-caption block pt-1 ${DUE_TONE_CLASS[due.tone]}`}>
             {due.label}
           </span>
         )}

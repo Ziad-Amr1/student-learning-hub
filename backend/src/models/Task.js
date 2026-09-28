@@ -24,7 +24,15 @@ export const TASK_RULES = [
   { field: 'priority', type: 'string', oneOf: TASK_PRIORITIES },
   { field: 'status', type: 'string', oneOf: TASK_STATUSES },
   { field: 'dueDate', type: 'string', nullable: true },
+  // Free-text category (Sprint 11 phase 2). Mirrors Note.category exactly:
+  // no `oneOf` (there is no fixed vocabulary) and no length requirement —
+  // presence/trimming is Model-owned, so the DB never constrains the value.
+  { field: 'category', type: 'string', max: 60, nullable: true },
 ]
+
+function trim(value) {
+  return typeof value === 'string' ? value.trim() : value
+}
 
 function toDate(value) {
   if (value === null || value === undefined || value === '') return null
@@ -52,10 +60,21 @@ function buildTask(input, existing = null) {
       : hasExisting
         ? existing.dueDate
         : null
+  // Free-text category (Sprint 11 phase 2): trim, and an empty result becomes
+  // "absent" (undefined -> NULL in the store). A stored NULL reads back as
+  // undefined too, so pre-v5 rows and cleared categories are indistinguishable
+  // — the safe-by-default contract. Case is preserved: this is a user label,
+  // not a normalized key (unlike Note tags in phase 4).
+  const category =
+    input.category !== undefined
+      ? trim(input.category) || undefined
+      : hasExisting
+        ? existing.category || undefined
+        : undefined
   const id = hasExisting ? existing.id : typeof input.id === 'string' && input.id ? input.id : newId()
   const createdAt = hasExisting ? existing.createdAt : new Date().toISOString()
 
-  return { id, title, description, priority, status, dueDate, createdAt }
+  return { id, title, description, priority, status, dueDate, category, createdAt }
 }
 
 // Build a normalized Task from a full set of source fields (used on read).

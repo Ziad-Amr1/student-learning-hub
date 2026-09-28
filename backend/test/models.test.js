@@ -255,3 +255,82 @@ test('Profile rejects null name/skills and accepts null to clear optional text f
   assert.equal(cleared.university, undefined, 'explicit null clears an optional profile field')
   assert.deepEqual(Profile.get().skills, ['React'])
 })
+
+// --- Sprint 11 phase 2 — free-text Task.category --------------------------------
+
+test('Task category is free text: trimmed on write, absent when empty, case preserved', () => {
+  const created = Task.create({ title: 'Revise graphs', category: '  Exam prep  ' })
+  assert.equal(created.category, 'Exam prep', 'surrounding whitespace is trimmed')
+  assert.equal(Task.findById(created.id).category, 'Exam prep', 'the trimmed value round-trips')
+
+  // Free text means case is the user's label, not a normalized key.
+  const mixedCase = Task.create({ title: 'Revise OS', category: 'Algorithms' })
+  assert.equal(Task.findById(mixedCase.id).category, 'Algorithms')
+
+  // An empty or whitespace-only category is "no category", never an empty string.
+  for (const [index, value] of ['   ', '', null].entries()) {
+    const task = Task.create({ title: `Blank ${index}`, category: value })
+    assert.equal(task.category, undefined, `category ${JSON.stringify(value)} must be absent`)
+    assert.equal(
+      Task.findById(task.id).category,
+      undefined,
+      'a stored NULL must read back as undefined (safe-by-default)',
+    )
+  }
+
+  // Omitting the field entirely is equally safe.
+  const omitted = Task.create({ title: 'No category at all' })
+  assert.equal(omitted.category, undefined)
+})
+
+test('Task category validates as a bounded optional free-text string', () => {
+  assert.throws(
+    () => Task.create({ title: 'Bad category type', category: 42 }),
+    (error) => error instanceof ValidationError && error.message.includes('category'),
+  )
+  assert.throws(
+    () => Task.create({ title: 'Long category', category: 'x'.repeat(61) }),
+    (error) => error instanceof ValidationError && error.message.includes('category'),
+  )
+  assert.equal(Task.findAll().length, 0, 'a rejected payload must not persist a partial row')
+
+  const atLimit = Task.create({ title: 'Category at the limit', category: 'x'.repeat(60) })
+  assert.equal(atLimit.category.length, 60)
+})
+
+test('Task category can be edited and cleared, and an absent patch preserves it', () => {
+  const created = Task.create({ title: 'Draft lab report', category: 'Labs' })
+
+  const renamed = Task.update(created.id, { category: '  Labs 2026  ' })
+  assert.equal(renamed.category, 'Labs 2026')
+  assert.equal(Task.findById(created.id).category, 'Labs 2026')
+
+  // An explicit null clears the value (the clear contract the form relies on).
+  const clearedByNull = Task.update(created.id, { category: null })
+  assert.equal(clearedByNull.category, undefined)
+  assert.equal(Task.findById(created.id).category, undefined)
+
+  // An explicit empty string clears it too, and is normalized to absent.
+  Task.update(created.id, { category: 'Labs' })
+  const clearedByEmpty = Task.update(created.id, { category: '' })
+  assert.equal(clearedByEmpty.category, undefined)
+  assert.equal(Task.findById(created.id).category, undefined)
+
+  // A partial update that does not mention category leaves it untouched, and
+  // null is rejected for a non-nullable field without touching the row.
+  Task.update(created.id, { category: 'Labs' })
+  const statusOnly = Task.update(created.id, { status: 'in-progress' })
+  assert.equal(statusOnly.category, 'Labs', 'an unrelated field must not clear the category')
+  assert.equal(Task.findById(created.id).category, 'Labs')
+})
+
+test('Task create-by-id stays idempotent with a category and never duplicates', () => {
+  const id = '11111111-2222-3333-4444-555555555555'
+  const first = Task.create({ id, title: 'Imported task', category: 'Imported' })
+  assert.equal(first.category, 'Imported')
+
+  // A retried migration must not overwrite the stored category.
+  const second = Task.create({ id, title: 'Imported task', category: 'Different' })
+  assert.equal(second.category, 'Imported')
+  assert.equal(Task.findAll().length, 1)
+})

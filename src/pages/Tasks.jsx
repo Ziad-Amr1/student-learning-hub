@@ -20,6 +20,7 @@ import ConfirmDialog from '../components/ui/ConfirmDialog'
 import { useTasks } from '../hooks/useTasks'
 import { normalizeTaskStatus } from '../utils/taskStatus'
 import { TASK_SORT_OPTIONS, sortTasks } from '../utils/taskSort'
+import { filterTasks, taskCategoryOptions, TASK_CATEGORY_ALL } from '../utils/taskFilter'
 import TaskCard from './tasks/TaskCard'
 
 export default function Tasks() {
@@ -31,6 +32,7 @@ export default function Tasks() {
   const [priority, setPriority] = useState('medium')
   const [status, setStatus] = useState('unstarted')
   const [dueDateInput, setDueDateInput] = useState('')
+  const [categoryInput, setCategoryInput] = useState('')
   const [editingTask, setEditingTask] = useState(null)
   const [titleError, setTitleError] = useState('')
   const [actionError, setActionError] = useState('')
@@ -38,6 +40,7 @@ export default function Tasks() {
   const [searchQuery, setSearchQuery] = useState('')
   const [filterPriority, setFilterPriority] = useState('all')
   const [filterStatus, setFilterStatus] = useState('all')
+  const [filterCategory, setFilterCategory] = useState(TASK_CATEGORY_ALL)
   const [sortBy, setSortBy] = useState('manual')
   const [taskToDelete, setTaskToDelete] = useState(null)
   const [formOpen, setFormOpen] = useState(false)
@@ -49,6 +52,7 @@ export default function Tasks() {
     setPriority('medium')
     setStatus('unstarted')
     setDueDateInput('')
+    setCategoryInput('')
     setEditingTask(null)
     setTitleError('')
     setActionError('')
@@ -66,6 +70,7 @@ export default function Tasks() {
     setPriority(task.priority)
     setStatus(normalizeTaskStatus(task.status))
     setDueDateInput(task.dueDate ? task.dueDate.slice(0, 16) : '')
+    setCategoryInput(task.category || '')
     setTitleError('')
     setActionError('')
     setFormOpen(true)
@@ -103,6 +108,10 @@ export default function Tasks() {
         priority,
         status,
         dueDate: dueDateInput ? new Date(dueDateInput).toISOString() : null,
+        // An explicit null clears the optional category. Sending `undefined`
+        // instead would be dropped by JSON.stringify and, because the Model
+        // update is partial, would silently keep the previous value.
+        category: categoryInput.trim() || null,
       }
       if (editingTask) {
         await updateTask(editingTask.id, payload)
@@ -136,11 +145,17 @@ export default function Tasks() {
     setTaskToDelete(null)
   }
 
-  const filteredTasks = tasks.filter((t) => {
-    const matchesSearch = t.title.toLowerCase().includes(searchQuery.toLowerCase())
-    const matchesPriority = filterPriority === 'all' || t.priority === filterPriority
-    const matchesStatus = filterStatus === 'all' || normalizeTaskStatus(t.status) === filterStatus
-    return matchesSearch && matchesPriority && matchesStatus
+  // Filter options are derived from the loaded data (no category vocabulary in
+  // the product). A selected category that no longer exists falls back to 'all'
+  // so the list can never be stranded showing nothing.
+  const categoryOptions = taskCategoryOptions(tasks)
+  const activeCategory = categoryOptions.includes(filterCategory) ? filterCategory : TASK_CATEGORY_ALL
+
+  const filteredTasks = filterTasks(tasks, {
+    query: searchQuery,
+    status: filterStatus,
+    priority: filterPriority,
+    category: activeCategory,
   })
 
   const visibleTasks = sortTasks(filteredTasks, sortBy)
@@ -183,6 +198,18 @@ export default function Tasks() {
             <SelectItem value="deferred">Deferred</SelectItem>
             <SelectItem value="done">Done</SelectItem>
             <SelectItem value="cancelled">Cancelled</SelectItem>
+          </SelectContent>
+        </Select>
+        <Select value={activeCategory} onValueChange={setFilterCategory}>
+          <SelectTrigger aria-label="Filter by category" className="px-3 py-2 text-sm">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {categoryOptions.map((category) => (
+              <SelectItem key={category} value={category}>
+                {category === TASK_CATEGORY_ALL ? 'All Categories' : category}
+              </SelectItem>
+            ))}
           </SelectContent>
         </Select>
         <Select value={sortBy} onValueChange={setSortBy}>
@@ -316,6 +343,14 @@ export default function Tasks() {
             onChange={(e) => setDueDateInput(e.target.value)}
           />
         </div>
+        <Input
+          label="Category"
+          type="text"
+          value={categoryInput}
+          onChange={(e) => setCategoryInput(e.target.value)}
+          placeholder="e.g., Exam prep"
+          maxLength={60}
+        />
       </FormDialog>
 
       <ConfirmDialog

@@ -2,7 +2,7 @@ import { cx } from '../../utils/cx'
 import Dialog from '../../components/ui/Dialog'
 import Badge from '../../components/ui/Badge'
 import Button from '../../components/ui/Button'
-import { formatDueDate } from '../../utils/date'
+import { getDueState } from '../../utils/dueDate'
 import { normalizeTaskStatus, TASK_STATUS_LABELS } from '../../utils/taskStatus'
 import {
   PRIORITY_VARIANT,
@@ -10,6 +10,13 @@ import {
   STATUS_ICON_STYLE,
   STATUS_VISUALS,
 } from '../../constants/cardStatus'
+
+// Text-only due treatment — same D2 contract as TaskCard (no badges).
+const DUE_TONE_CLASS = {
+  overdue: 'text-destructive-strong',
+  warning: 'text-warning-strong',
+  muted: null,
+}
 
 // Read-only "show me this task" view opened from the Dashboard recent-tasks
 // list. Reuses the shared Dialog primitive; the only action is an explicit
@@ -19,7 +26,7 @@ export default function TaskDetailsDialog({ task, onClose, onEdit }) {
   const StatusIcon = STATUS_ICON_BY_STATUS[status] ?? STATUS_ICON_BY_STATUS.unstarted
   const statusLabel = TASK_STATUS_LABELS[status] ?? status
   const statusVisual = STATUS_VISUALS[status] ?? STATUS_VISUALS.unstarted
-  const due = formatDueDate(task.dueDate)
+  const due = getDueState({ dueDate: task.dueDate, status })
 
   return (
     <Dialog open onClose={onClose} title="Task details" description={task.title}>
@@ -51,7 +58,7 @@ export default function TaskDetailsDialog({ task, onClose, onEdit }) {
             <p className="mb-1 text-caption uppercase tracking-wide text-muted-foreground">
               Due date
             </p>
-            <p className={cx('text-body-small', due.overdue && 'text-destructive-strong')}>
+            <p className={cx('text-body-small', DUE_TONE_CLASS[due.tone])}>
               {due.label}
               {task.dueDate ? ` · ${new Date(task.dueDate).toLocaleDateString()}` : ''}
             </p>

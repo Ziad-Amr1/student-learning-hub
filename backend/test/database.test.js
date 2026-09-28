@@ -43,7 +43,7 @@ test('creates the database file and applies the initial schema', () => {
 test('records applied migrations in schema_migrations', () => {
   const db = initDatabase({ path: dbPath })
   const rows = db.prepare('SELECT id, name, applied_at FROM schema_migrations ORDER BY id').all()
-  assert.equal(rows.length, 4)
+  assert.equal(rows.length, 5)
   assert.equal(rows[0].id, 1)
   assert.equal(rows[0].name, 'create_initial_domains')
   assert.equal(rows[1].id, 2)
@@ -52,17 +52,20 @@ test('records applied migrations in schema_migrations', () => {
   assert.equal(rows[2].name, 'create_library')
   assert.equal(rows[3].id, 4)
   assert.equal(rows[3].name, 'add_library_total_pages')
+  assert.equal(rows[4].id, 5)
+  assert.equal(rows[4].name, 'add_task_category')
   assert.ok(typeof rows[0].applied_at === 'string' && rows[0].applied_at.length > 0)
   assert.ok(typeof rows[1].applied_at === 'string' && rows[1].applied_at.length > 0)
   assert.ok(typeof rows[2].applied_at === 'string' && rows[2].applied_at.length > 0)
   assert.ok(typeof rows[3].applied_at === 'string' && rows[3].applied_at.length > 0)
+  assert.ok(typeof rows[4].applied_at === 'string' && rows[4].applied_at.length > 0)
 })
 
 test('is idempotent when migrations are applied twice', () => {
   const db = initDatabase({ path: dbPath })
   runMigrations(db, MIGRATIONS)
   const rows = db.prepare('SELECT id FROM schema_migrations').all()
-  assert.equal(rows.length, 4)
+  assert.equal(rows.length, 5)
   assert.deepEqual(tableNames(db).sort(), [...TABLES, 'schema_migrations', 'app_meta'].sort())
 })
 
@@ -87,4 +90,81 @@ test('rolls back a failing migration completely', () => {
   assert.throws(() => runMigrations(db, failing), /boom/)
   assert.ok(!tableNames(db).includes('partial_rollback'), 'failed migration must roll back')
   assert.equal(db.prepare('SELECT id FROM schema_migrations').all().length, 0)
+})
+
+// --- Sprint 11 phase 2 — migration v5 add_task_category ------------------------
+
+test('v5 upgrades a v1-v4 database additively and backfills nothing', () => {
+  // A database left behind by the previous release: migrations 1-4 only, with a
+  // task written before `category` existed.
+  const db = initDatabase({ path: dbPath, migrations: MIGRATIONS.filter((m) => m.id <= 4) })
+  db.prepare(
+    `INSERT INTO tasks (id, title, description, priority, status, dueDate, createdAt)
+     VALUES ('task-legacy', 'Legacy task', 'Written before v5', 'high', 'done',
+             '2026-09-20T00:00:00.000Z', '2026-09-01T00:00:00.000Z')`,
+  ).run()
+  assert.deepEqual(
+    db
+      .prepare('SELECT id FROM schema_migrations ORDER BY id')
+      .all()
+      .map((row) => row.id),
+    [1, 2, 3, 4],
+    'the pre-upgrade database is at v1-v4',
+  )
+
+  // Applying v5 on top must preserve the existing row byte-for-byte.
+  runMigrations(db, MIGRATIONS)
+
+  const row = db.prepare('SELECT * FROM tasks WHERE id = ?').get('task-legacy')
+  assert.equal(row.title, 'Legacy task')
+  assert.equal(row.description, 'Written before v5')
+  assert.equal(row.priority, 'high')
+  assert.equal(row.status, 'done')
+  assert.equal(row.dueDate, '2026-09-20T00:00:00.000Z')
+  assert.equal(row.createdAt, '2026-09-01T00:00:00.000Z')
+  assert.equal(
+    row.category,
+    null,
+    'existing rows must stay uncategorized - no backfill by design',
+  )
+
+  const ids = db.prepare('SELECT id FROM schema_migrations ORDER BY id').all().map((r) => r.id)
+  assert.deepEqual(ids, [1, 2, 3, 4, 5])
+})
+
+test('v5 category column is nullable and free-text (no CHECK vocabulary)', () => {
+  const db = initDatabase({ path: dbPath })
+
+  const info = db.prepare('PRAGMA table_info(tasks)').all()
+  const category = info.find((column) => column.name === 'category')
+  assert.ok(category, 'tasks.category column must exist after v5')
+  assert.equal(category.type, 'TEXT')
+  assert.equal(category.notnull, 0, 'category must be nullable')
+  assert.equal(
+    category.dflt_value,
+    null,
+    'no column default - absent means the client sent nothing, not a magic value',
+  )
+
+  // A free-text value the Model accepts must never be rejected by the DB:
+  // mixed case, spaces, and a long-ish label all round-trip.
+  const cases = ['Exam prep', '  spaced  ', 'C++ / OOP', 'مراجعة']
+  for (const [index, value] of cases.entries()) {
+    db.prepare(
+      `INSERT INTO tasks (id, title, priority, status, createdAt, category)
+       VALUES (?, 'T', 'medium', 'unstarted', '2026-09-28T00:00:00.000Z', ?)`,
+    ).run(`free-${index}`, value)
+  }
+  const stored = db
+    .prepare("SELECT category FROM tasks WHERE id LIKE 'free-%' ORDER BY id")
+    .all()
+    .map((row) => row.category)
+  assert.deepEqual(stored, cases, 'category is stored verbatim; trimming is the Model\'s job')
+
+  // NULL is accepted so the column can be cleared.
+  db.prepare(
+    `INSERT INTO tasks (id, title, priority, status, createdAt, category)
+     VALUES ('free-null', 'T', 'medium', 'unstarted', '2026-09-28T00:00:00.000Z', NULL)`,
+  ).run()
+  assert.equal(db.prepare('SELECT category FROM tasks WHERE id = ?').get('free-null').category, null)
 })

@@ -161,6 +161,11 @@ test('migrates all five domains preserving ids, values, arrays, and timestamps',
   assert.equal(t1.status, 'unstarted')
   assert.equal(t1.dueDate, '2026-08-27T10:37:00.000Z')
   assert.equal(t1.createdAt, original.tasks[0].createdAt, 'server-managed createdAt must be preserved')
+  assert.equal(
+    t1.category,
+    undefined,
+    'a legacy record imports with no category — Sprint 11 phase 2 adds no backfill',
+  )
 
   // notes — timestamps restored, optional field falls back to undefined
   const notes = Note.findAll()

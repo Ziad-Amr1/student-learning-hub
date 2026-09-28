@@ -172,4 +172,20 @@ export const MIGRATIONS = [
       `)
     },
   },
+  {
+    // Task category (added 2026-09-28, Sprint 11 phase 2). Free-text label
+    // following the Note.category precedent: the Model owns trimming and the
+    // "" -> absent rule, so the column carries NO vocabulary CHECK (a DB must
+    // never reject a value the Model accepts, and the vocabulary is the user's).
+    // Forward-only ALTER: nullable, no DEFAULT, no data rewrite — existing rows
+    // read back as NULL ("no category") and are deliberately NOT backfilled.
+    id: 5,
+    name: 'add_task_category',
+    up: (db) => {
+      db.exec(`
+        ALTER TABLE tasks
+          ADD COLUMN category TEXT
+      `)
+    },
+  },
 ]
