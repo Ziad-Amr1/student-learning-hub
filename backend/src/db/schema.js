@@ -11,6 +11,7 @@ export const TABLES = ['tasks', 'notes', 'resources', 'learning', 'library', 'pr
 // table → JSON-array columns the Store must serialize/deserialize. Only model
 // fields that ARE arrays appear here; every other column is scalar.
 export const JSON_COLUMNS = {
+  notes: ['tags'],
   learning: ['relatedNotes', 'relatedResources'],
   library: ['quotes', 'relatedResourceIds', 'relatedLearningIds'],
   profile: ['skills'],
@@ -185,6 +186,21 @@ export const MIGRATIONS = [
       db.exec(`
         ALTER TABLE tasks
           ADD COLUMN category TEXT
+      `)
+    },
+  },
+  {
+    // Note tags (added 2026-09-28, Sprint 11 phase 4). JSON-array column —
+    // same precedent as Library quotes / Learning relatedNotes: no vocabulary
+    // CHECK, normalization (trim → lowercase → drop empty → dedupe, first-seen
+    // order) is Model-owned. NOT NULL DEFAULT '[]' means pre-v6 notes read back
+    // as `[]` ("no tags") and are deliberately NOT backfilled.
+    id: 6,
+    name: 'add_note_tags',
+    up: (db) => {
+      db.exec(`
+        ALTER TABLE notes
+          ADD COLUMN tags TEXT NOT NULL DEFAULT '[]'
       `)
     },
   },

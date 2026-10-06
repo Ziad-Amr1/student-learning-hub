@@ -331,6 +331,7 @@ test('S4 §9 — array-domain CRUD parity + success envelopes', async () => {
     body: { title: 'React hooks', content: 'Three rules of hooks.', category: 'React' },
   })
   assert.equal(res.status, 201)
+  assert.deepEqual(res.json.data.tags, [], 'a note created without tags carries an empty array')
   const noteId = res.json.data.id
   res = await request(`/notes/${noteId}`, { method: 'PUT', body: { pinned: true } })
   assert.equal(res.json.data.pinned, true)
@@ -483,6 +484,39 @@ test('Sprint 09 N1/N2 — explicit null payloads return 400 and never persist li
   const noteId = note.json.data.id
   assert.equal(await request(`/notes/${noteId}`, { method: 'PUT', body: { title: null } }).then((r) => r.status), 400)
   assert.equal(await request('/notes', { method: 'POST', body: { title: 'x', content: null } }).then((r) => r.status), 400)
+
+  // Notes — tags round-trip with model-owned normalization; invalid tag
+  // payloads are 400s (never a 500), and `[]` is a valid clear (not a null).
+  const tagged = await request('/notes', {
+    method: 'POST',
+    body: { title: 'Tagged API note', content: 'x', tags: [' React ', 'react', 'CSS'] },
+  })
+  assert.equal(tagged.status, 201)
+  assert.deepEqual(tagged.json.data.tags, ['react', 'css'], 'tags are normalized by the model')
+  const taggedId = tagged.json.data.id
+
+  const clearedTags = await request(`/notes/${taggedId}`, { method: 'PUT', body: { tags: [] } })
+  assert.equal(clearedTags.status, 200)
+  assert.deepEqual(clearedTags.json.data.tags, [], 'an explicit empty array clears the tags')
+
+  const reTagged = await request(`/notes/${taggedId}`, { method: 'PUT', body: { tags: ['Redux'] } })
+  assert.deepEqual(reTagged.json.data.tags, ['redux'])
+  const storedTags = await request('/notes')
+  assert.deepEqual(
+    storedTags.json.data.find((item) => item.id === taggedId).tags,
+    ['redux'],
+    'the updated tags persist for a fresh read within the same session',
+  )
+
+  const badTagsNull = await request(`/notes/${taggedId}`, { method: 'PUT', body: { tags: null } })
+  assert.equal(badTagsNull.status, 400)
+  assert.ok(badTagsNull.json.message.includes('tags'))
+  const badTagsString = await request('/notes', {
+    method: 'POST',
+    body: { title: 'Bad', content: 'x', tags: 'React' },
+  })
+  assert.equal(badTagsString.status, 400)
+  assert.ok(badTagsString.json.message.includes('tags'))
 
   // Resources — required url null
   const resource = await request('/resources', {

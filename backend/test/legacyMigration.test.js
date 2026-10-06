@@ -173,6 +173,11 @@ test('migrates all five domains preserving ids, values, arrays, and timestamps',
   assert.equal(notes.find((note) => note.id === 'n1').updatedAt, original.notes[0].updatedAt)
   assert.equal(notes.find((note) => note.id === 'n2').category, undefined)
   assert.equal(notes.find((note) => note.id === 'n2').pinned, false)
+  assert.deepEqual(
+    notes.find((note) => note.id === 'n1').tags,
+    [],
+    'a pre-tags legacy note imports with an empty tag array — Sprint 11 phase 4 adds no backfill',
+  )
 
   // resources
   const resources = Resource.findAll()

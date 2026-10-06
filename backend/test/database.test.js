@@ -43,7 +43,7 @@ test('creates the database file and applies the initial schema', () => {
 test('records applied migrations in schema_migrations', () => {
   const db = initDatabase({ path: dbPath })
   const rows = db.prepare('SELECT id, name, applied_at FROM schema_migrations ORDER BY id').all()
-  assert.equal(rows.length, 5)
+  assert.equal(rows.length, 6)
   assert.equal(rows[0].id, 1)
   assert.equal(rows[0].name, 'create_initial_domains')
   assert.equal(rows[1].id, 2)
@@ -54,18 +54,21 @@ test('records applied migrations in schema_migrations', () => {
   assert.equal(rows[3].name, 'add_library_total_pages')
   assert.equal(rows[4].id, 5)
   assert.equal(rows[4].name, 'add_task_category')
+  assert.equal(rows[5].id, 6)
+  assert.equal(rows[5].name, 'add_note_tags')
   assert.ok(typeof rows[0].applied_at === 'string' && rows[0].applied_at.length > 0)
   assert.ok(typeof rows[1].applied_at === 'string' && rows[1].applied_at.length > 0)
   assert.ok(typeof rows[2].applied_at === 'string' && rows[2].applied_at.length > 0)
   assert.ok(typeof rows[3].applied_at === 'string' && rows[3].applied_at.length > 0)
   assert.ok(typeof rows[4].applied_at === 'string' && rows[4].applied_at.length > 0)
+  assert.ok(typeof rows[5].applied_at === 'string' && rows[5].applied_at.length > 0)
 })
 
 test('is idempotent when migrations are applied twice', () => {
   const db = initDatabase({ path: dbPath })
   runMigrations(db, MIGRATIONS)
   const rows = db.prepare('SELECT id FROM schema_migrations').all()
-  assert.equal(rows.length, 5)
+  assert.equal(rows.length, 6)
   assert.deepEqual(tableNames(db).sort(), [...TABLES, 'schema_migrations', 'app_meta'].sort())
 })
 
@@ -129,7 +132,7 @@ test('v5 upgrades a v1-v4 database additively and backfills nothing', () => {
   )
 
   const ids = db.prepare('SELECT id FROM schema_migrations ORDER BY id').all().map((r) => r.id)
-  assert.deepEqual(ids, [1, 2, 3, 4, 5])
+  assert.deepEqual(ids, [1, 2, 3, 4, 5, 6])
 })
 
 test('v5 category column is nullable and free-text (no CHECK vocabulary)', () => {
@@ -167,4 +170,69 @@ test('v5 category column is nullable and free-text (no CHECK vocabulary)', () =>
      VALUES ('free-null', 'T', 'medium', 'unstarted', '2026-09-28T00:00:00.000Z', NULL)`,
   ).run()
   assert.equal(db.prepare('SELECT category FROM tasks WHERE id = ?').get('free-null').category, null)
+})
+
+// --- Sprint 11 phase 4 — migration v6 add_note_tags --------------------------
+
+test('v6 upgrades a v1-v5 database additively and gives legacy notes an empty tag array', () => {
+  // A database left behind by the previous release: migrations 1-5 only, with a
+  // note written before `tags` existed.
+  const db = initDatabase({ path: dbPath, migrations: MIGRATIONS.filter((m) => m.id <= 5) })
+  db.prepare(
+    `INSERT INTO notes (id, title, content, category, pinned, createdAt, updatedAt)
+     VALUES ('note-legacy', 'Legacy note', 'Written before v6', 'exam', 0,
+             '2026-09-01T00:00:00.000Z', '2026-09-01T00:00:00.000Z')`,
+  ).run()
+  assert.deepEqual(
+    db
+      .prepare('SELECT id FROM schema_migrations ORDER BY id')
+      .all()
+      .map((row) => row.id),
+    [1, 2, 3, 4, 5],
+    'the pre-upgrade database is at v1-v5',
+  )
+
+  // Applying v6 on top must preserve the existing row byte-for-byte.
+  runMigrations(db, MIGRATIONS)
+
+  const row = db.prepare('SELECT * FROM notes WHERE id = ?').get('note-legacy')
+  assert.equal(row.title, 'Legacy note')
+  assert.equal(row.content, 'Written before v6')
+  assert.equal(row.category, 'exam')
+  assert.equal(row.pinned, 0)
+  assert.equal(row.updatedAt, '2026-09-01T00:00:00.000Z')
+  assert.equal(
+    row.tags,
+    '[]',
+    'legacy notes must read back as an empty tag array - no backfill by design',
+  )
+
+  const ids = db.prepare('SELECT id FROM schema_migrations ORDER BY id').all().map((r) => r.id)
+  assert.deepEqual(ids, [1, 2, 3, 4, 5, 6])
+})
+
+test('v6 tags column is a NOT NULL JSON-text array column defaulting to an empty array', () => {
+  const db = initDatabase({ path: dbPath })
+
+  const info = db.prepare('PRAGMA table_info(notes)').all()
+  const tags = info.find((column) => column.name === 'tags')
+  assert.ok(tags, 'notes.tags column must exist after v6')
+  assert.equal(tags.type, 'TEXT')
+  assert.equal(tags.notnull, 1, 'tags column must be NOT NULL')
+  assert.equal(
+    tags.dflt_value,
+    "'[]'",
+    'the column default is the empty JSON array, so omitting tags is "no tags"',
+  )
+
+  // A note created without tags round-trips as the JSON array [], and a JSON
+  // array with mixed content round-trips verbatim at the storage layer (the
+  // Model — not the DB — owns normalization).
+  db.prepare(
+    `INSERT INTO notes (id, title, content, createdAt, updatedAt, tags)
+     VALUES ('default-tags', 'T', 'C', '2026-09-28T00:00:00.000Z', '2026-09-28T00:00:00.000Z',
+             '[" React ", "REACT", ""]')`,
+  ).run()
+  const stored = db.prepare("SELECT tags FROM notes WHERE id = 'default-tags'").get()
+  assert.equal(stored.tags, '[" React ", "REACT", ""]', 'storage layer stores tags verbatim')
 })

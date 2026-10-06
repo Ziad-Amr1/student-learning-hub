@@ -334,3 +334,86 @@ test('Task create-by-id stays idempotent with a category and never duplicates', 
   assert.equal(second.category, 'Imported')
   assert.equal(Task.findAll().length, 1)
 })
+
+// --- Sprint 11 phase 4 — Note tags -------------------------------------------
+
+test('Note tags normalize: trim → lowercase → drop empty → dedupe, first-seen order', () => {
+  const created = Note.create({
+    title: 'Tagged note',
+    content: 'learning about normalization',
+    tags: [' React ', 'react', '', ' JavaScript ', 'REACT'],
+  })
+  assert.deepEqual(
+    created.tags,
+    ['react', 'javascript'],
+    'whitespace is trimmed, case is folded, empties drop, duplicates collapse keeping the first seen',
+  )
+  assert.deepEqual(Note.findById(created.id).tags, ['react', 'javascript'])
+})
+
+test('Note tags default to an empty array and omit-tags reads are safe', () => {
+  const created = Note.create({ title: 'Untagged note', content: 'no tags here' })
+  assert.deepEqual(created.tags, [], 'a note created without tags carries an empty array')
+  assert.deepEqual(Note.findById(created.id).tags, [], 'the empty array round-trips')
+})
+
+test('Note tags can be edited, cleared and preserved by an unrelated patch', () => {
+  const created = Note.create({ title: 'Edit tags', content: 'x', tags: ['alpha', 'beta'] })
+
+  // Editing sends the complete list (the form's contract) — the model replaces,
+  // normalizing the new payload exactly like the first write.
+  const replaced = Note.update(created.id, { tags: [' BETA ', 'gamma'] })
+  assert.deepEqual(replaced.tags, ['beta', 'gamma'], 'the submitted list replaces the old one')
+
+  // An explicit empty array clears the tags (a valid, non-null value).
+  const cleared = Note.update(created.id, { tags: [] })
+  assert.deepEqual(cleared.tags, [])
+  assert.deepEqual(Note.findById(created.id).tags, [])
+
+  // A content edit that omits tags must preserve them.
+  Note.update(created.id, { tags: ['kept'] })
+  const contentOnly = Note.update(created.id, { content: 'y' })
+  assert.deepEqual(contentOnly.tags, ['kept'], 'an unrelated patch must not clear tags')
+  assert.deepEqual(Note.findById(created.id).tags, ['kept'])
+})
+
+test('Note tags reject invalid input: null, non-array, and non-string elements', () => {
+  assert.throws(
+    () => Note.create({ title: 'Bad tags', content: 'x', tags: null }),
+    (error) => error instanceof ValidationError && error.message.includes('tags'),
+  )
+  assert.throws(
+    () => Note.create({ title: 'Bad tags', content: 'x', tags: 'React' }),
+    (error) => error instanceof ValidationError && error.message.includes('tags'),
+  )
+  assert.throws(
+    () => Note.create({ title: 'Bad tags', content: 'x', tags: [42] }),
+    (error) => error instanceof ValidationError && error.message.includes('tags'),
+  )
+  assert.equal(Note.findAll().length, 0, 'rejected payloads must not persist partial rows')
+
+  const created = Note.create({ title: 'OK tags', content: 'x', tags: ['react'] })
+  assert.throws(() => Note.update(created.id, { tags: null }), ValidationError)
+  assert.throws(() => Note.update(created.id, { tags: [true] }), ValidationError)
+  assert.deepEqual(Note.findById(created.id).tags, ['react'])
+})
+
+test('Note tags edit is a content edit that bumps updatedAt', () => {
+  const created = Note.create({ title: 'Tagged', content: 'x', tags: ['a'] })
+  const tagged = Note.update(created.id, { tags: ['a', 'b'] })
+  assert.notEqual(tagged.updatedAt, created.updatedAt, 'adding a tag is a content edit')
+
+  const pinOnly = Note.update(created.id, { pinned: true })
+  assert.equal(pinOnly.updatedAt, tagged.updatedAt, 'a pin toggle still must not bump updatedAt')
+})
+
+test('Note create-by-id stays idempotent with tags and never duplicates', () => {
+  const id = '99999999-8888-7777-6666-555555555555'
+  const first = Note.create({ id, title: 'Imported note', content: 'x', tags: ['legacy'] })
+  assert.deepEqual(first.tags, ['legacy'])
+
+  // A retried migration must not overwrite the stored tags.
+  const second = Note.create({ id, title: 'Imported note', content: 'x', tags: ['other'] })
+  assert.deepEqual(second.tags, ['legacy'])
+  assert.equal(Note.findAll().length, 1)
+})

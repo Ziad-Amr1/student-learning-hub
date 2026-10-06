@@ -13,10 +13,31 @@ export const NOTE_RULES = [
   { field: 'content', required: true, type: 'string', message: "'content' is required and must be a non-empty string." },
   { field: 'category', type: 'string', max: 60, nullable: true },
   { field: 'pinned', type: 'boolean' },
+  { field: 'tags', arrayOf: 'string', message: "'tags' must be an array of strings." },
 ]
 
 function trim(value) {
   return typeof value === 'string' ? value.trim() : value
+}
+
+// Canonical tag normalization — the single rule for every write path, so a tag
+// a student types in ANY editor (form today, CSV/paste later) lands in storage
+// exactly the same way: trim → lowercase → drop empty → dedupe, preserving
+// first-seen order. `[' React ', 'react', '', ' JavaScript ', 'REACT']` →
+// `['react', 'javascript']`. Absent/undefined inputs are left alone (callers
+// decide the default) so partial updates cannot clobber existing tags.
+function normalizeTags(value) {
+  if (!Array.isArray(value)) return value
+  const seen = new Set()
+  const result = []
+  for (const item of value) {
+    if (typeof item !== 'string') continue
+    const tag = item.trim().toLowerCase()
+    if (!tag || seen.has(tag)) continue
+    seen.add(tag)
+    result.push(tag)
+  }
+  return result
 }
 
 // Normalize a stored Note into its canonical read shape. Preserves every field
@@ -28,6 +49,7 @@ function fromStored(note) {
     content: note.content || '',
     category: note.category || undefined,
     pinned: Boolean(note.pinned),
+    tags: Array.isArray(note.tags) ? note.tags : [],
     createdAt: note.createdAt,
     updatedAt: note.updatedAt,
   }
@@ -50,6 +72,15 @@ function buildNote(input, existing = null) {
         : undefined
   const pinned =
     input.pinned !== undefined ? Boolean(input.pinned) : hasExisting ? existing.pinned : false
+  // Tags default to an empty array. `[]` is NOT treated as an empty string, so
+  // it passes validation and explicitly clears tags on update; `undefined`
+  // preserves existing tags (partial updates never clobber).
+  const tags =
+    input.tags !== undefined
+      ? normalizeTags(input.tags)
+      : hasExisting
+        ? existing.tags ?? []
+        : []
   const id = hasExisting ? existing.id : typeof input.id === 'string' && input.id ? input.id : newId()
   const createdAt = hasExisting ? existing.createdAt : new Date().toISOString()
   const updatedAt = !hasExisting
@@ -58,7 +89,7 @@ function buildNote(input, existing = null) {
       ? new Date().toISOString()
       : existing.updatedAt
 
-  return { id, title, content, category, pinned, createdAt, updatedAt }
+  return { id, title, content, category, pinned, tags, createdAt, updatedAt }
 }
 
 export function findAll() {

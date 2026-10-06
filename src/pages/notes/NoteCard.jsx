@@ -27,6 +27,15 @@ export default function NoteCard({ note, onEdit, onTogglePin, onDelete }) {
           </div>
         </div>
         <p className="text-body-small text-muted-foreground whitespace-pre-wrap wrap-anywhere">{preview}</p>
+        {note.tags && note.tags.length > 0 && (
+          <ul className="flex flex-wrap gap-1.5" aria-label="Note tags">
+            {note.tags.map((tag) => (
+              <li key={tag}>
+                <Badge variant="secondary" size="sm">{tag}</Badge>
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
       <div className="flex items-center justify-between pt-2 border-t border-border">
         <span className="text-caption text-muted-foreground">
