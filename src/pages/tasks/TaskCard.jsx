@@ -57,7 +57,7 @@ export default function TaskCard({ task, onEdit, onUpdateStatus, onDelete }) {
         statusVisual.bgClass
       )}
     >
-      <div className="space-y-1 flex-1 min-w-0">
+      <div className="space-y-1 w-full flex-1 min-w-0">
         <div className="flex items-center gap-2 flex-wrap">
           <h3 className="text-base font-bold text-foreground truncate">{task.title}</h3>
           <Badge variant={PRIORITY_VARIANT[task.priority] ?? 'outline'}>{task.priority}</Badge>

@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import { BookOpen } from 'lucide-react'
 import {
   Card,
   CardContent,
@@ -33,9 +34,12 @@ export default function LearningProgress({ className }) {
       </CardHeader>
       <CardContent className="flex flex-col gap-5">
         {items.length === 0 ? (
-          <p className="text-body-small text-muted-foreground">
-            No learning goals yet — add your first one on the Learning page.
-          </p>
+          <div className="flex flex-col items-center gap-2 py-4 text-center">
+            <BookOpen className="w-(--icon-md) h-(--icon-md) text-muted-foreground" aria-hidden="true" />
+            <p className="m-0 text-body-small text-muted-foreground">
+              No learning goals yet — add your first one on the Learning page.
+            </p>
+          </div>
         ) : (
           items.map((item) => {
             const units = formatLearningUnits(item)

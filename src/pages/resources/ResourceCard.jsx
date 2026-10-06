@@ -148,7 +148,7 @@ export default function ResourceCard({ resource, viewMode = 'list', onEdit, onTo
 
   return (
     <Card className={cx('p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4', pinnedClass)}>
-      <div className="space-y-1 flex-1 min-w-0">
+      <div className="space-y-1 w-full flex-1 min-w-0">
         <div className="flex items-center gap-2 flex-wrap">
           <h3 className="text-base font-bold text-foreground truncate">{resource.title}</h3>
           <Badge variant={CATEGORY_VARIANT[resource.category] ?? 'outline'}>

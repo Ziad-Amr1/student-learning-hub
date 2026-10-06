@@ -458,7 +458,7 @@ export default function Library() {
             )}
           </section>
         ) : (
-          <section aria-label={`All books (${entries.length})`}>
+          <section aria-label={`All books (${entries.length})`} className="flex flex-col gap-4">
             <div className="flex flex-col gap-1">
               <h2>All Books</h2>
               <p className="text-body-small text-muted-foreground">

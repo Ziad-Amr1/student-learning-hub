@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { ListTodo } from 'lucide-react'
 import { cx } from '../../utils/cx'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/Card'
 import Badge from '../../components/ui/Badge'
@@ -30,9 +31,12 @@ export default function RecentTasks({ className }) {
       </CardHeader>
       <CardContent>
         {recentTasks.length === 0 ? (
-          <p className="text-body-small text-muted-foreground">
-            No tasks yet — add your first one on the Tasks page.
-          </p>
+          <div className="flex flex-col items-center gap-2 py-4 text-center">
+            <ListTodo className="w-(--icon-md) h-(--icon-md) text-muted-foreground" aria-hidden="true" />
+            <p className="m-0 text-body-small text-muted-foreground">
+              No tasks yet — add your first one on the Tasks page.
+            </p>
+          </div>
         ) : (
           <ul className="flex flex-col divide-y divide-border">
             {recentTasks.map((task) => (

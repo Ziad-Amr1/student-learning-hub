@@ -44,7 +44,7 @@ export default function Dashboard() {
       </div>
       <section aria-label="Task statistics">
         <h2 className="sr-only">Task statistics</h2>
-        <div className="grid gap-(--layout-card-gap) sm:grid-cols-2 xl:grid-cols-4">
+        <div className="grid grid-cols-1 gap-(--layout-card-gap) sm:grid-cols-2 xl:grid-cols-4">
           {stats.map((stat) => (
             <StatCard key={stat.label} {...stat} />
           ))}
@@ -52,7 +52,7 @@ export default function Dashboard() {
       </section>
       <section
         aria-label="Recent tasks and learning progress"
-        className="grid gap-(--layout-card-gap) lg:grid-cols-5"
+        className="grid grid-cols-1 gap-(--layout-card-gap) lg:grid-cols-5"
       >
         <h2 className="sr-only">Recent activity</h2>
         <RecentTasks className="lg:col-span-3" />
