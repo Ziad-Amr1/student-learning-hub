@@ -6,11 +6,22 @@
 const BASE_URL = import.meta.env?.VITE_API_URL ?? 'http://localhost:5000/api'
 
 async function request(path, { method = 'GET', body } = {}) {
-  const response = await fetch(`${BASE_URL}${path}`, {
-    method,
-    headers: body ? { 'Content-Type': 'application/json' } : undefined,
-    body: body ? JSON.stringify(body) : undefined,
-  })
+  let response
+  try {
+    response = await fetch(`${BASE_URL}${path}`, {
+      method,
+      headers: body ? { 'Content-Type': 'application/json' } : undefined,
+      body: body ? JSON.stringify(body) : undefined,
+    })
+  } catch (cause) {
+    // A thrown fetch (connection refused, DNS failure, mixed-content block on
+    // the static GitHub Pages build) is a TRANSPORT failure, not an HTTP error.
+    // Tag it so callers can fall back to seed data instead of erroring out.
+    const error = new Error('Could not reach the Huby backend.')
+    error.isNetworkError = true
+    error.cause = cause
+    throw error
+  }
 
   let json = {}
   try {

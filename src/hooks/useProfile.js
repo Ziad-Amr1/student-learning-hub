@@ -27,13 +27,16 @@ function readLegacy() {
 }
 
 export function useProfile() {
-  const { data, loading, error, setData, refresh } = useRemote('profile', profileApi.get, {
+  const { data, loading, error, offline, setData, refresh } = useRemote('profile', profileApi.get, {
     seed: null,
+    fallback: profileSeed,
   })
   const seeding = useRef(false)
 
   useEffect(() => {
     if (loading || error) return
+    // Offline (no backend): show the seed profile read-only and skip seeding.
+    if (offline) return
     if (localStorage.getItem(MARKER_KEY)) return
     if (data !== null && data !== undefined) return
     if (seeding.current) return
@@ -55,7 +58,7 @@ export function useProfile() {
         seeding.current = false
       })
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [loading, error, data])
+  }, [loading, error, data, offline])
 
   const save = async (nextProfile) => {
     const saved = await profileApi.update(nextProfile)

@@ -12,6 +12,29 @@ import { useCallback, useEffect, useSyncExternalStore } from 'react'
 
 const stores = new Map()
 
+// Module-level offline signal. Flipped on the first time a domain fetch cannot
+// reach the backend AND a `fallback` seed is available — the static GitHub
+// Pages build has no backend, so the app shows sample data (read-only) instead
+// of an error. Once set it stays set for the session; the UI reads it via
+// useOffline() to show a notice.
+const offlineListeners = new Set()
+let offlineSnapshot = false
+
+function markOffline() {
+  if (offlineSnapshot) return
+  offlineSnapshot = true
+  for (const listener of offlineListeners) listener()
+}
+
+function subscribeOffline(listener) {
+  offlineListeners.add(listener)
+  return () => offlineListeners.delete(listener)
+}
+
+export function useOffline() {
+  return useSyncExternalStore(subscribeOffline, () => offlineSnapshot)
+}
+
 function readInitial(seed) {
   return typeof seed === 'function' ? seed() : seed ?? []
 }
@@ -24,17 +47,18 @@ function ensureStore(key, seed) {
       data,
       loading: false,
       error: null,
+      offline: false,
       fetched: false,
       promise: null,
       listeners: new Set(),
-      snapshot: { data, loading: false, error: null },
+      snapshot: { data, loading: false, error: null, offline: false },
     }
     stores.set(key, store)
   }
   return store
 }
 
-export default function useRemote(key, fetchList, { seed = [] } = {}) {
+export default function useRemote(key, fetchList, { seed = [], fallback } = {}) {
   const store = ensureStore(key, seed)
 
   const subscribe = useCallback(
@@ -50,7 +74,12 @@ export default function useRemote(key, fetchList, { seed = [] } = {}) {
   const getSnapshot = useCallback(() => store.snapshot, [store])
 
   const notify = useCallback(() => {
-    store.snapshot = { data: store.data, loading: store.loading, error: store.error }
+    store.snapshot = {
+      data: store.data,
+      loading: store.loading,
+      error: store.error,
+      offline: store.offline,
+    }
     for (const listener of store.listeners) listener()
   }, [store])
 
@@ -66,7 +95,18 @@ export default function useRemote(key, fetchList, { seed = [] } = {}) {
         store.fetched = true
         store.error = null
       } catch (error) {
-        store.error = error.message
+        // Backend unreachable AND a seed fallback exists → show the sample data
+        // read-only instead of an error (the static GitHub Pages build). The
+        // global offline signal makes AppShell surface a notice.
+        if (error?.isNetworkError && fallback !== undefined) {
+          store.data = readInitial(fallback)
+          store.offline = true
+          store.error = null
+          store.fetched = true
+          markOffline()
+        } else {
+          store.error = error.message
+        }
       } finally {
         store.loading = false
         store.promise = null
@@ -75,7 +115,7 @@ export default function useRemote(key, fetchList, { seed = [] } = {}) {
     })()
     store.promise = promise
     return promise
-  }, [store, fetchList, notify])
+  }, [store, fetchList, fallback, notify])
 
   useEffect(() => {
     if (!store.fetched && !store.loading && !store.promise) {
@@ -104,6 +144,7 @@ export default function useRemote(key, fetchList, { seed = [] } = {}) {
     data: snapshot.data,
     loading: snapshot.loading,
     error: snapshot.error,
+    offline: snapshot.offline,
     setData,
     refresh,
   }

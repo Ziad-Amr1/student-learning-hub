@@ -46,13 +46,19 @@ function readLegacy(storageKey) {
 export default function useRemoteSeed(config) {
   const { key, list, create, update, remove, storageKey, markerKey, seed, normalize } = config
 
-  const { data, loading, error, setData, refresh } = useRemote(key, list, { seed: [] })
+  const { data, loading, error, offline, setData, refresh } = useRemote(key, list, {
+    seed: [],
+    fallback: seed,
+  })
   const [migrationFailures, setMigrationFailures] = useState(null)
   const configRef = useRef(config)
   configRef.current = config
 
   useEffect(() => {
     if (loading || error) return
+    // Offline (no backend): the seed is already on screen read-only. There is
+    // nowhere to migrate TO, so skip the migration entirely.
+    if (offline) return
     if (migrationPromises.has(key)) return
 
     if (localStorage.getItem(markerKey)) return
@@ -98,7 +104,7 @@ export default function useRemoteSeed(config) {
 
     migrationPromises.set(key, promise)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [loading, error])
+  }, [loading, error, offline])
 
   const createOne = async (payload) => {
     const created = await create(payload)

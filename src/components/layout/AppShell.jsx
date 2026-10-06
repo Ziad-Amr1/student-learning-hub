@@ -3,6 +3,7 @@ import { Outlet, useLocation } from 'react-router-dom'
 import {
   BookOpen,
   CircleUser,
+  CloudOff,
   FolderOpen,
   LayoutDashboard,
   Library,
@@ -10,6 +11,7 @@ import {
   NotebookPen,
 } from 'lucide-react'
 import { cx } from '../../utils/cx'
+import { useOffline } from '../../hooks/useRemote.js'
 import Navbar from './Navbar'
 import Sidebar from './Sidebar'
 import MobileNav from './MobileNav'
@@ -39,6 +41,7 @@ function readSidebarPreference() {
 export default function AppShell() {
   const [menuOpen, setMenuOpen] = useState(false)
   const [sidebarCollapsed, setSidebarCollapsed] = useState(readSidebarPreference)
+  const offline = useOffline()
   const mainRef = useRef(null)
   const { pathname } = useLocation()
 
@@ -91,6 +94,18 @@ export default function AppShell() {
             as dead gutter. Below lg, and on public pages, Container keeps its
             centered max width. */} 
         <Container className="lg:mx-0! lg:max-w-none!">
+          {offline && (
+            <div
+              role="status"
+              className="mb-6 flex items-start gap-2 rounded-md border border-info/40 bg-info-soft px-4 py-3 text-body-small text-info-strong"
+            >
+              <CloudOff className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
+              <p>
+                Offline preview — the Huby backend isn&apos;t reachable, so you&apos;re
+                seeing sample data. Changes won&apos;t be saved.
+              </p>
+            </div>
+          )}
           <Outlet />
         </Container>
       </main>
